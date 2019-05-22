@@ -59,8 +59,7 @@ class Schedule():
 
         sorted_tasks = sorted(formatted_tasks, key=itemgetter(0))
 
-        headers = ['', '', '\033[4mID\033[0m', '\033[4mTime\033[0m',
-                   '\033[4mDescription\033[0m']
+        headers = ['', '', 'ID', 'Time', 'Description']
         return tabulate(sorted_tasks, headers, tablefmt="plain")
 
 

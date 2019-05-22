@@ -74,7 +74,7 @@ class TaskscheduleTest(unittest.TestCase):
 
     def test_format_as_table_returns_correct_format(self):
         expected_rows = [
-            '        \x1b[4mID\x1b[0m    \x1b[4mTime\x1b[0m         \x1b[4mDescription\x1b[0m',
+            '        ID    Time         Description',
             ' 0',
             ' 1',
             ' 2',
