@@ -1,3 +1,5 @@
+"""Command line interface of taskschedule"""
+
 import time
 import curses
 import argparse
@@ -5,6 +7,7 @@ import argparse
 from taskschedule.schedule import Schedule
 
 def draw(stdscr, refresh_rate=1, hide_empty=True):
+    """Draw the schedule using curses."""
     schedule = Schedule()
     curses.curs_set(0)
     curses.start_color()

@@ -1,3 +1,6 @@
+"""This module provides a Schedule class, which is used for retrieving
+   scheduled tasks from taskwarrior and displaying them in a table."""
+
 from operator import itemgetter
 
 from tabulate import tabulate
@@ -5,17 +8,21 @@ from tasklib import TaskWarrior
 from isodate import parse_duration
 
 class Schedule():
+    """This class provides methods to format tasks and display them in
+       a schedule report."""
     def __init__(self, tw_data_dir='~/.task', tw_data_dir_create=False):
         self.tw_data_dir = tw_data_dir
         self.tw_data_dir_create = tw_data_dir_create
         self.tasks = []
 
     def get_tasks(self):
+        """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
         self.tasks = taskwarrior.tasks.filter(scheduled='today',
                                               status='pending')
 
     def format_task(self, task):
+        """Format a task. Put the details in a list and return it."""
         hour = task['scheduled'].hour
         glyph = '○'
         task_id = task['id']
@@ -39,6 +46,8 @@ class Schedule():
         return formatted_task
 
     def format_as_table(self, hide_empty=True):
+        """Format the scheduled tasks as a table. If hide_empty is True,
+           hide all unused hours. Return the table as a string."""
         tasks = self.tasks
         formatted_tasks = []
 
