@@ -8,6 +8,7 @@ class Schedule():
     def __init__(self, tw_data_dir='~/.task', tw_data_dir_create=False):
         self.tw_data_dir = tw_data_dir
         self.tw_data_dir_create = tw_data_dir_create
+        self.tasks = []
 
     def get_tasks(self):
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
