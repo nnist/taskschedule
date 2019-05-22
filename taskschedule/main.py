@@ -16,6 +16,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
     curses.init_pair(2, 8, 0)  # Hours
     curses.init_pair(3, 20, 234)  # Alternating background
     curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
+    curses.init_pair(5, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Current hour
 
     while True:
         max_y, max_x = stdscr.getmaxyx()
@@ -38,7 +39,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
         # Draw schedule
         for i, row in enumerate(data):
             # Draw hours
-            stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
+            current_hour = time.localtime().tm_hour
+            if int(row[:2]) == current_hour:
+                stdscr.addstr(i+1, 0, row[:2], curses.color_pair(5))
+            else:
+                stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
 
             # Get task details
             details = row[2:]
