@@ -21,7 +21,12 @@ def draw(stdscr, refresh_rate=1):
         header = rows[0]
         data = rows[1:]
 
-        stdscr.addstr(0, 0, header, curses.color_pair(1) | curses.A_UNDERLINE)
+        for i, char in enumerate(header):
+            if char == ' ':
+                color = curses.color_pair(1)
+            else:
+                color = curses.color_pair(1) | curses.A_UNDERLINE
+            stdscr.addstr(0, i, char, color)
 
         for i, row in enumerate(data):
             stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
