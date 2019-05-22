@@ -4,7 +4,7 @@ import os
 from datetime import datetime
 
 from .context import taskschedule
-from taskschedule.taskschedule import Schedule
+from taskschedule.schedule import Schedule
 
 from tasklib import TaskWarrior, Task
 
@@ -116,7 +116,7 @@ class TaskscheduleTest(unittest.TestCase):
 #       assert process.returncode == 0
 
     def test_cli_help_returns_help_message(self):
-        process = subprocess.run(['python3 taskschedule/taskschedule.py -h'],
+        process = subprocess.run(['python3 __main__.py -h'],
                                  shell=True,
                                  timeout=10,
                                  stdout=subprocess.PIPE,
