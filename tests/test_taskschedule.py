@@ -102,7 +102,7 @@ class TaskscheduleTest(unittest.TestCase):
         ]
 
         self.schedule.get_tasks()
-        table = self.schedule.format_as_table()
+        table = self.schedule.format_as_table(hide_empty=False)
         rows = table.split('\n')
 
         assert rows == expected_rows
