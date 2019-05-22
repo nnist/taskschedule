@@ -13,7 +13,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
     curses.curs_set(0)
     curses.start_color()
     curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(2, 8, 0)
+    curses.init_pair(2, 8, 0)  # Hours
+    curses.init_pair(3, curses.COLOR_WHITE, 234)  # Alternating background
 
     while True:
         max_y, max_x = stdscr.getmaxyx()
@@ -38,8 +39,15 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
             details = row[2:]
             if len(details) > max_x:
                 details = details[0:max_x - 5] + '...'
+            else:
+                details = details + ' ' * (max_x - len(details) - 2)
 
-            stdscr.addstr(i+1, 2, details, curses.color_pair(1))
+            if i % 2:
+                color = curses.color_pair(1)
+            else:
+                color = curses.color_pair(3)
+
+            stdscr.addstr(i+1, 2, details, color)
 
         stdscr.refresh()
         time.sleep(refresh_rate)
