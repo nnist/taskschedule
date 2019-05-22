@@ -14,6 +14,8 @@ def draw(stdscr, refresh_rate=1):
     curses.init_pair(2, 8, 0)
 
     while True:
+        max_y, max_x = stdscr.getmaxyx()
+
         stdscr.clear()
 
         schedule.get_tasks()
@@ -30,7 +32,12 @@ def draw(stdscr, refresh_rate=1):
 
         for i, row in enumerate(data):
             stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
-            stdscr.addstr(i+1, 2, row[2:], curses.color_pair(1))
+
+            details = row[2:]
+            if len(details) > max_x:
+                details = details[0:max_x - 5] + '...'
+
+            stdscr.addstr(i+1, 2, details, curses.color_pair(1))
 
         stdscr.refresh()
         time.sleep(refresh_rate)
