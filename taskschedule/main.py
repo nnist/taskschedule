@@ -17,6 +17,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
     curses.init_pair(3, 20, 234)  # Alternating background
     curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
     curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
+    curses.init_pair(6, 19, 234)  # Completed task - alternating background
+    curses.init_pair(7, 19, 0)  # Completed task
 
     while True:
         max_y, max_x = stdscr.getmaxyx()
@@ -54,9 +56,16 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
 
             # Draw using alternating background
             if i % 2:
-                color = curses.color_pair(1)
+                if details[6] == "0":
+                    color = curses.color_pair(7)
+                else:
+                    color = curses.color_pair(1)
             else:
-                color = curses.color_pair(3)
+                if details[6] == "0":
+                    color = curses.color_pair(6)
+                else:
+                    color = curses.color_pair(3)
+
 
             stdscr.addstr(i+1, 2, details, color)
 
