@@ -66,7 +66,6 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 else:
                     color = curses.color_pair(3)
 
-
             stdscr.addstr(i+1, 2, details, color)
 
         stdscr.refresh()
