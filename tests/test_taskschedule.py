@@ -12,11 +12,11 @@ class TaskscheduleTest(unittest.TestCase):
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True)
         Task(taskwarrior, description='test_9:00_to_10:11',
-             scheduled='09:00', estimate='71min').save()
+             schedule='today+9hr', estimate='71min').save()
         Task(taskwarrior, description='test_14:00_to_16:00',
-             scheduled='14:00', estimate='2hr').save()
+             schedule='today+14hr', estimate='2hr').save()
         Task(taskwarrior, description='test_16:10_to_16:34',
-             scheduled='16:10', estimate='24min').save()
+             schedule='today+16hr+10min', estimate='24min').save()
 
         self.schedule = Schedule(tw_data_dir='tests/test_data/.task',
                                  tw_data_dir_create=True)
