@@ -56,5 +56,20 @@ class TaskscheduleTest(unittest.TestCase):
         assert str(task['scheduled']) == '{} 16:10:00+02:00'.format(date_str)
         assert str(task['estimate']) == 'PT24M'
 
+    def test_format_task_returns_correct_format(self):
+        self.schedule.get_tasks()
+
+        task = self.schedule.tasks[0]
+        assert self.schedule.format_task(task) == [9, '○', 2, '09:00-10:11',
+                                                   'test_9:00_to_10:11']
+
+        task = self.schedule.tasks[1]
+        assert self.schedule.format_task(task) == [14, '○', 3, '14:00-16:00',
+                                                   'test_14:00_to_16:00']
+
+        task = self.schedule.tasks[2]
+        assert self.schedule.format_task(task) == [16, '○', 4, '16:10-16:34',
+                                                   'test_16:10_to_16:34']
+
 if __name__ == '__main__':
     unittest.main()
