@@ -73,6 +73,7 @@ class Schedule():
             except IndexError:
                 pass
 
+        # Fill remaining hours on schedule with empty lines
         for i in range(24):
             if i > first_hour - 2 and i < last_hour + 2:
                 if i not in hours:
