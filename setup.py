@@ -15,7 +15,7 @@ setup(
     url='https://github.com/nnist/taskschedule',
     classifiers=[
         'Environment :: Console :: Curses',
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 2 - Pre-Alpha',
         'Intended Audience :: End Users/Desktop',
         "License :: OSI Approved :: MIT License",
         'Operating System :: MacOS',
