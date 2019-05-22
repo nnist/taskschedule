@@ -1,5 +1,6 @@
 import unittest
 import os
+from datetime import datetime
 
 from .context import taskschedule
 from taskschedule.taskschedule import Schedule
@@ -37,9 +38,23 @@ class TaskscheduleTest(unittest.TestCase):
 
     def test_get_tasks_returns_correct_tasks(self):
         self.schedule.get_tasks()
-        print(self.schedule.tasks)
-        assert self.schedule.tasks is not []
 
+        date_str = datetime.now().strftime('%Y-%m-%d')
+
+        task = self.schedule.tasks[0]
+        assert str(task['description']) == 'test_9:00_to_10:11'
+        assert str(task['scheduled']) == '{} 09:00:00+02:00'.format(date_str)
+        assert str(task['estimate']) == 'PT1H11M'
+
+        task = self.schedule.tasks[1]
+        assert str(task['description']) == 'test_14:00_to_16:00'
+        assert str(task['scheduled']) == '{} 14:00:00+02:00'.format(date_str)
+        assert str(task['estimate']) == 'PT2H'
+
+        task = self.schedule.tasks[2]
+        assert str(task['description']) == 'test_16:10_to_16:34'
+        assert str(task['scheduled']) == '{} 16:10:00+02:00'.format(date_str)
+        assert str(task['estimate']) == 'PT24M'
 
 if __name__ == '__main__':
     unittest.main()
