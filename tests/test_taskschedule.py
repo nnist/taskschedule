@@ -107,6 +107,27 @@ class TaskscheduleTest(unittest.TestCase):
 
         assert rows == expected_rows
 
+    def test_format_as_table_hide_empty_returns_correct_format(self):
+        expected_rows = [
+            '        ID    Time         Description',
+            ' 8',
+            ' 9  ○   2     09:00-10:11  test_9:00_to_10:11',
+            '10',
+            '11',
+            '12',
+            '13',
+            '14  ○   3     14:00-16:00  test_14:00_to_16:00',
+            '15',
+            '16  ○   4     16:10-16:34  test_16:10_to_16:34',
+            '17'
+        ]
+
+        self.schedule.get_tasks()
+        table = self.schedule.format_as_table(hide_empty=True)
+        rows = table.split('\n')
+
+        assert rows == expected_rows
+
 #   def test_cli_returns_0(self):
 #       process = subprocess.run(['python3 taskschedule/taskschedule.py'],
 #                                shell=True,
