@@ -27,6 +27,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
         header = rows[0]
         data = rows[1:]
 
+        # Draw header
         for i, char in enumerate(header):
             if char == ' ':
                 color = curses.color_pair(1)
@@ -34,15 +35,19 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
                 color = curses.color_pair(4) | curses.A_UNDERLINE
             stdscr.addstr(0, i, char, color)
 
+        # Draw schedule
         for i, row in enumerate(data):
+            # Draw hours
             stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
 
+            # Get task details
             details = row[2:]
-            if len(details) > max_x:
+            if len(details) > max_x:  # Too long: truncate
                 details = details[0:max_x - 5] + '...'
-            else:
+            else:  # Fill remaining width with spaces
                 details = details + ' ' * (max_x - len(details) - 2)
 
+            # Draw using alternating background
             if i % 2:
                 color = curses.color_pair(1)
             else:
