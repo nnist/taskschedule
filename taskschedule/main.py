@@ -6,7 +6,7 @@ import argparse
 
 from taskschedule.schedule import Schedule
 
-def draw(stdscr, refresh_rate=1):
+def draw(stdscr, refresh_rate=1, hide_empty=True):
     schedule = Schedule()
     curses.curs_set(0)
     curses.start_color()
@@ -19,7 +19,7 @@ def draw(stdscr, refresh_rate=1):
         stdscr.clear()
 
         schedule.get_tasks()
-        rows = schedule.format_as_table().splitlines()
+        rows = schedule.format_as_table(hide_empty=hide_empty).splitlines()
         header = rows[0]
         data = rows[1:]
 
@@ -51,6 +51,11 @@ def main(argv):
     parser.add_argument(
         '-r', '--refresh', help="refresh every n seconds", type=int, default=1
     )
+    parser.add_argument(
+        '-a', '--all', help="show all hours, even if empty",
+        action='store_true', default=False
+    )
     args = parser.parse_args(argv)
 
-    curses.wrapper(draw, args.refresh)
+    hide_empty = not args.all
+    curses.wrapper(draw, args.refresh, hide_empty)

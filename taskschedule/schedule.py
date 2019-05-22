@@ -38,7 +38,7 @@ class Schedule():
         formatted_task = [hour, glyph, task_id, formatted_time, description]
         return formatted_task
 
-    def format_as_table(self):
+    def format_as_table(self, hide_empty=True):
         tasks = self.tasks
         formatted_tasks = []
 
@@ -50,9 +50,24 @@ class Schedule():
         for task in formatted_tasks:
             hours.append(task[0])
 
+        first_hour = 0
+        if hide_empty:
+            try:
+                first_hour = sorted(hours)[0]
+            except IndexError:
+                pass
+
+        last_hour = 23
+        if hide_empty:
+            try:
+                last_hour = sorted(hours)[-1]
+            except IndexError:
+                pass
+
         for i in range(24):
-            if i not in hours:
-                formatted_tasks.append([i, '', '', '', ''])
+            if i > first_hour - 2 and i < last_hour + 2:
+                if i not in hours:
+                    formatted_tasks.append([i, '', '', '', ''])
 
         sorted_tasks = sorted(formatted_tasks, key=itemgetter(0))
 
