@@ -15,6 +15,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
     curses.init_pair(1, 20, curses.COLOR_BLACK)
     curses.init_pair(2, 8, 0)  # Hours
     curses.init_pair(3, 20, 234)  # Alternating background
+    curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
 
     while True:
         max_y, max_x = stdscr.getmaxyx()
@@ -30,7 +31,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True):
             if char == ' ':
                 color = curses.color_pair(1)
             else:
-                color = curses.color_pair(1) | curses.A_UNDERLINE
+                color = curses.color_pair(4) | curses.A_UNDERLINE
             stdscr.addstr(0, i, char, color)
 
         for i, row in enumerate(data):
