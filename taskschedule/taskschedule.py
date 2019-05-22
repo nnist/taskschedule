@@ -1,3 +1,6 @@
+import sys
+import os
+import argparse
 from operator import itemgetter
 
 from tabulate import tabulate
@@ -59,3 +62,26 @@ class Schedule():
         headers = ['', '', '\033[4mID\033[0m', '\033[4mTime\033[0m',
                    '\033[4mDescription\033[0m']
         return tabulate(sorted_tasks, headers, tablefmt="plain")
+
+
+def main(argv):
+    """Display a schedule report for taskwarrior."""
+    parser = argparse.ArgumentParser(
+        description="""Display a schedule report for taskwarrior."""
+    )
+    args = parser.parse_args(argv)
+
+    schedule = Schedule()
+    schedule.get_tasks()
+    print(schedule.format_as_table())
+
+
+if __name__ == "__main__":
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt:
+        print('Interrupted by user.')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0) # pylint: disable=protected-access

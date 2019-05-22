@@ -1,3 +1,4 @@
+import subprocess
 import unittest
 import os
 from datetime import datetime
@@ -105,6 +106,23 @@ class TaskscheduleTest(unittest.TestCase):
         rows = table.split('\n')
 
         assert rows == expected_rows
+
+    def test_cli_returns_0(self):
+        process = subprocess.run(['python3 taskschedule/taskschedule.py'],
+                                 shell=True,
+                                 timeout=10,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, check=True)
+        assert process.returncode == 0
+
+    def test_cli_help_returns_help_message(self):
+        process = subprocess.run(['python3 taskschedule/taskschedule.py -h'],
+                                 shell=True,
+                                 timeout=10,
+                                 stdout=subprocess.PIPE,
+                                 stderr=subprocess.PIPE, check=True)
+        output = process.stdout.split(b'\n')
+        assert output[0].startswith(b'usage:')
 
 
 if __name__ == '__main__':
