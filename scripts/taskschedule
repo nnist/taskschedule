@@ -1,0 +1,8 @@
+#!/usr/bin/env python3
+
+import sys
+
+import taskschedule.main
+
+if __name__ == '__main__':
+    taskschedule.main.main(sys.argv[1:])

@@ -31,8 +31,9 @@ setup(
     python_requires='>=3.5',
     packages=[
         'taskschedule',
-        'taskschedule.tests'
+        'tests'
     ],
+    scripts=['scripts/taskschedule'],
     include_package_data=True,
     install_requires=[
         'tabulate',
