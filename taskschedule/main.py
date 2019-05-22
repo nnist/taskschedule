@@ -7,7 +7,7 @@ import argparse
 from taskschedule.schedule import Schedule
 
 
-def draw(stdscr, refresh_rate=1, hide_empty=True, completed=True):
+def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=True):
     """Draw the schedule using curses."""
     schedule = Schedule()
     curses.curs_set(0)
@@ -25,7 +25,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, completed=True):
 
         stdscr.clear()
 
-        schedule.get_tasks(completed=completed)
+        schedule.get_tasks(scheduled=scheduled, completed=completed)
         rows = schedule.format_as_table(hide_empty=hide_empty).splitlines()
         header = rows[0]
         data = rows[1:]
@@ -82,6 +82,10 @@ def main(argv):
         '-r', '--refresh', help="refresh every n seconds", type=int, default=1
     )
     parser.add_argument(
+        '-s', '--scheduled', help="scheduled date: ex. 'today', 'tomorrow'",
+        type=str, default='today'
+    )
+    parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
         action='store_true', default=False
     )
@@ -92,4 +96,4 @@ def main(argv):
     args = parser.parse_args(argv)
 
     hide_empty = not args.all
-    curses.wrapper(draw, args.refresh, hide_empty, args.completed)
+    curses.wrapper(draw, args.refresh, hide_empty, args.scheduled, args.completed)

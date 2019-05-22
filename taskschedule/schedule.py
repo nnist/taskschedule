@@ -16,15 +16,15 @@ class Schedule():
         self.tw_data_dir_create = tw_data_dir_create
         self.tasks = []
 
-    def get_tasks(self, completed=True):
+    def get_tasks(self, scheduled='today', completed=True):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
         tasks = []
-        for task in taskwarrior.tasks.filter(scheduled='today', status='pending'):
+        for task in taskwarrior.tasks.filter(scheduled=scheduled, status='pending'):
             tasks.append(task)
 
         if completed:
-            for task in taskwarrior.tasks.filter(scheduled='today', status='completed'):
+            for task in taskwarrior.tasks.filter(scheduled=scheduled, status='completed'):
                 tasks.append(task)
 
         self.tasks = tasks
