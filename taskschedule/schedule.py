@@ -7,6 +7,7 @@ from tabulate import tabulate
 from tasklib import TaskWarrior
 from isodate import parse_duration
 
+
 class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
