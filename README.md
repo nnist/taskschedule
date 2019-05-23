@@ -1,28 +1,56 @@
 # Taskschedule
 This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
-## Usage
-To use it, simply run `python3 taskschedule.py`.
+Features:
+- Schedule is updated real-time
+- Schedule can be printed like a regular taskwarrior report
+- Active tasks are highlighted
+- Completed tasks can be shown or hidden
 
-This will output something like this:
+## Requirements
+- taskwarrior
+
+## Usage
+1. Start taskschedule
 ```
-Hr   ID  Start End   Description
-_______________________________________________________________________________
-..
-08 ○ 544 08:25       Eat breakfast
-09 ○ 265 08:40       Feed cat
-   ○ 268 08:50       Go to the gym
-10
-..       
-14       
-15 █ 585 15:00-17:00 Do laundry
-16 █     
-17 ▀     
-18       
-19 ▌ 375 19:00-20:30 Long task is looooooong, so very very loooong
-20 ▘     
-21 ○ 480 21:00-23:00 Declutter desk
-22 ┆
-23 ┆
-24
+$ taskschedule
+```
+2. In a new terminal, create a task
+```sh
+$ task add Buy cat food
+Created task 62.
+```
+3. Schedule the task
+```
+$ task 62 mod schedule:17:00
+Modifying task 62 'Buy cat food'.
+Modified 1 task.
+```
+4. The task will now be visible in taskschedule:
+```
+     ID Time  Description
+16
+17 ○ 62 17:00 Buy cat food
+18
+```
+5. Start the task in taskwarrior
+```
+$ task 62 start
+```
+6. The task is now displayed as active in taskschedule:
+```
+     ID Time  Description
+16
+17 ○ 62 17:00 Buy cat food        <-- highlighted
+18
+```
+7. Mark task as done
+```
+$ task 62 done
+```
+```
+     ID Time  Description
+16
+17 ○    17:00 Buy cat food        <-- barely visible
+18
 ```
