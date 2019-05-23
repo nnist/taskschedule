@@ -81,13 +81,19 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         for i in range(24):
             if i > first_hour - 2 and i < last_hour + 2:
                 if i not in hours:
-                    formatted_tasks.append([str(i), '', '', '', ''])
+                    if i < 10:
+                        formatted_hour = '0' + str(i) + ':00'
+                    else:
+                        formatted_hour = str(i) + ':00'
+
+                    formatted_tasks.append([str(i), '', '', formatted_hour,
+                                            ''])
 
         # Align the formatted tasks
         matrix = schedule.align_matrix(formatted_tasks)
 
         # Sort the matrix by hour
-        matrix[1:] = sorted(matrix[1:], key=lambda k: int(k[0]))
+        matrix[1:] = sorted(matrix[1:], key=lambda k: k[3][0:5])
 
         # Draw header
         header = ' '.join(matrix[0])
@@ -137,8 +143,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
             stdscr.addstr(i+1, offset, task_id + ' ', color)
             offset += len(task_id) + 1
 
-            # Draw time
-            formatted_time = row[3]
+            # Draw time if row is not empty
+            if task_id == ' ' * len(row[2]):
+                formatted_time = ' ' * len(row[3])
+            else:
+                formatted_time = row[3]
             stdscr.addstr(i+1, offset, formatted_time + ' ', color)
             offset += len(formatted_time) + 1
 
