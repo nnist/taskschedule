@@ -25,8 +25,6 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
     while True:
         max_y, max_x = stdscr.getmaxyx()
 
-        stdscr.clear()
-
         schedule.get_tasks(scheduled=scheduled, completed=completed)
         tasks = schedule.tasks
 
