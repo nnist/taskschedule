@@ -6,6 +6,8 @@ import argparse
 
 from taskschedule.schedule import Schedule
 
+from isodate import parse_duration
+
 
 def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=True):
     """Draw the schedule using curses."""
@@ -26,11 +28,69 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         stdscr.clear()
 
         schedule.get_tasks(scheduled=scheduled, completed=completed)
-        rows = schedule.format_as_table(hide_empty=hide_empty).splitlines()
-        header = rows[0]
-        data = rows[1:]
+        tasks = schedule.tasks
+
+        # Create matrix with tasks
+        formatted_tasks = [['', '', 'ID', 'Time', 'Description']]
+        for task in tasks:
+            hour = task['scheduled'].hour
+            glyph = '○'
+            task_id = task['id']
+
+            start = task['scheduled']
+            estimate = task['estimate']
+
+            start_time = '{}'.format(start.strftime('%H:%M'))
+
+            if estimate is None:
+                formatted_time = '{}'.format(start_time)
+            else:
+                duration = parse_duration(estimate)
+                end = start + duration
+                end_time = '{}'.format(end.strftime('%H:%M'))
+                formatted_time = '{}-{}'.format(start_time, end_time)
+
+            description = task['description']
+
+            formatted_task = [str(hour), glyph, str(task_id), formatted_time,
+                              description]
+            formatted_tasks.append(formatted_task)
+
+        # Create list of hours that have tasks
+        hours = []
+        for task in formatted_tasks[1:]:
+            hours.append(int(task[0]))
+
+        # Determine first scheduled hour
+        first_hour = 0
+        if hide_empty:
+            try:
+                first_hour = sorted(hours)[0]
+            except IndexError:
+                pass
+
+        # Determine last scheduled hour
+        last_hour = 23
+        if hide_empty:
+            try:
+                last_hour = sorted(hours)[-1]
+            except IndexError:
+                pass
+
+        # Fill remaining hours on schedule with empty lines
+        for i in range(24):
+            if i > first_hour - 2 and i < last_hour + 2:
+                if i not in hours:
+                    formatted_tasks.append([str(i), '', '', '', ''])
+
+        # Align the formatted tasks
+        matrix = schedule.align_matrix(formatted_tasks)
+
+        # Sort the matrix by hour
+        matrix[1:] = sorted(matrix[1:], key=lambda k: int(k[0]))
 
         # Draw header
+        header = ' '.join(matrix[0])
         for i, char in enumerate(header):
             if char == ' ':
                 color = curses.color_pair(1)
@@ -39,34 +99,52 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
             stdscr.addstr(0, i, char, color)
 
         # Draw schedule
-        for i, row in enumerate(data):
-            # Draw hours
+        for i, row in enumerate(matrix[1:]):
+            offset = 0
+            color = curses.color_pair(1)
+
+            # Draw hours, highlight current hour
             current_hour = time.localtime().tm_hour
-            if int(row[:2]) == current_hour:
-                stdscr.addstr(i+1, 0, row[:2], curses.color_pair(5))
+            hour = row[0]
+            if int(hour) == current_hour:
+                color = curses.color_pair(5)
             else:
-                stdscr.addstr(i+1, 0, row[:2], curses.color_pair(2))
+                color = curses.color_pair(2)
 
-            # Get task details
-            details = row[2:]
-            if len(details) > max_x:  # Too long: truncate
-                details = details[0:max_x - 5] + '...'
-            else:  # Fill remaining width with spaces
-                details = details + ' ' * (max_x - len(details) - 2)
+            stdscr.addstr(i+1, offset, hour, color)
+            offset += 3
 
-            # Draw using alternating background
+            # Draw glyph
+            color = curses.color_pair(1)
+            glyph = row[1]
+            stdscr.addstr(i+1, offset, glyph, color)
+            offset += len(glyph) + 1
+
+            # Set color using alternating background
             if i % 2:
-                if details[6] == "0":
+                if str(row[2]).startswith('0'):
                     color = curses.color_pair(7)
                 else:
                     color = curses.color_pair(1)
             else:
-                if details[6] == "0":
+                if str(row[2]).startswith('0'):
                     color = curses.color_pair(6)
                 else:
                     color = curses.color_pair(3)
 
-            stdscr.addstr(i+1, 2, details, color)
+            # Draw ID
+            task_id = row[2]
+            stdscr.addstr(i+1, offset, task_id + ' ', color)
+            offset += len(task_id) + 1
+
+            # Draw time
+            formatted_time = row[3]
+            stdscr.addstr(i+1, offset, formatted_time + ' ', color)
+            offset += len(formatted_time) + 1
+
+            # Draw description
+            description = row[4]
+            stdscr.addstr(i+1, offset, description, color)
 
         stdscr.refresh()
         time.sleep(refresh_rate)
