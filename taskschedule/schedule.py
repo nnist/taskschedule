@@ -29,6 +29,25 @@ class Schedule():
 
         self.tasks = tasks
 
+    def align_matrix(self, array):
+        """Align all columns in a matrix by padding the items with spaces.
+           Return the aligned array."""
+        col_sizes = {}
+        for row in array:
+            for i, col in enumerate(row):
+                col_sizes[i] = max(col_sizes.get(i, 0), len(col))
+
+        ncols = len(col_sizes)
+        result = []
+        for row in array:
+            row = list(row) + [''] * (ncols - len(row))
+            for i, col in enumerate(row):
+                row[i] = col.ljust(col_sizes[i])
+
+            result.append(row)
+
+        return result
+
     def format_task(self, task):
         """Format a task. Put the details in a list and return it."""
         hour = task['scheduled'].hour

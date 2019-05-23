@@ -145,6 +145,28 @@ class TaskscheduleTest(unittest.TestCase):
         output = process.stdout.split(b'\n')
         assert output[0].startswith(b'usage:')
 
+    def test_align_matrix(self):
+        rows = [
+            ['', '', 'ID', 'Time', 'Description'],
+            ['8', '', '', '', ''],
+            ['9', '○', '2', '09:00-10:11', 'test_9:00_to_10:11'],
+            ['10', '', '', '', ''],
+            ['11', '', '', '', ''],
+            ['14', '○', '654', '12:00', 'test_12:00'],
+        ]
+        returned_rows = self.schedule.align_matrix(rows)
+
+        expected_rows = [
+            ['  ', ' ', 'ID ', 'Time       ', 'Description       '],
+            ['8 ', ' ', '   ', '           ', '                  '],
+            ['9 ', '○', '2  ', '09:00-10:11', 'test_9:00_to_10:11'],
+            ['10', ' ', '   ', '           ', '                  '],
+            ['11', ' ', '   ', '           ', '                  '],
+            ['14', '○', '654', '12:00      ', 'test_12:00        '],
+        ]
+
+        assert returned_rows == expected_rows
+
 
 if __name__ == '__main__':
     unittest.main()
