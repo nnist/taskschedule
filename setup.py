@@ -36,7 +36,6 @@ setup(
     scripts=['scripts/taskschedule'],
     include_package_data=True,
     install_requires=[
-        'tabulate',
         'tasklib',
         'isodate',
     ],
