@@ -15,36 +15,30 @@ Features:
 ```
 $ taskschedule
 ```
-2. In a new terminal, create a task
-```sh
-$ task add Buy cat food
+2. In a new terminal, create a scheduled task
+```
+$ task add Buy cat food schedule:17:00
 Created task 62.
 ```
-3. Schedule the task
-```
-$ task 62 mod schedule:17:00
-Modifying task 62 'Buy cat food'.
-Modified 1 task.
-```
-4. The task will now be visible in taskschedule:
+3. The task will now be visible in taskschedule:
 ```
      ID Time  Description
 16
 17 ○ 62 17:00 Buy cat food
 18
 ```
-5. Start the task in taskwarrior
+4. Start the task in taskwarrior
 ```
 $ task 62 start
 ```
-6. The task is now displayed as active in taskschedule:
+5. The task is now displayed as active in taskschedule:
 ```
      ID Time  Description
 16
 17 ○ 62 17:00 Buy cat food        <-- highlighted
 18
 ```
-7. Mark task as done
+6. Mark task as done
 ```
 $ task 62 done
 ```
