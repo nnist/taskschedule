@@ -22,7 +22,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
     curses.init_pair(6, 19, 234)  # Completed task - alternating background
     curses.init_pair(7, 19, 0)  # Completed task
 
-    previous_lines = []
+    previous_as_dict = []
 
     while True:
         max_y, max_x = stdscr.getmaxyx()
@@ -31,118 +31,107 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
 
         as_dict = schedule.as_dict()
 
-        lines = [['', '', 'ID', 'Time', 'Description']]
-        past_first_task = False
-        line_with_last_task = 0
+        # Clear the screen if lines have changed since last time
+        if as_dict != previous_as_dict:
+            stdscr.clear()
+        previous_as_dict = as_dict
 
-        # Fill lines with tasks
+        # Draw header
+        headers = ['', '', 'ID', 'Time', 'Description']
+        color = curses.color_pair(4) | curses.A_UNDERLINE
+        offset = 5
+        stdscr.addstr(0, offset, headers[2], color)
+        offset = 5 + schedule.get_max_length('id') + 1
+        stdscr.addstr(0, offset, headers[3], color)
+        offset += 12
+        stdscr.addstr(0, offset, headers[4], color)
+
+        # Draw schedule
+        past_first_task = False
+        alternate = True
+        current_line = 1
         for i in range(24):
             tasks = as_dict[i]
             if not tasks:
                 # Add empty line if between tasks or option is enabled
                 if past_first_task or not hide_empty:
-                    lines.append([str(i), '', '', '', ''])
-            else:
+                    if alternate:
+                        color = curses.color_pair(1)
+                    else:
+                        color = curses.color_pair(3)
+
+                    # Fill line to screen length
+                    stdscr.addstr(current_line, 3, ' ' * (max_x - 3), color)
+
+                    # Draw hour, highlight current hour
+                    current_hour = time.localtime().tm_hour
+                    if i == current_hour:
+                        stdscr.addstr(current_line, 0, str(i),
+                                      curses.color_pair(5))
+                    else:
+                        stdscr.addstr(current_line, 0, str(i),
+                                      curses.color_pair(2))
+
+                    current_line += 1
+                    alternate = not alternate
+
+            for ii, task in enumerate(tasks):
                 past_first_task = True
-                for ii, task in enumerate(tasks):
-                    color = curses.color_pair(1)
-                    if ii == 0:
-                        hour = task['scheduled'].hour
+                if alternate:
+                    if task['status'] == 'completed':
+                        color = curses.color_pair(7)
                     else:
-                        hour = -1
-                    glyph = '○'
-                    task_id = task['id']
-                    start = task['scheduled']
-                    estimate = task['estimate']
-                    start_time = '{}'.format(start.strftime('%H:%M'))
-                    description = task['description']
-
-                    if estimate is None:
-                        formatted_time = '{}'.format(start_time)
+                        color = curses.color_pair(1)
+                else:
+                    if task['status'] == 'completed':
+                        color = curses.color_pair(6)
                     else:
-                        duration = parse_duration(estimate)
-                        end = start + duration
-                        end_time = '{}'.format(end.strftime('%H:%M'))
-                        formatted_time = '{}-{}'.format(start_time, end_time)
+                        color = curses.color_pair(3)
 
-                    line = [str(hour), glyph, str(task_id),
-                            formatted_time, description]
-                    lines.append(line)
-                    line_with_last_task = len(lines)
-
-        # Optionally truncate empty lines after last task
-        if hide_empty:
-            lines = lines[0:line_with_last_task]
-
-        # Clear the screen if lines have changed since last time
-        if lines != previous_lines:
-            stdscr.clear()
-        previous_lines = lines
-
-        # Align the lines
-        matrix = schedule.align_matrix(lines)
-
-        # Draw header
-        header = ' '.join(matrix[0])
-        for i, char in enumerate(header):
-            if char == ' ':
-                color = curses.color_pair(1)
-            else:
-                color = curses.color_pair(4) | curses.A_UNDERLINE
-            stdscr.addstr(0, i, char, color)
-
-        # Draw schedule
-        for i, row in enumerate(matrix[1:]):
-            offset = 0
-            color = curses.color_pair(1)
-
-            # Draw hours, highlight current hour
-            current_hour = time.localtime().tm_hour
-            hour = row[0]
-            if int(hour) != -1:
-                if int(hour) == current_hour:
-                    color = curses.color_pair(5)
+                # Only draw hour once for multiple tasks
+                if ii == 0:
+                    hour = str(i)
                 else:
-                    color = curses.color_pair(2)
+                    hour = ''
 
-                stdscr.addstr(i+1, offset, hour, color)
+                glyph = '○'
+                task_id = task['id']
+                start = task['scheduled']
+                estimate = task['estimate']
+                start_time = '{}'.format(start.strftime('%H:%M'))
+                description = task['description']
 
-            offset += 3
-
-            # Draw glyph
-            color = curses.color_pair(1)
-            glyph = row[1]
-            stdscr.addstr(i+1, offset, glyph, color)
-            offset += len(glyph) + 1
-
-            # Set color using alternating background
-            if i % 2:
-                if str(row[2]).startswith('0'):
-                    color = curses.color_pair(7)
+                if estimate is None:
+                    formatted_time = '{}'.format(start_time)
                 else:
-                    color = curses.color_pair(1)
-            else:
-                if str(row[2]).startswith('0'):
-                    color = curses.color_pair(6)
-                else:
-                    color = curses.color_pair(3)
+                    duration = parse_duration(estimate)
+                    end = start + duration
+                    end_time = '{}'.format(end.strftime('%H:%M'))
+                    formatted_time = '{}-{}'.format(start_time, end_time)
 
-            # Draw ID
-            task_id = row[2]
-            stdscr.addstr(i+1, offset, task_id + ' ', color)
-            offset += len(task_id) + 1
+                # Draw hour, highlight current hour
+                current_hour = time.localtime().tm_hour
+                if hour != '':
+                    if int(hour) == current_hour:
+                        stdscr.addstr(current_line, 0, hour,
+                                      curses.color_pair(5))
+                    else:
+                        stdscr.addstr(current_line, 0, hour,
+                                      curses.color_pair(2))
 
-            # Draw time if row is not empty
-            if task_id == ' ' * len(row[2]):
-                formatted_time = ' ' * len(row[3])
-            else:
-                formatted_time = row[3]
-            stdscr.addstr(i+1, offset, formatted_time + ' ', color)
-            offset += len(formatted_time) + 1
+                # Fill line to screen length
+                stdscr.addstr(current_line, 3, ' ' * (max_x - 3), color)
 
-            # Draw description
-            description = row[4]
-            stdscr.addstr(i+1, offset, description, color)
+                # Draw task details
+                stdscr.addstr(current_line, 3, glyph, color)
+                stdscr.addstr(current_line, 5, str(task_id), color)
+                offset = 5 + schedule.get_max_length('id') + 1
+                stdscr.addstr(current_line, offset, formatted_time, color)
+                offset += 12
+                stdscr.addstr(current_line, offset, description, color)
+
+                current_line += 1
+                alternate = not alternate
 
         stdscr.refresh()
         time.sleep(refresh_rate)
