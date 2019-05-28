@@ -22,6 +22,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
     curses.init_pair(6, 19, 234)  # Completed task - alternating background
     curses.init_pair(7, 19, 0)  # Completed task
 
+    previous_lines = []
+
     while True:
         max_y, max_x = stdscr.getmaxyx()
 
@@ -68,6 +70,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         # Optionally truncate empty lines after last task
         if hide_empty:
             lines = lines[0:line_with_last_task]
+
+        # Clear the screen if lines have changed since last time
+        if lines != previous_lines:
+            stdscr.clear()
+        previous_lines = lines
 
         # Align the lines
         matrix = schedule.align_matrix(lines)
