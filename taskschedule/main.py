@@ -129,7 +129,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
 
                 # Draw task details
                 stdscr.addstr(current_line, 3, glyph, curses.color_pair(9))
-                stdscr.addstr(current_line, 5, str(task_id), color)
+                if task_id != 0:
+                    stdscr.addstr(current_line, 5, str(task_id), color)
                 offset = 5 + schedule.get_max_length('id') + 1
                 stdscr.addstr(current_line, offset, formatted_time, color)
                 offset += 12
