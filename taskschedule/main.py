@@ -62,7 +62,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                         color = curses.color_pair(3)
 
                     # Fill line to screen length
-                    stdscr.addstr(current_line, 3, ' ' * (max_x - 3), color)
+                    stdscr.addstr(current_line, 5, ' ' * (max_x - 5), color)
 
                     # Draw hour, highlight current hour
                     current_hour = time.localtime().tm_hour
@@ -124,7 +124,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                                       curses.color_pair(2))
 
                 # Fill line to screen length
-                stdscr.addstr(current_line, 3, ' ' * (max_x - 3), color)
+                stdscr.addstr(current_line, 5, ' ' * (max_x - 5), color)
 
                 # Draw task details
                 stdscr.addstr(current_line, 3, glyph, color)
