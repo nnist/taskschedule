@@ -25,6 +25,24 @@ class Schedule():
 
         self.tasks = tasks
 
+    def as_dict(self):
+        """Return a dict with scheduled tasks.
+        >>> as_dict()
+        {1: [], 2: [], ..., 9: [task, task, task], 10: [task, task], ...}
+        """
+        as_dict = {}
+        for i in range(24):
+            task_list = []
+            for task in self.tasks:
+                start = task['scheduled']
+                if start.hour == i:
+                    task_list.append(task)
+
+            task_list = sorted(task_list, key=lambda k: k['scheduled'])
+            as_dict[i] = task_list
+
+        return as_dict
+
     def align_matrix(self, array):
         """Align all columns in a matrix by padding the items with spaces.
            Return the aligned array."""
