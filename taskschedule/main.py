@@ -26,72 +26,51 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         max_y, max_x = stdscr.getmaxyx()
 
         schedule.get_tasks(scheduled=scheduled, completed=completed)
-        tasks = schedule.tasks
 
-        # Create matrix with tasks
-        formatted_tasks = [['', '', 'ID', 'Time', 'Description']]
-        for task in tasks:
-            hour = task['scheduled'].hour
-            glyph = '○'
-            task_id = task['id']
+        as_dict = schedule.as_dict()
 
-            start = task['scheduled']
-            estimate = task['estimate']
+        lines = [['', '', 'ID', 'Time', 'Description']]
+        past_first_task = False
+        line_with_last_task = 0
 
-            start_time = '{}'.format(start.strftime('%H:%M'))
-
-            if estimate is None:
-                formatted_time = '{}'.format(start_time)
-            else:
-                duration = parse_duration(estimate)
-                end = start + duration
-                end_time = '{}'.format(end.strftime('%H:%M'))
-                formatted_time = '{}-{}'.format(start_time, end_time)
-
-            description = task['description']
-
-            formatted_task = [str(hour), glyph, str(task_id), formatted_time,
-                              description]
-            formatted_tasks.append(formatted_task)
-
-        # Create list of hours that have tasks
-        hours = []
-        for task in formatted_tasks[1:]:
-            hours.append(int(task[0]))
-
-        # Determine first scheduled hour
-        first_hour = 0
-        if hide_empty:
-            try:
-                first_hour = sorted(hours)[0]
-            except IndexError:
-                pass
-
-        # Determine last scheduled hour
-        last_hour = 23
-        if hide_empty:
-            try:
-                last_hour = sorted(hours)[-1]
-            except IndexError:
-                pass
-
-        # Fill remaining hours on schedule with empty lines
+        # Fill lines with tasks
         for i in range(24):
-            if i > first_hour - 2 and i < last_hour + 2:
-                if i not in hours:
-                    if i < 10:
-                        formatted_hour = '0' + str(i) + ':00'
+            tasks = as_dict[i]
+            if not tasks:
+                # Add empty line if between tasks or option is enabled
+                if past_first_task or not hide_empty:
+                    lines.append([str(i), '', '', '', ''])
+            else:
+                past_first_task = True
+                for task in tasks:
+                    color = curses.color_pair(1)
+                    hour = task['scheduled'].hour
+                    glyph = '○'
+                    task_id = task['id']
+                    start = task['scheduled']
+                    estimate = task['estimate']
+                    start_time = '{}'.format(start.strftime('%H:%M'))
+                    description = task['description']
+
+                    if estimate is None:
+                        formatted_time = '{}'.format(start_time)
                     else:
-                        formatted_hour = str(i) + ':00'
+                        duration = parse_duration(estimate)
+                        end = start + duration
+                        end_time = '{}'.format(end.strftime('%H:%M'))
+                        formatted_time = '{}-{}'.format(start_time, end_time)
 
-                    formatted_tasks.append([str(i), '', '', formatted_hour,
-                                            ''])
+                    line = [str(hour), glyph, str(task_id),
+                            formatted_time, description]
+                    lines.append(line)
+                    line_with_last_task = len(lines)
 
-        # Align the formatted tasks
-        matrix = schedule.align_matrix(formatted_tasks)
+        # Optionally truncate empty lines after last task
+        if hide_empty:
+            lines = lines[0:line_with_last_task]
 
-        # Sort the matrix by hour
-        matrix[1:] = sorted(matrix[1:], key=lambda k: k[3][0:5])
+        # Align the lines
+        matrix = schedule.align_matrix(lines)
 
         # Draw header
         header = ' '.join(matrix[0])
