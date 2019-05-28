@@ -22,6 +22,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
     curses.init_pair(6, 19, 234)  # Completed task - alternating background
     curses.init_pair(7, 19, 0)  # Completed task
     curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
+    curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
 
     previous_as_dict = []
 
@@ -127,7 +128,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 stdscr.addstr(current_line, 5, ' ' * (max_x - 5), color)
 
                 # Draw task details
-                stdscr.addstr(current_line, 3, glyph, color)
+                stdscr.addstr(current_line, 3, glyph, curses.color_pair(9))
                 stdscr.addstr(current_line, 5, str(task_id), color)
                 offset = 5 + schedule.get_max_length('id') + 1
                 stdscr.addstr(current_line, offset, formatted_time, color)
