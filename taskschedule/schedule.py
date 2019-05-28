@@ -43,6 +43,18 @@ class Schedule():
 
         return as_dict
 
+    def get_max_length(self, value):
+        """Return the max string length of a given value of all tasks
+           in the schedule.
+        """
+        max_length = 0
+        for task in self.tasks:
+            length = len(str(task[value]))
+            if length > max_length:
+                max_length = length
+
+        return max_length
+
     def align_matrix(self, array):
         """Align all columns in a matrix by padding the items with spaces.
            Return the aligned array."""
