@@ -44,9 +44,12 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                     lines.append([str(i), '', '', '', ''])
             else:
                 past_first_task = True
-                for task in tasks:
+                for ii, task in enumerate(tasks):
                     color = curses.color_pair(1)
-                    hour = task['scheduled'].hour
+                    if ii == 0:
+                        hour = task['scheduled'].hour
+                    else:
+                        hour = -1
                     glyph = '○'
                     task_id = task['id']
                     start = task['scheduled']
@@ -96,12 +99,14 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
             # Draw hours, highlight current hour
             current_hour = time.localtime().tm_hour
             hour = row[0]
-            if int(hour) == current_hour:
-                color = curses.color_pair(5)
-            else:
-                color = curses.color_pair(2)
+            if int(hour) != -1:
+                if int(hour) == current_hour:
+                    color = curses.color_pair(5)
+                else:
+                    color = curses.color_pair(2)
 
-            stdscr.addstr(i+1, offset, hour, color)
+                stdscr.addstr(i+1, offset, hour, color)
+
             offset += 3
 
             # Draw glyph
