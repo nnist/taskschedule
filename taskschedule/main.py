@@ -21,6 +21,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
     curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
     curses.init_pair(6, 19, 234)  # Completed task - alternating background
     curses.init_pair(7, 19, 0)  # Completed task
+    curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
 
     previous_as_dict = []
 
@@ -77,16 +78,19 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
 
             for ii, task in enumerate(tasks):
                 past_first_task = True
-                if alternate:
-                    if task['status'] == 'completed':
-                        color = curses.color_pair(7)
-                    else:
-                        color = curses.color_pair(1)
+                if task.active:
+                    color = curses.color_pair(8)
                 else:
-                    if task['status'] == 'completed':
-                        color = curses.color_pair(6)
+                    if alternate:
+                        if task['status'] == 'completed':
+                            color = curses.color_pair(7)
+                        else:
+                            color = curses.color_pair(1)
                     else:
-                        color = curses.color_pair(3)
+                        if task['status'] == 'completed':
+                            color = curses.color_pair(6)
+                        else:
+                            color = curses.color_pair(3)
 
                 # Only draw hour once for multiple tasks
                 if ii == 0:
