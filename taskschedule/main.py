@@ -9,7 +9,7 @@ from taskschedule.schedule import Schedule
 from isodate import parse_duration
 
 
-def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=True):
+def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=True, hide_projects=False):
     """Draw the schedule using curses."""
     schedule = Schedule()
     curses.curs_set(0)
@@ -39,7 +39,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         previous_as_dict = as_dict
 
         # Draw header
-        headers = ['', '', 'ID', 'Time', 'Project', 'Description']
+        if not hide_projects:
+            headers = ['', '', 'ID', 'Time', 'Project', 'Description']
+        else:
+            headers = ['', '', 'ID', 'Time', 'Description']
+
         color = curses.color_pair(4) | curses.A_UNDERLINE
         offset = 5
         stdscr.addstr(0, offset, headers[2], color)
@@ -47,8 +51,10 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         stdscr.addstr(0, offset, headers[3], color)
         offset += 12
         stdscr.addstr(0, offset, headers[4], color)
-        offset += schedule.get_max_length('project') + 1
-        stdscr.addstr(0, offset, headers[5], color)
+
+        if not hide_projects:
+            offset += schedule.get_max_length('project') + 1
+            stdscr.addstr(0, offset, headers[5], color)
 
         # Draw schedule
         past_first_task = False
@@ -137,8 +143,14 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 offset = 5 + schedule.get_max_length('id') + 1
                 stdscr.addstr(current_line, offset, formatted_time, color)
                 offset += 12
-                stdscr.addstr(current_line, offset, project, color)
-                offset += schedule.get_max_length('project') + 1
+
+                if not hide_projects:
+                    if project is None:
+                        project = ''
+
+                    stdscr.addstr(current_line, offset, project, color)
+                    offset += schedule.get_max_length('project') + 1
+
                 stdscr.addstr(current_line, offset, description, color)
 
                 current_line += 1
@@ -168,7 +180,11 @@ def main(argv):
         '-c', '--completed', help="hide completed tasks",
         action='store_false', default=True
     )
+    parser.add_argument(
+        '-p', '--project', help="hide project column",
+        action='store_true', default=False
+    )
     args = parser.parse_args(argv)
 
     hide_empty = not args.all
-    curses.wrapper(draw, args.refresh, hide_empty, args.scheduled, args.completed)
+    curses.wrapper(draw, args.refresh, hide_empty, args.scheduled, args.completed, args.project)
