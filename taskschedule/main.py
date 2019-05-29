@@ -39,7 +39,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         previous_as_dict = as_dict
 
         # Draw header
-        headers = ['', '', 'ID', 'Time', 'Description']
+        headers = ['', '', 'ID', 'Time', 'Project', 'Description']
         color = curses.color_pair(4) | curses.A_UNDERLINE
         offset = 5
         stdscr.addstr(0, offset, headers[2], color)
@@ -47,6 +47,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         stdscr.addstr(0, offset, headers[3], color)
         offset += 12
         stdscr.addstr(0, offset, headers[4], color)
+        offset += schedule.get_max_length('project') + 1
+        stdscr.addstr(0, offset, headers[5], color)
 
         # Draw schedule
         past_first_task = False
@@ -105,6 +107,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 estimate = task['estimate']
                 start_time = '{}'.format(start.strftime('%H:%M'))
                 description = task['description']
+                project = task['project']
 
                 if estimate is None:
                     formatted_time = '{}'.format(start_time)
@@ -134,6 +137,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 offset = 5 + schedule.get_max_length('id') + 1
                 stdscr.addstr(current_line, offset, formatted_time, color)
                 offset += 12
+                stdscr.addstr(current_line, offset, project, color)
+                offset += schedule.get_max_length('project') + 1
                 stdscr.addstr(current_line, offset, description, color)
 
                 current_line += 1
