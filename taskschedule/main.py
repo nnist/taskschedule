@@ -54,7 +54,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         stdscr.addstr(0, offset, headers[4], color)
 
         if not hide_projects:
-            offset += schedule.get_max_length('project') + 1
+            add_offset = schedule.get_max_length('project') + 1
+            if add_offset < 8:
+                add_offset = 8
+
+            offset += add_offset
             stdscr.addstr(0, offset, headers[5], color)
 
         # Draw schedule
@@ -150,7 +154,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                         project = ''
 
                     stdscr.addstr(current_line, offset, project, color)
-                    offset += schedule.get_max_length('project') + 1
+                    add_offset = schedule.get_max_length('project') + 1
+                    if add_offset < 8:
+                        add_offset = 8
+
+                    offset += add_offset
 
                 stdscr.addstr(current_line, offset, description, color)
 
