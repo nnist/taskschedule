@@ -38,28 +38,26 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
             stdscr.clear()
         previous_as_dict = as_dict
 
-        # Draw headers
-        headers = ['', '', 'ID', 'Time']
-        if not hide_projects:
-            headers.append('Project')
+        # Determine offsets
+        offsets = [0, 5] # Hour, glyph
+        offsets.append(5 + schedule.get_max_length('id') + 1) # ID
+        offsets.append(offsets[2] + 12) # Time
 
-        headers.append('Description')
+        add_offset = schedule.get_max_length('project') + 1
+        if add_offset < 8:
+            add_offset = 8
+        offsets.append(offsets[3] + add_offset) # Project
+
+        # Draw headers
+        headers = ['', '', 'ID', 'Time', 'Project', 'Description']
 
         color = curses.color_pair(4) | curses.A_UNDERLINE
-        offset = 5
-        stdscr.addstr(0, offset, headers[2], color)
-        offset = 5 + schedule.get_max_length('id') + 1
-        stdscr.addstr(0, offset, headers[3], color)
-        offset += 12
-        stdscr.addstr(0, offset, headers[4], color)
+        stdscr.addstr(0, offsets[1], headers[2], color)
+        stdscr.addstr(0, offsets[2], headers[3], color)
+        stdscr.addstr(0, offsets[3], headers[4], color)
 
         if not hide_projects:
-            add_offset = schedule.get_max_length('project') + 1
-            if add_offset < 8:
-                add_offset = 8
-
-            offset += add_offset
-            stdscr.addstr(0, offset, headers[5], color)
+            stdscr.addstr(0, offsets[4], headers[5], color)
 
         # Draw schedule
         past_first_task = False
@@ -145,22 +143,17 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
                 stdscr.addstr(current_line, 3, glyph, curses.color_pair(9))
                 if task_id != 0:
                     stdscr.addstr(current_line, 5, str(task_id), color)
-                offset = 5 + schedule.get_max_length('id') + 1
-                stdscr.addstr(current_line, offset, formatted_time, color)
-                offset += 12
+
+                stdscr.addstr(current_line, offsets[2], formatted_time, color)
 
                 if not hide_projects:
                     if project is None:
                         project = ''
 
-                    stdscr.addstr(current_line, offset, project, color)
-                    add_offset = schedule.get_max_length('project') + 1
-                    if add_offset < 8:
-                        add_offset = 8
-
-                    offset += add_offset
-
-                stdscr.addstr(current_line, offset, description, color)
+                    stdscr.addstr(current_line, offsets[3], project, color)
+                    stdscr.addstr(current_line, offsets[4], description, color)
+                else:
+                    stdscr.addstr(current_line, offsets[3], description, color)
 
                 current_line += 1
                 alternate = not alternate
