@@ -38,11 +38,12 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
             stdscr.clear()
         previous_as_dict = as_dict
 
-        # Draw header
+        # Draw headers
+        headers = ['', '', 'ID', 'Time']
         if not hide_projects:
-            headers = ['', '', 'ID', 'Time', 'Project', 'Description']
-        else:
-            headers = ['', '', 'ID', 'Time', 'Description']
+            headers.append('Project')
+
+        headers.append('Description')
 
         color = curses.color_pair(4) | curses.A_UNDERLINE
         offset = 5
