@@ -166,6 +166,7 @@ class Screen():
                 self.buffer.append((current_line, offsets[2],
                                     formatted_time, color))
 
+                # Optionally draw project column
                 offset = 0
                 if not self.hide_projects:
                     if task.project is None:
@@ -179,6 +180,7 @@ class Screen():
                 else:
                     offset = offsets[3]
 
+                # Draw description column
                 description = task.description[0:max_x - offset]
                 self.buffer.append((current_line, offset,
                                     description, color))
