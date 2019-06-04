@@ -17,12 +17,23 @@ class Screen():
         self.completed = completed
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
+        self.buffer = []
+        self.prev_buffer = []
 
     def close(self):
         curses.endwin()
 
     def draw(self):
-        """Draw the schedule using curses."""
+        """Draw the current buffer."""
+        if self.prev_buffer is not self.buffer:
+            for line, offset, string, color in self.buffer:
+                self.stdscr.addstr(line, offset, string, color)
+                self.stdscr.refresh()
+
+    def draw_buffer(self):
+        self.prev_buffer = self.buffer
+        self.buffer = []
+
         schedule = Schedule()
         curses.curs_set(0)
         curses.start_color()
@@ -38,19 +49,12 @@ class Screen():
         curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
         curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
 
-        previous_as_dict = []
-
         max_y, max_x = self.stdscr.getmaxyx()
 
         schedule.load_tasks(scheduled=self.scheduled,
                             completed=self.completed)
 
         as_dict = schedule.as_dict()
-
-        # Clear the screen if lines have changed since last time
-        if as_dict != previous_as_dict:
-            self.stdscr.clear()
-        previous_as_dict = as_dict
 
         # Determine offsets
         offsets = schedule.get_column_offsets()
@@ -59,12 +63,12 @@ class Screen():
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
 
         color = curses.color_pair(4) | curses.A_UNDERLINE
-        self.stdscr.addstr(0, offsets[1], headers[2], color)
-        self.stdscr.addstr(0, offsets[2], headers[3], color)
-        self.stdscr.addstr(0, offsets[3], headers[4], color)
+        self.buffer.append((0, offsets[1], headers[2], color))
+        self.buffer.append((0, offsets[2], headers[3], color))
+        self.buffer.append((0, offsets[3], headers[4], color))
 
         if not self.hide_projects:
-            self.stdscr.addstr(0, offsets[4], headers[5], color)
+            self.buffer.append((0, offsets[4], headers[5], color))
 
         # Draw schedule
         past_first_task = False
@@ -81,17 +85,17 @@ class Screen():
                         color = curses.color_pair(3)
 
                     # Fill line to screen length
-                    self.stdscr.addstr(current_line, 5, ' ' * (max_x - 5),
-                                       color)
+                    self.buffer.append((current_line, 5, ' ' * (max_x - 5),
+                                        color))
 
                     # Draw hour, highlight current hour
                     current_hour = time.localtime().tm_hour
                     if i == current_hour:
-                        self.stdscr.addstr(current_line, 0, str(i),
-                                           curses.color_pair(5))
+                        self.buffer.append((current_line, 0, str(i),
+                                            curses.color_pair(5)))
                     else:
-                        self.stdscr.addstr(current_line, 0, str(i),
-                                           curses.color_pair(2))
+                        self.buffer.append((current_line, 0, str(i),
+                                            curses.color_pair(2)))
 
                     current_line += 1
                     alternate = not alternate
@@ -140,25 +144,25 @@ class Screen():
                 current_hour = time.localtime().tm_hour
                 if hour != '':
                     if int(hour) == current_hour:
-                        self.stdscr.addstr(current_line, 0, hour,
-                                           curses.color_pair(5))
+                        self.buffer.append((current_line, 0, hour,
+                                            curses.color_pair(5)))
                     else:
-                        self.stdscr.addstr(current_line, 0, hour,
-                                           curses.color_pair(2))
+                        self.buffer.append((current_line, 0, hour,
+                                            curses.color_pair(2)))
 
                 # Fill line to screen length
-                self.stdscr.addstr(current_line, 5, ' ' * (max_x - 5),
-                                   color)
+                self.buffer.append((current_line, 5, ' ' * (max_x - 5),
+                                    color))
 
                 # Draw task details
-                self.stdscr.addstr(current_line, 3, task.glyph,
-                                   curses.color_pair(9))
+                self.buffer.append((current_line, 3, task.glyph,
+                                    curses.color_pair(9)))
                 if task.task_id != 0:
-                    self.stdscr.addstr(current_line, 5, str(task.task_id),
-                                       color)
+                    self.buffer.append((current_line, 5, str(task.task_id),
+                                        color))
 
-                self.stdscr.addstr(current_line, offsets[2],
-                                   formatted_time, color)
+                self.buffer.append((current_line, offsets[2],
+                                    formatted_time, color))
 
                 if not self.hide_projects:
                     if task.project is None:
@@ -166,15 +170,13 @@ class Screen():
                     else:
                         project = task.project
 
-                    self.stdscr.addstr(current_line, offsets[3], project,
-                                       color)
-                    self.stdscr.addstr(current_line, offsets[4],
-                                       task.description, color)
+                    self.buffer.append((current_line, offsets[3], project,
+                                        color))
+                    self.buffer.append((current_line, offsets[4],
+                                        task.description, color))
                 else:
-                    self.stdscr.addstr(current_line, offsets[3],
-                                       task.description, color)
+                    self.buffer.append((current_line, offsets[3],
+                                        task.description, color))
 
                 current_line += 1
                 alternate = not alternate
-
-        self.stdscr.refresh()

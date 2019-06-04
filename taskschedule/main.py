@@ -39,6 +39,7 @@ def main(argv):
 
     try:
         while True:
+            screen.draw_buffer()
             screen.draw()
             time.sleep(args.refresh)
     except KeyboardInterrupt:
