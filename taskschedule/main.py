@@ -3,6 +3,7 @@
 import time
 import curses
 import argparse
+import datetime
 
 from isodate import parse_duration
 
@@ -24,6 +25,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
     curses.init_pair(7, 19, 0)  # Completed task
     curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
     curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
+    curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
 
     previous_as_dict = []
 
@@ -83,9 +85,41 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                     alternate = not alternate
 
             for ii, task in enumerate(tasks):
+                glyph = '○'
+                task_id = task['id']
+                start = task['scheduled']
+                estimate = task['estimate']
+                start_time = '{}'.format(start.strftime('%H:%M'))
+                description = task['description']
+                project = task['project']
+
+                is_current_task = False
+                start_timestamp = datetime.datetime.timestamp(start)
+                now = datetime.datetime.now()
+                now_timestamp = datetime.datetime.timestamp(now)
+                if estimate is None:
+                    try:
+                        next_task = tasks[ii + 1]
+                    except IndexError:
+                        is_current_task = False
+                    else:
+                        next_task_start = next_task['scheduled']
+                        next_task_start_timestamp = datetime.datetime.timestamp(next_task_start)
+                        if now_timestamp > start_timestamp and next_task_start_timestamp > now_timestamp:
+                            is_current_task = True
+                else:
+                    duration = parse_duration(estimate)
+                    end = start + duration
+
+                    end_timestamp = datetime.datetime.timestamp(end)
+                    if now_timestamp > start_timestamp and end_timestamp > now_timestamp:
+                        is_current_task = True
+
                 past_first_task = True
                 if task.active:
                     color = curses.color_pair(8)
+                elif is_current_task:
+                    color = curses.color_pair(10)
                 else:
                     if alternate:
                         if task['status'] == 'completed':
@@ -103,14 +137,6 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                     hour = str(i)
                 else:
                     hour = ''
-
-                glyph = '○'
-                task_id = task['id']
-                start = task['scheduled']
-                estimate = task['estimate']
-                start_time = '{}'.format(start.strftime('%H:%M'))
-                description = task['description']
-                project = task['project']
 
                 if estimate is None:
                     formatted_time = '{}'.format(start_time)
