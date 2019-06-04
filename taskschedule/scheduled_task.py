@@ -5,7 +5,8 @@ from isodate import parse_duration
 
 class ScheduledTask():
     """A scheduled task."""
-    def __init__(self, task):
+    def __init__(self, task, schedule):
+        self.schedule = schedule
         self.task = task
         self.glyph = '○'
         self.active = task.active
@@ -31,9 +32,9 @@ class ScheduledTask():
 
         self.project = task['project']
 
-    def should_be_active(self, next_task):
-        """If the task should be active (current time is past scheduled time
-           but before end time), return True. Else, return False."""
+    def should_be_active(self):
+        """Return true if the task should be active."""
+
         if self.start is not None:
             start_ts = dt.timestamp(self.start)
         else:
@@ -41,14 +42,14 @@ class ScheduledTask():
 
         now = dt.now()
         now_ts = dt.timestamp(now)
-        if self.start is None:
-            next_task_start_ts = dt.timestamp(next_task.start)
-            if now_ts > start_ts and next_task_start_ts > now_ts:
-                return True
-        else:
-            if self.end is None:
-                return False
 
+        if self.end is None:
+            next_task = self.schedule.get_next_task(self)
+            if next_task is not None:
+                next_task_start_ts = dt.timestamp(next_task.start)
+                if now_ts > start_ts and next_task_start_ts > now_ts:
+                    return True
+        else:
             end_ts = dt.timestamp(self.end)
             if now_ts > start_ts and end_ts > now_ts:
                 return True

@@ -108,12 +108,7 @@ class Screen():
                     alternate = not alternate
 
             for ii, task in enumerate(tasks):
-                try:
-                    next_task = tasks[ii + 1]
-                except IndexError:
-                    is_current_task = False
-                else:
-                    is_current_task = task.should_be_active(next_task)
+                is_current_task = task.should_be_active()
 
                 past_first_task = True
                 if task.active:

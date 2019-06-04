@@ -21,14 +21,14 @@ class Schedule():
         filtered_tasks = taskwarrior.tasks.filter(scheduled=scheduled,
                                                   status='pending')
         for task in filtered_tasks:
-            scheduled_task = ScheduledTask(task)
+            scheduled_task = ScheduledTask(task, self)
             scheduled_tasks.append(scheduled_task)
 
         if completed:
             filtered_tasks = taskwarrior.tasks.filter(scheduled=scheduled,
                                                       status='completed')
             for task in filtered_tasks:
-                scheduled_task = ScheduledTask(task)
+                scheduled_task = ScheduledTask(task, self)
                 scheduled_tasks.append(scheduled_task)
 
         self.tasks = scheduled_tasks
@@ -77,6 +77,21 @@ class Schedule():
 
         offsets.append(offsets[3] + add_offset)  # Project
         return offsets
+
+    def get_next_task(self, task):
+        """Get the next scheduled task after the given task. If there is no
+           next scheduled task, return None."""
+        next_tasks = []
+        for task_ in self.tasks:
+            if task_.start > task.start:
+                next_tasks.append(task_)
+
+        next_tasks.sort(key=lambda task: task.start)
+
+        if next_tasks:
+            return next_tasks[0]
+
+        return None
 
     def align_matrix(self, array):
         """Align all columns in a matrix by padding the items with spaces.
