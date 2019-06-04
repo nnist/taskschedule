@@ -4,12 +4,13 @@ import time
 import curses
 import argparse
 
-from taskschedule.schedule import Schedule
-
 from isodate import parse_duration
 
+from taskschedule.schedule import Schedule
 
-def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=True, hide_projects=False):
+
+def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
+         completed=True, hide_projects=False):
     """Draw the schedule using curses."""
     schedule = Schedule()
     curses.curs_set(0)
@@ -39,14 +40,14 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today', completed=T
         previous_as_dict = as_dict
 
         # Determine offsets
-        offsets = [0, 5] # Hour, glyph
-        offsets.append(5 + schedule.get_max_length('id') + 1) # ID
-        offsets.append(offsets[2] + 12) # Time
+        offsets = [0, 5]  # Hour, glyph
+        offsets.append(5 + schedule.get_max_length('id') + 1)  # ID
+        offsets.append(offsets[2] + 12)  # Time
 
         add_offset = schedule.get_max_length('project') + 1
         if add_offset < 8:
             add_offset = 8
-        offsets.append(offsets[3] + add_offset) # Project
+        offsets.append(offsets[3] + add_offset)  # Project
 
         # Draw headers
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
@@ -189,4 +190,5 @@ def main(argv):
     args = parser.parse_args(argv)
 
     hide_empty = not args.all
-    curses.wrapper(draw, args.refresh, hide_empty, args.scheduled, args.completed, args.project)
+    curses.wrapper(draw, args.refresh, hide_empty, args.scheduled,
+                   args.completed, args.project)
