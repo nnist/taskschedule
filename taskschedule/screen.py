@@ -166,6 +166,7 @@ class Screen():
                 self.buffer.append((current_line, offsets[2],
                                     formatted_time, color))
 
+                offset = 0
                 if not self.hide_projects:
                     if task.project is None:
                         project = ''
@@ -174,11 +175,13 @@ class Screen():
 
                     self.buffer.append((current_line, offsets[3], project,
                                         color))
-                    self.buffer.append((current_line, offsets[4],
-                                        task.description, color))
+                    offset = offsets[4]
                 else:
-                    self.buffer.append((current_line, offsets[3],
-                                        task.description, color))
+                    offset = offsets[3]
+
+                description = task.description[0:max_x - offset]
+                self.buffer.append((current_line, offset,
+                                    description, color))
 
                 current_line += 1
                 alternate = not alternate
