@@ -55,6 +55,21 @@ class Schedule():
 
         return max_length
 
+    def get_column_offsets(self):
+        """Return the offsets for each column in the schedule for rendering
+           a table."""
+        offsets = [0, 5]  # Hour, glyph
+        offsets.append(5 + self.get_max_length('id') + 1)  # ID
+        offsets.append(offsets[2] + 12)  # Time
+
+        add_offset = self.get_max_length('project') + 1
+
+        if add_offset < 8:
+            add_offset = 8
+
+        offsets.append(offsets[3] + add_offset)  # Project
+        return offsets
+
     def align_matrix(self, array):
         """Align all columns in a matrix by padding the items with spaces.
            Return the aligned array."""
