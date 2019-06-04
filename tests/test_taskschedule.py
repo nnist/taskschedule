@@ -207,7 +207,7 @@ class ScheduledTaskTest(unittest.TestCase):
         self.assertEqual(str(task.start), '{} 09:00:00+02:00'.format(date_str))
         self.assertEqual(str(task.end), '{} 10:11:00+02:00'.format(date_str))
 
-        self.assertEqual(task.should_be_active(), False)
+        self.assertEqual(task.should_be_active, False)
 
     def test_overdue_task_returns_true(self):
         task = ScheduledTask(self.tasks[0], self.schedule)

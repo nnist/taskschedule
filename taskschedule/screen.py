@@ -108,14 +108,14 @@ class Screen():
                     alternate = not alternate
 
             for ii, task in enumerate(tasks):
-                is_current_task = task.should_be_active()
+                is_current_task = task.should_be_active
 
                 past_first_task = True
                 if task.active:
                     color = curses.color_pair(8)
                 elif is_current_task:
                     color = curses.color_pair(10)
-                elif task.overdue() and not task.completed:
+                elif task.overdue and not task.completed:
                     color = curses.color_pair(11)
                 else:
                     if alternate:

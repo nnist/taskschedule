@@ -32,6 +32,7 @@ class ScheduledTask():
 
         self.project = task['project']
 
+    @property
     def should_be_active(self):
         """Return true if the task should be active."""
 
@@ -56,6 +57,7 @@ class ScheduledTask():
 
         return False
 
+    @property
     def overdue(self):
         """If the task is overdue (current time is past end time),
            return True. Else, return False."""
