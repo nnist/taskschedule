@@ -27,10 +27,15 @@ class Screen():
         """Draw the current buffer."""
         if self.prev_buffer is not self.buffer:
             for line, offset, string, color in self.buffer:
-                self.stdscr.addstr(line, offset, string, color)
-                self.stdscr.refresh()
+                max_y, max_x = self.stdscr.getmaxyx()
+                if line < max_y - 1:
+                    self.stdscr.addstr(line, offset, string, color)
+                    self.stdscr.refresh()
+                else:
+                    break
 
     def draw_buffer(self):
+        max_y, max_x = self.stdscr.getmaxyx()
         self.prev_buffer = self.buffer
         self.buffer = []
 
@@ -48,8 +53,6 @@ class Screen():
         curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
         curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
         curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
-
-        max_y, max_x = self.stdscr.getmaxyx()
 
         schedule.load_tasks(scheduled=self.scheduled,
                             completed=self.completed)
@@ -85,8 +88,8 @@ class Screen():
                         color = curses.color_pair(3)
 
                     # Fill line to screen length
-                    self.buffer.append((current_line, 5, ' ' * (max_x - 5),
-                                        color))
+                    self.buffer.append((current_line, 5,
+                                        ' ' * (max_x - 5), color))
 
                     # Draw hour, highlight current hour
                     current_hour = time.localtime().tm_hour
