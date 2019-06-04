@@ -15,17 +15,10 @@ class ScheduledTask():
         else:
             self.completed = False
 
-        try:
-            self.task_id = task['id']
-        except TypeError:
-            self.task_id = 0
+        self.task_id = task['id']
 
-        try:
-            self.start = task['scheduled']
-            self.start_time = '{}'.format(self.start.strftime('%H:%M'))
-        except TypeError:
-            self.start = None
-            self.start_time = None
+        self.start = task['scheduled']
+        self.start_time = '{}'.format(self.start.strftime('%H:%M'))
 
         try:
             estimate = task['estimate']
@@ -34,15 +27,9 @@ class ScheduledTask():
         except TypeError:
             self.end = None
 
-        try:
-            self.description = task['description']
-        except TypeError:
-            self.description = None
+        self.description = task['description']
 
-        try:
-            self.project = task['project']
-        except TypeError:
-            self.project = None
+        self.project = task['project']
 
     def should_be_active(self, next_task):
         """If the task should be active (current time is past scheduled time
