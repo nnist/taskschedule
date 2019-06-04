@@ -19,9 +19,26 @@ class Screen():
         self.hide_empty = hide_empty
         self.buffer = []
         self.prev_buffer = []
+        self.init_colors()
 
     def close(self):
         curses.endwin()
+
+    def init_colors(self):
+        """Initialize the colors."""
+        curses.curs_set(0)
+        curses.start_color()
+        curses.init_pair(1, 20, curses.COLOR_BLACK)
+        curses.init_pair(2, 8, 0)  # Hours
+        curses.init_pair(3, 20, 234)  # Alternating background
+        curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
+        curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
+        curses.init_pair(6, 19, 234)  # Completed task - alternating background
+        curses.init_pair(7, 19, 0)  # Completed task
+        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
+        curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
+        curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
+        curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
 
     def draw(self):
         """Draw the current buffer."""
@@ -40,19 +57,6 @@ class Screen():
         self.buffer = []
 
         schedule = Schedule()
-        curses.curs_set(0)
-        curses.start_color()
-        curses.init_pair(1, 20, curses.COLOR_BLACK)
-        curses.init_pair(2, 8, 0)  # Hours
-        curses.init_pair(3, 20, 234)  # Alternating background
-        curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
-        curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
-        curses.init_pair(6, 19, 234)  # Completed task - alternating background
-        curses.init_pair(7, 19, 0)  # Completed task
-        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
-        curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
-        curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
-        curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
 
         schedule.load_tasks(scheduled=self.scheduled,
                             completed=self.completed)
