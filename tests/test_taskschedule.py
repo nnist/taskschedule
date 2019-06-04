@@ -39,7 +39,7 @@ class TaskscheduleTest(unittest.TestCase):
         assert schedule is not None
 
     def test_get_tasks_returns_correct_tasks(self):
-        self.schedule.get_tasks()
+        self.schedule.load_tasks()
 
         date_str = datetime.now().strftime('%Y-%m-%d')
 

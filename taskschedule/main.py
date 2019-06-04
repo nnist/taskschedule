@@ -34,7 +34,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
     while True:
         max_y, max_x = stdscr.getmaxyx()
 
-        schedule.get_tasks(scheduled=scheduled, completed=completed)
+        schedule.load_tasks(scheduled=scheduled, completed=completed)
 
         as_dict = schedule.as_dict()
 

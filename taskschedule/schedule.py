@@ -14,7 +14,7 @@ class Schedule():
         self.tw_data_dir_create = tw_data_dir_create
         self.tasks = []
 
-    def get_tasks(self, scheduled='today', completed=True):
+    def load_tasks(self, scheduled='today', completed=True):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
         scheduled_tasks = []
