@@ -3,6 +3,8 @@
 
 from tasklib import TaskWarrior
 
+from taskschedule.scheduled_task import ScheduledTask
+
 
 class Schedule():
     """This class provides methods to format tasks and display them in
@@ -15,15 +17,17 @@ class Schedule():
     def get_tasks(self, scheduled='today', completed=True):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
-        tasks = []
+        scheduled_tasks = []
         for task in taskwarrior.tasks.filter(scheduled=scheduled, status='pending'):
-            tasks.append(task)
+            scheduled_task = ScheduledTask(task)
+            scheduled_tasks.append(scheduled_task)
 
         if completed:
             for task in taskwarrior.tasks.filter(scheduled=scheduled, status='completed'):
-                tasks.append(task)
+                scheduled_task = ScheduledTask(task)
+                scheduled_tasks.append(scheduled_task)
 
-        self.tasks = tasks
+        self.tasks = scheduled_tasks
 
     def as_dict(self):
         """Return a dict with scheduled tasks.
@@ -34,11 +38,11 @@ class Schedule():
         for i in range(24):
             task_list = []
             for task in self.tasks:
-                start = task['scheduled']
+                start = task.start
                 if start.hour == i:
                     task_list.append(task)
 
-            task_list = sorted(task_list, key=lambda k: k['scheduled'])
+            task_list = sorted(task_list, key=lambda k: k.start)
             as_dict[i] = task_list
 
         return as_dict
@@ -49,7 +53,7 @@ class Schedule():
         """
         max_length = 0
         for task in self.tasks:
-            length = len(str(task[value]))
+            length = len(str(task.task[value]))
             if length > max_length:
                 max_length = length
 

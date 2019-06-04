@@ -8,6 +8,7 @@ import datetime
 from isodate import parse_duration
 
 from taskschedule.schedule import Schedule
+from taskschedule.scheduled_task import ScheduledTask
 
 
 def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
@@ -85,35 +86,12 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                     alternate = not alternate
 
             for ii, task in enumerate(tasks):
-                glyph = '○'
-                task_id = task['id']
-                start = task['scheduled']
-                estimate = task['estimate']
-                start_time = '{}'.format(start.strftime('%H:%M'))
-                description = task['description']
-                project = task['project']
-
-                is_current_task = False
-                start_timestamp = datetime.datetime.timestamp(start)
-                now = datetime.datetime.now()
-                now_timestamp = datetime.datetime.timestamp(now)
-                if estimate is None:
-                    try:
-                        next_task = tasks[ii + 1]
-                    except IndexError:
-                        is_current_task = False
-                    else:
-                        next_task_start = next_task['scheduled']
-                        next_task_start_timestamp = datetime.datetime.timestamp(next_task_start)
-                        if now_timestamp > start_timestamp and next_task_start_timestamp > now_timestamp:
-                            is_current_task = True
+                try:
+                    next_task = tasks[ii + 1]
+                except IndexError:
+                    is_current_task = False
                 else:
-                    duration = parse_duration(estimate)
-                    end = start + duration
-
-                    end_timestamp = datetime.datetime.timestamp(end)
-                    if now_timestamp > start_timestamp and end_timestamp > now_timestamp:
-                        is_current_task = True
+                    is_current_task = task.should_be_active(next_task)
 
                 past_first_task = True
                 if task.active:
@@ -122,12 +100,12 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                     color = curses.color_pair(10)
                 else:
                     if alternate:
-                        if task['status'] == 'completed':
+                        if task.completed:
                             color = curses.color_pair(7)
                         else:
                             color = curses.color_pair(1)
                     else:
-                        if task['status'] == 'completed':
+                        if task.completed:
                             color = curses.color_pair(6)
                         else:
                             color = curses.color_pair(3)
@@ -138,13 +116,11 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                 else:
                     hour = ''
 
-                if estimate is None:
-                    formatted_time = '{}'.format(start_time)
+                if task.end is None:
+                    formatted_time = '{}'.format(task.start_time)
                 else:
-                    duration = parse_duration(estimate)
-                    end = start + duration
-                    end_time = '{}'.format(end.strftime('%H:%M'))
-                    formatted_time = '{}-{}'.format(start_time, end_time)
+                    end_time = '{}'.format(task.end.strftime('%H:%M'))
+                    formatted_time = '{}-{}'.format(task.start_time, end_time)
 
                 # Draw hour, highlight current hour
                 current_hour = time.localtime().tm_hour
@@ -160,20 +136,25 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                 stdscr.addstr(current_line, 5, ' ' * (max_x - 5), color)
 
                 # Draw task details
-                stdscr.addstr(current_line, 3, glyph, curses.color_pair(9))
-                if task_id != 0:
-                    stdscr.addstr(current_line, 5, str(task_id), color)
+                stdscr.addstr(current_line, 3, task.glyph,
+                              curses.color_pair(9))
+                if task.task_id != 0:
+                    stdscr.addstr(current_line, 5, str(task.task_id), color)
 
                 stdscr.addstr(current_line, offsets[2], formatted_time, color)
 
                 if not hide_projects:
-                    if project is None:
+                    if task.project is None:
                         project = ''
+                    else:
+                        project = task.project
 
                     stdscr.addstr(current_line, offsets[3], project, color)
-                    stdscr.addstr(current_line, offsets[4], description, color)
+                    stdscr.addstr(current_line, offsets[4], task.description,
+                                  color)
                 else:
-                    stdscr.addstr(current_line, offsets[3], description, color)
+                    stdscr.addstr(current_line, offsets[3], task.description,
+                                  color)
 
                 current_line += 1
                 alternate = not alternate
