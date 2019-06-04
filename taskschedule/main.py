@@ -27,6 +27,7 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
     curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
     curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
     curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
+    curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
 
     previous_as_dict = []
 
@@ -98,6 +99,8 @@ def draw(stdscr, refresh_rate=1, hide_empty=True, scheduled='today',
                     color = curses.color_pair(8)
                 elif is_current_task:
                     color = curses.color_pair(10)
+                elif task.overdue() and not task.completed:
+                    color = curses.color_pair(11)
                 else:
                     if alternate:
                         if task.completed:

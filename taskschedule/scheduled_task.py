@@ -54,3 +54,22 @@ class ScheduledTask():
                 return True
 
         return False
+
+    def overdue(self):
+        """If the task is overdue (current time is past end time),
+           return True. Else, return False."""
+        now = dt.now()
+        now_ts = dt.timestamp(now)
+
+        if self.end is None:
+            start_ts = dt.timestamp(self.start)
+            if now_ts > start_ts:
+                return True
+
+            return False
+
+        end_ts = dt.timestamp(self.end)
+        if now_ts > end_ts:
+            return True
+
+        return False

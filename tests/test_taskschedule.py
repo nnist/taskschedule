@@ -173,10 +173,14 @@ class ScheduledTaskTest(unittest.TestCase):
     def setUp(self):
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True)
+        Task(taskwarrior, description='test_yesterday',
+             schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
              schedule='today+9hr', estimate='71min', project='test').save()
         Task(taskwarrior, description='test_14:00_to_16:00',
              schedule='today+14hr', estimate='2hr').save()
+        Task(taskwarrior, description='test_tomorrow',
+             schedule='tomorrow', estimate='24min').save()
 
         self.tasks = taskwarrior.tasks.filter(status='pending')
 
@@ -187,9 +191,9 @@ class ScheduledTaskTest(unittest.TestCase):
         os.remove(os.path.dirname(__file__) + '/test_data/.task/undo.data')
 
     def test_init_works_correctly(self):
-        task = ScheduledTask(self.tasks[0])
+        task = ScheduledTask(self.tasks[1])
 
-        self.assertEqual(task.task, self.tasks[0])
+        self.assertEqual(task.task, self.tasks[1])
         self.assertEqual(task.active, False)
         self.assertEqual(task.completed, False)
         self.assertNotEqual(task.task_id, 0)
@@ -202,6 +206,14 @@ class ScheduledTaskTest(unittest.TestCase):
 
         next_task = self.tasks[1]
         self.assertEqual(task.should_be_active(next_task), False)
+
+    def test_overdue_task_returns_true(self):
+        task = ScheduledTask(self.tasks[0])
+        self.assertEqual(task.overdue(), True)
+
+    def test_non_overdue_task_returns_false(self):
+        task = ScheduledTask(self.tasks[3])
+        self.assertEqual(task.overdue(), False)
 
 
 if __name__ == '__main__':
