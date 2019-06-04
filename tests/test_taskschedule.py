@@ -5,6 +5,7 @@ from datetime import datetime
 
 from .context import taskschedule
 from taskschedule.schedule import Schedule
+from taskschedule.scheduled_task import ScheduledTask
 
 from tasklib import TaskWarrior, Task
 
@@ -166,6 +167,41 @@ class TaskscheduleTest(unittest.TestCase):
         ]
 
         assert returned_rows == expected_rows
+
+
+class ScheduledTaskTest(unittest.TestCase):
+    def setUp(self):
+        taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
+                                  create=True)
+        Task(taskwarrior, description='test_9:00_to_10:11',
+             schedule='today+9hr', estimate='71min', project='test').save()
+        Task(taskwarrior, description='test_14:00_to_16:00',
+             schedule='today+14hr', estimate='2hr').save()
+
+        self.tasks = taskwarrior.tasks.filter(status='pending')
+
+    def tearDown(self):
+        os.remove(os.path.dirname(__file__) + '/test_data/.task/backlog.data')
+        os.remove(os.path.dirname(__file__) + '/test_data/.task/completed.data')
+        os.remove(os.path.dirname(__file__) + '/test_data/.task/pending.data')
+        os.remove(os.path.dirname(__file__) + '/test_data/.task/undo.data')
+
+    def test_init_works_correctly(self):
+        task = ScheduledTask(self.tasks[0])
+
+        self.assertEqual(task.task, self.tasks[0])
+        self.assertEqual(task.active, False)
+        self.assertEqual(task.completed, False)
+        self.assertNotEqual(task.task_id, 0)
+        self.assertEqual(task.project, 'test')
+
+        date_str = datetime.now().strftime('%Y-%m-%d')
+        self.assertEqual(str(task.description), 'test_9:00_to_10:11')
+        self.assertEqual(str(task.start), '{} 09:00:00+02:00'.format(date_str))
+        self.assertEqual(str(task.end), '{} 10:11:00+02:00'.format(date_str))
+
+        next_task = self.tasks[1]
+        self.assertEqual(task.should_be_active(next_task), False)
 
 
 if __name__ == '__main__':
