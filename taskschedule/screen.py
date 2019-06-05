@@ -42,6 +42,43 @@ class Screen():
         curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
         curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
 
+        # pylint: disable=invalid-name
+        self.COLOR_DEFAULT = curses.color_pair(1)
+        self.COLOR_DEFAULT_ALTERNATE = curses.color_pair(3)
+        self.COLOR_HEADER = curses.color_pair(4) | curses.A_UNDERLINE
+        self.COLOR_HOUR = curses.color_pair(2)
+        self.COLOR_HOUR_CURRENT = curses.color_pair(5)
+        self.COLOR_ACTIVE = curses.color_pair(8)
+        self.COLOR_SHOULD_BE_ACTIVE = curses.color_pair(10)
+        self.COLOR_OVERDUE = curses.color_pair(11)
+        self.COLOR_COMPLETED = curses.color_pair(7)
+        self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(6)
+        self.COLOR_GLYPH = curses.color_pair(9)
+
+    def get_task_color(self, task, alternate):
+        """Return the color for the given task."""
+        color = None
+
+        if task.active:
+            color = self.COLOR_ACTIVE
+        elif task.should_be_active:
+            color = self.COLOR_SHOULD_BE_ACTIVE
+        elif task.overdue and not task.completed:
+            color = self.COLOR_OVERDUE
+        else:
+            if alternate:
+                if task.completed:
+                    color = self.COLOR_COMPLETED_ALTERNATE
+                else:
+                    color = self.COLOR_DEFAULT_ALTERNATE
+            else:
+                if task.completed:
+                    color = self.COLOR_COMPLETED
+                else:
+                    color = self.COLOR_DEFAULT
+
+        return color
+
     def draw(self):
         """Draw the current buffer."""
         if self.prev_buffer != self.buffer:
@@ -72,13 +109,12 @@ class Screen():
         # Draw headers
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
 
-        color = curses.color_pair(4) | curses.A_UNDERLINE
-        self.buffer.append((0, offsets[1], headers[2], color))
-        self.buffer.append((0, offsets[2], headers[3], color))
-        self.buffer.append((0, offsets[3], headers[4], color))
+        self.buffer.append((0, offsets[1], headers[2], self.COLOR_HEADER))
+        self.buffer.append((0, offsets[2], headers[3], self.COLOR_HEADER))
+        self.buffer.append((0, offsets[3], headers[4], self.COLOR_HEADER))
 
         if not self.hide_projects:
-            self.buffer.append((0, offsets[4], headers[5], color))
+            self.buffer.append((0, offsets[4], headers[5], self.COLOR_HEADER))
 
         # Draw schedule
         alternate = True
@@ -98,9 +134,9 @@ class Screen():
             if not tasks:
                 # Add empty line
                 if alternate:
-                    color = curses.color_pair(1)
+                    color = self.COLOR_DEFAULT_ALTERNATE
                 else:
-                    color = curses.color_pair(3)
+                    color = self.COLOR_DEFAULT
 
                 # Fill line to screen length
                 self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
@@ -109,34 +145,16 @@ class Screen():
                 current_hour = time.localtime().tm_hour
                 if i == current_hour:
                     self.buffer.append((current_line, 0, str(i),
-                                        curses.color_pair(5)))
+                                        self.COLOR_HOUR_CURRENT))
                 else:
                     self.buffer.append((current_line, 0, str(i),
-                                        curses.color_pair(2)))
+                                        self.COLOR_HOUR))
 
                 current_line += 1
                 alternate = not alternate
 
             for ii, task in enumerate(tasks):
-                is_current_task = task.should_be_active
-
-                if task.active:
-                    color = curses.color_pair(8)
-                elif is_current_task:
-                    color = curses.color_pair(10)
-                elif task.overdue and not task.completed:
-                    color = curses.color_pair(11)
-                else:
-                    if alternate:
-                        if task.completed:
-                            color = curses.color_pair(7)
-                        else:
-                            color = curses.color_pair(1)
-                    else:
-                        if task.completed:
-                            color = curses.color_pair(6)
-                        else:
-                            color = curses.color_pair(3)
+                color = self.get_task_color(task, alternate)
 
                 # Only draw hour once for multiple tasks
                 if ii == 0:
@@ -156,10 +174,10 @@ class Screen():
                 if hour != '':
                     if int(hour) == current_hour:
                         self.buffer.append((current_line, 0, hour,
-                                            curses.color_pair(5)))
+                                            self.COLOR_HOUR_CURRENT))
                     else:
                         self.buffer.append((current_line, 0, hour,
-                                            curses.color_pair(2)))
+                                            self.COLOR_HOUR))
 
                 # Fill line to screen length
                 self.buffer.append((current_line, 5, ' ' * (max_x - 5),
@@ -167,7 +185,7 @@ class Screen():
 
                 # Draw task details
                 self.buffer.append((current_line, 3, task.glyph,
-                                    curses.color_pair(9)))
+                                    self.COLOR_GLYPH))
                 if task.task_id != 0:
                     self.buffer.append((current_line, 5, str(task.task_id),
                                         color))
