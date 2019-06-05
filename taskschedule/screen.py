@@ -9,12 +9,14 @@ from taskschedule.scheduled_task import ScheduledTask
 
 
 class Screen():
-    def __init__(self, refresh_rate=1, hide_empty=True, scheduled='today',
+    def __init__(self, refresh_rate=1, hide_empty=True, scheduled_before='tomorrow',
+                 scheduled_after='today',
                  completed=True, hide_projects=False):
         self.stdscr = curses.initscr()
         self.refresh_rate = refresh_rate
-        self.scheduled = scheduled
         self.completed = completed
+        self.scheduled_before = scheduled_before
+        self.scheduled_after = scheduled_after
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
         self.buffer = []
@@ -58,7 +60,8 @@ class Screen():
 
         schedule = Schedule()
 
-        schedule.load_tasks(scheduled=self.scheduled,
+        schedule.load_tasks(scheduled_before=self.scheduled_before,
+                            scheduled_after=self.scheduled_after,
                             completed=self.completed)
 
         as_dict = schedule.as_dict()

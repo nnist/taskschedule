@@ -15,8 +15,12 @@ def main(argv):
         '-r', '--refresh', help="refresh every n seconds", type=int, default=1
     )
     parser.add_argument(
-        '-s', '--scheduled', help="scheduled date: ex. 'today', 'tomorrow'",
+        '--after', help="scheduled after date: ex. 'today', 'tomorrow'",
         type=str, default='today'
+    )
+    parser.add_argument(
+        '--before', help="scheduled before date: ex. 'today', 'tomorrow'",
+        type=str, default='tomorrow'
     )
     parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
@@ -34,7 +38,9 @@ def main(argv):
 
     hide_empty = not args.all
 
-    screen = Screen(hide_empty=hide_empty, scheduled=args.scheduled,
+    screen = Screen(hide_empty=hide_empty,
+                    scheduled_before=args.before,
+                    scheduled_after=args.after,
                     completed=args.completed, hide_projects=args.project)
 
     try:
