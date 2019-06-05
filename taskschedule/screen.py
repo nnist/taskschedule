@@ -5,6 +5,7 @@ from taskschedule.schedule import Schedule
 
 
 class Screen():
+    """This class handles the rendering of the schedule."""
     def __init__(self, refresh_rate=1, hide_empty=True, scheduled_before='tomorrow',
                  scheduled_after='today',
                  completed=True, hide_projects=False):
@@ -20,6 +21,7 @@ class Screen():
         self.init_colors()
 
     def close(self):
+        """Close the curses screen."""
         curses.endwin()
 
     def init_colors(self):
@@ -87,6 +89,7 @@ class Screen():
                     break
 
     def draw_buffer(self):
+        """Refresh the buffer."""
         max_y, max_x = self.stdscr.getmaxyx()
         self.prev_buffer = self.buffer
         self.buffer = []
