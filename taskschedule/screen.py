@@ -1,11 +1,7 @@
-import time
 import curses
-import datetime
-
-from isodate import parse_duration
+import time
 
 from taskschedule.schedule import Schedule
-from taskschedule.scheduled_task import ScheduledTask
 
 
 class Screen():
