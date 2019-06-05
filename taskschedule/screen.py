@@ -140,7 +140,7 @@ class Screen():
                 # Fill line to screen length
                 self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
 
-                # Draw hour, highlight current hour
+                # Draw hour column, highlight current hour
                 current_hour = time.localtime().tm_hour
                 if i == current_hour:
                     self.buffer.append((current_line, 0, str(i),
@@ -161,14 +161,7 @@ class Screen():
                 else:
                     hour = ''
 
-                if task.end is None:
-                    formatted_time = '{}'.format(task.start_time)
-                else:
-                    end_time = '{}'.format(task.end.strftime('%H:%M'))
-                    formatted_time = '{}-{}'.format(task.start_time,
-                                                    end_time)
-
-                # Draw hour, highlight current hour
+                # Draw hour column, highlight current hour
                 current_hour = time.localtime().tm_hour
                 if hour != '':
                     if int(hour) == current_hour:
@@ -182,12 +175,22 @@ class Screen():
                 self.buffer.append((current_line, 5, ' ' * (max_x - 5),
                                     color))
 
-                # Draw task details
+                # Draw glyph column
                 self.buffer.append((current_line, 3, task.glyph,
                                     self.COLOR_GLYPH))
+
+                # Draw task id column
                 if task.task_id != 0:
                     self.buffer.append((current_line, 5, str(task.task_id),
                                         color))
+
+                # Draw time column
+                if task.end is None:
+                    formatted_time = '{}'.format(task.start_time)
+                else:
+                    end_time = '{}'.format(task.end.strftime('%H:%M'))
+                    formatted_time = '{}-{}'.format(task.start_time,
+                                                    end_time)
 
                 self.buffer.append((current_line, offsets[2],
                                     formatted_time, color))
