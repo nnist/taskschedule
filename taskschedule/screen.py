@@ -88,7 +88,7 @@ class Screen():
                 else:
                     break
 
-    def draw_buffer(self):
+    def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.stdscr.getmaxyx()
         self.prev_buffer = self.buffer
