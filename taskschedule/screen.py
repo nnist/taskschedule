@@ -80,6 +80,7 @@ class Screen():
     def draw(self):
         """Draw the current buffer."""
         if self.prev_buffer != self.buffer:
+            self.stdscr.clear()
             for line, offset, string, color in self.buffer:
                 max_y, max_x = self.stdscr.getmaxyx()
                 if line < max_y - 1:
