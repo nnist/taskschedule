@@ -211,11 +211,11 @@ class ScheduledTaskTest(unittest.TestCase):
 
     def test_overdue_task_returns_true(self):
         task = ScheduledTask(self.tasks[0], self.schedule)
-        self.assertEqual(task.overdue(), True)
+        self.assertEqual(task.overdue, True)
 
     def test_non_overdue_task_returns_false(self):
         task = ScheduledTask(self.tasks[3], self.schedule)
-        self.assertEqual(task.overdue(), False)
+        self.assertEqual(task.overdue, False)
 
 
 if __name__ == '__main__':
