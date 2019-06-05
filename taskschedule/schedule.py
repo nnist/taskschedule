@@ -35,6 +35,7 @@ class Schedule():
                 scheduled_task = ScheduledTask(task, self)
                 scheduled_tasks.append(scheduled_task)
 
+        scheduled_tasks.sort(key=lambda task: task.start)
         self.tasks = scheduled_tasks
 
     def as_dict(self):
