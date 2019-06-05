@@ -81,39 +81,45 @@ class Screen():
             self.buffer.append((0, offsets[4], headers[5], color))
 
         # Draw schedule
-        past_first_task = False
         alternate = True
         current_line = 1
-        for i in range(24):
+
+        if self.hide_empty:
+            first_task = schedule.tasks[0].start
+            first_hour = first_task.hour
+            last_task = schedule.tasks[-1].start
+            last_hour = last_task.hour
+        else:
+            first_hour = 0
+            last_hour = 23
+
+        for i in range(first_hour, last_hour + 1):
             tasks = as_dict[i]
             if not tasks:
-                # Add empty line if between tasks or option is enabled
-                if past_first_task or not self.hide_empty:
-                    if alternate:
-                        color = curses.color_pair(1)
-                    else:
-                        color = curses.color_pair(3)
+                # Add empty line
+                if alternate:
+                    color = curses.color_pair(1)
+                else:
+                    color = curses.color_pair(3)
 
-                    # Fill line to screen length
-                    self.buffer.append((current_line, 5,
-                                        ' ' * (max_x - 5), color))
+                # Fill line to screen length
+                self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
 
-                    # Draw hour, highlight current hour
-                    current_hour = time.localtime().tm_hour
-                    if i == current_hour:
-                        self.buffer.append((current_line, 0, str(i),
-                                            curses.color_pair(5)))
-                    else:
-                        self.buffer.append((current_line, 0, str(i),
-                                            curses.color_pair(2)))
+                # Draw hour, highlight current hour
+                current_hour = time.localtime().tm_hour
+                if i == current_hour:
+                    self.buffer.append((current_line, 0, str(i),
+                                        curses.color_pair(5)))
+                else:
+                    self.buffer.append((current_line, 0, str(i),
+                                        curses.color_pair(2)))
 
-                    current_line += 1
-                    alternate = not alternate
+                current_line += 1
+                alternate = not alternate
 
             for ii, task in enumerate(tasks):
                 is_current_task = task.should_be_active
 
-                past_first_task = True
                 if task.active:
                     color = curses.color_pair(8)
                 elif is_current_task:
