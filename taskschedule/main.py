@@ -4,6 +4,8 @@ import argparse
 import time
 import sys
 
+from curses import napms, KEY_RESIZE
+
 from taskschedule.screen import Screen
 
 
@@ -69,11 +71,17 @@ def main(argv):
                     scheduled=args.scheduled,
                     completed=args.completed, hide_projects=args.project)
 
+    last_refresh_time = 0
     try:
         while True:
-            screen.refresh_buffer()
-            screen.draw()
-            time.sleep(args.refresh)
+            key = screen.stdscr.getch()
+            if (key == KEY_RESIZE or
+                    time.time() > last_refresh_time + args.refresh):
+                last_refresh_time = time.time()
+                screen.refresh_buffer()
+                screen.draw()
+
+            napms(50)
     except KeyboardInterrupt:
         pass
     finally:

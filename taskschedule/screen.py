@@ -10,6 +10,8 @@ class Screen():
                  scheduled_after=None, scheduled=None,
                  completed=True, hide_projects=False):
         self.stdscr = curses.initscr()
+        self.stdscr.nodelay(True)
+
         self.refresh_rate = refresh_rate
         self.completed = completed
 
