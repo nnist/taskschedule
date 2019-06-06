@@ -16,17 +16,17 @@ def main(argv):
         '-r', '--refresh', help="refresh every n seconds", type=int, default=1
     )
     parser.add_argument(
-        '--after', help="scheduled after date: ex. 'today', 'tomorrow'",
-        type=str
+        '--from', help="scheduled from date: ex. 'today', 'tomorrow'",
+        type=str, dest='after'
     )
     parser.add_argument(
-        '--before', help="scheduled before date: ex. 'today', 'tomorrow'",
-        type=str
+        '--until', help="scheduled until date: ex. 'today', 'tomorrow'",
+        type=str, dest='before'
     )
     parser.add_argument(
         '-s', '--scheduled',
         help="""scheduled date: ex. 'today', 'tomorrow'
-                (overrides --after and --before)""",
+                (overrides --from and --until)""",
         type=str
     )
     parser.add_argument(
@@ -48,11 +48,11 @@ def main(argv):
     if args.scheduled:
         if args.before or args.after:
             print('Error: The --scheduled option can not be used together '
-                  'with --before and/or --after.')
+                  'with --until and/or --from.')
             sys.exit(1)
     else:
         if args.before and not args.after or not args.before and args.after:
-            print('Error: Either both --before and --after or neither options '
+            print('Error: Either both --until and --from or neither options '
                   'must be used.')
             sys.exit(1)
 
