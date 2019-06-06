@@ -17,17 +17,17 @@ def main(argv):
     )
     parser.add_argument(
         '--after', help="scheduled after date: ex. 'today', 'tomorrow'",
-        type=str, default='today'
+        type=str
     )
     parser.add_argument(
         '--before', help="scheduled before date: ex. 'today', 'tomorrow'",
-        type=str, default='tomorrow'
+        type=str
     )
     parser.add_argument(
         '-s', '--scheduled',
         help="""scheduled date: ex. 'today', 'tomorrow'
                 (overrides --after and --before)""",
-        type=str, default=None
+        type=str
     )
     parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
@@ -46,10 +46,17 @@ def main(argv):
     hide_empty = not args.all
 
     if args.scheduled:
-        if args.before != 'tomorrow' or args.after != 'today':
+        if args.before or args.after:
             print('Error: The --scheduled option can not be used together '
                   'with --before and/or --after.')
             sys.exit(1)
+    else:
+        if not args.before and not args.after:
+            args.scheduled = 'today'
+        elif not args.before:
+            args.before = 'tomorrow'
+        elif not args.after:
+            args.after = 'yesterday'
 
     screen = Screen(hide_empty=hide_empty,
                     scheduled_before=args.before,
