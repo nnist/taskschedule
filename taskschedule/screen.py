@@ -60,7 +60,12 @@ class Screen():
         """Return the color for the given task."""
         color = None
 
-        if task.active:
+        if task.completed:
+            if alternate:
+                color = self.COLOR_COMPLETED_ALTERNATE
+            else:
+                color = self.COLOR_COMPLETED
+        elif task.active:
             color = self.COLOR_ACTIVE
         elif task.should_be_active:
             color = self.COLOR_SHOULD_BE_ACTIVE
@@ -68,15 +73,9 @@ class Screen():
             color = self.COLOR_OVERDUE
         else:
             if alternate:
-                if task.completed:
-                    color = self.COLOR_COMPLETED_ALTERNATE
-                else:
-                    color = self.COLOR_DEFAULT_ALTERNATE
+                color = self.COLOR_DEFAULT_ALTERNATE
             else:
-                if task.completed:
-                    color = self.COLOR_COMPLETED
-                else:
-                    color = self.COLOR_DEFAULT
+                color = self.COLOR_DEFAULT
 
         return color
 
