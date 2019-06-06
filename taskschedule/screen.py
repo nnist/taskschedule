@@ -84,15 +84,20 @@ class Screen():
 
     def draw(self):
         """Draw the current buffer."""
-        if self.prev_buffer != self.buffer:
+        if not self.buffer:
             self.stdscr.clear()
-            for line, offset, string, color in self.buffer:
-                max_y, max_x = self.stdscr.getmaxyx()
-                if line < max_y - 1:
-                    self.stdscr.addstr(line, offset, string, color)
-                    self.stdscr.refresh()
-                else:
-                    break
+            self.stdscr.addstr(0, 0, 'No tasks to display.', self.COLOR_DEFAULT)
+            self.stdscr.refresh()
+        else:
+            if self.prev_buffer != self.buffer:
+                self.stdscr.clear()
+                for line, offset, string, color in self.buffer:
+                    max_y, max_x = self.stdscr.getmaxyx()
+                    if line < max_y - 1:
+                        self.stdscr.addstr(line, offset, string, color)
+                        self.stdscr.refresh()
+                    else:
+                        break
 
     def refresh_buffer(self):
         """Refresh the buffer."""
@@ -106,6 +111,9 @@ class Screen():
                             scheduled_after=self.scheduled_after,
                             scheduled=self.scheduled,
                             completed=self.completed)
+
+        if not schedule.tasks:
+            return
 
         as_dict = schedule.as_dict()
 
