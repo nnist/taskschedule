@@ -26,6 +26,8 @@ class Screen():
         self.prev_buffer = []
         self.init_colors()
 
+        self.schedule = Schedule()
+
     def close(self):
         """Close the curses screen."""
         curses.endwin()
@@ -82,22 +84,44 @@ class Screen():
 
         return color
 
+    def draw_footnote(self, y):
+        if self.scheduled_before and self.scheduled_after:
+            footnote = '{} tasks - from {} until {}'.format(
+                len(self.schedule.tasks),
+                self.scheduled_after,
+                self.scheduled_before)
+        else:
+            footnote = '{} tasks - {}'.format(len(self.schedule.tasks),
+                                              self.scheduled)
+
+        self.stdscr.addstr(y + 2, 0,
+                           footnote,
+                           self.COLOR_DEFAULT)
+
     def draw(self):
         """Draw the current buffer."""
+        last_line = 0
         if not self.buffer:
             self.stdscr.clear()
-            self.stdscr.addstr(0, 0, 'No tasks to display.', self.COLOR_DEFAULT)
+            self.stdscr.addstr(0, 0, 'No tasks to display.',
+                               self.COLOR_DEFAULT)
+            self.draw_footnote(last_line)
             self.stdscr.refresh()
         else:
             if self.prev_buffer != self.buffer:
                 self.stdscr.clear()
                 for line, offset, string, color in self.buffer:
                     max_y, max_x = self.stdscr.getmaxyx()
-                    if line < max_y - 1:
+                    if line < max_y - 2:
                         self.stdscr.addstr(line, offset, string, color)
                         self.stdscr.refresh()
                     else:
                         break
+
+                    last_line = line
+
+                self.draw_footnote(last_line)
+                self.stdscr.refresh()
 
     def refresh_buffer(self):
         """Refresh the buffer."""
@@ -105,20 +129,18 @@ class Screen():
         self.prev_buffer = self.buffer
         self.buffer = []
 
-        schedule = Schedule()
+        self.schedule.load_tasks(scheduled_before=self.scheduled_before,
+                                 scheduled_after=self.scheduled_after,
+                                 scheduled=self.scheduled,
+                                 completed=self.completed)
 
-        schedule.load_tasks(scheduled_before=self.scheduled_before,
-                            scheduled_after=self.scheduled_after,
-                            scheduled=self.scheduled,
-                            completed=self.completed)
-
-        if not schedule.tasks:
+        if not self.schedule.tasks:
             return
 
-        as_dict = schedule.as_dict()
+        as_dict = self.schedule.as_dict()
 
         # Determine offsets
-        offsets = schedule.get_column_offsets()
+        offsets = self.schedule.get_column_offsets()
         max_project_column_length = round(max_x / 8)
         if offsets[4] - offsets[3] > max_project_column_length:
             offsets[4] = offsets[3] + max_project_column_length
@@ -126,10 +148,10 @@ class Screen():
         # Draw headers
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
         column_lengths = [2, 1]
-        column_lengths.append(schedule.get_max_length('id'))
+        column_lengths.append(self.schedule.get_max_length('id'))
         column_lengths.append(11)
         column_lengths.append(max_project_column_length - 1)
-        column_lengths.append(schedule.get_max_length('description'))
+        column_lengths.append(self.schedule.get_max_length('description'))
 
         for i, header in enumerate(headers):
             try:
@@ -150,9 +172,9 @@ class Screen():
         current_line = 1
 
         if self.hide_empty:
-            first_task = schedule.tasks[0].start
+            first_task = self.schedule.tasks[0].start
             first_hour = first_task.hour
-            last_task = schedule.tasks[-1].start
+            last_task = self.schedule.tasks[-1].start
             last_hour = last_task.hour
         else:
             first_hour = 0
