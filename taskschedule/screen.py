@@ -11,6 +11,7 @@ class Screen():
                  completed=True, hide_projects=False):
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
+        curses.noecho()
 
         self.refresh_rate = refresh_rate
         self.completed = completed
