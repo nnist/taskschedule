@@ -116,6 +116,18 @@ class Screen():
 
         # Draw headers
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
+        column_lengths = [2, 1]
+        column_lengths.append(schedule.get_max_length('id'))
+        column_lengths.append(11)
+        column_lengths.append(max_project_column_length - 1)
+        column_lengths.append(schedule.get_max_length('description'))
+
+        for i, header in enumerate(headers):
+            try:
+                extra_length = column_lengths[i] - len(header)
+                headers[i] += ' ' * extra_length
+            except IndexError:
+                pass
 
         self.buffer.append((0, offsets[1], headers[2], self.COLOR_HEADER))
         self.buffer.append((0, offsets[2], headers[3], self.COLOR_HEADER))
