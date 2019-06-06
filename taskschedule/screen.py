@@ -108,6 +108,9 @@ class Screen():
 
         # Determine offsets
         offsets = schedule.get_column_offsets()
+        max_project_column_length = round(max_x / 8)
+        if offsets[4] - offsets[3] > max_project_column_length:
+            offsets[4] = offsets[3] + max_project_column_length
 
         # Draw headers
         headers = ['', '', 'ID', 'Time', 'Project', 'Description']
@@ -205,7 +208,8 @@ class Screen():
                     if task.project is None:
                         project = ''
                     else:
-                        project = task.project
+                        max_length = offsets[4] - offsets[3] - 1
+                        project = task.project[0:max_length]
 
                     self.buffer.append((current_line, offsets[3], project,
                                         color))
