@@ -3,11 +3,11 @@ import unittest
 import os
 from datetime import datetime
 
-from .context import taskschedule
+from tasklib import TaskWarrior, Task
+
 from taskschedule.schedule import Schedule
 from taskschedule.scheduled_task import ScheduledTask
-
-from tasklib import TaskWarrior, Task
+from .context import taskschedule
 
 
 class TaskscheduleTest(unittest.TestCase):
