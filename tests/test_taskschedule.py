@@ -1,3 +1,5 @@
+# pylint: disable=missing-docstring,no-self-use
+
 import subprocess
 import unittest
 import os
