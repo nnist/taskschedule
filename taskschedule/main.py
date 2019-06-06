@@ -75,6 +75,9 @@ def main(argv):
     try:
         while True:
             key = screen.stdscr.getch()
+            if key == 113:
+                break
+
             if (key == KEY_RESIZE or
                     time.time() > last_refresh_time + args.refresh):
                 last_refresh_time = time.time()
