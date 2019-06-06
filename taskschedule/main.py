@@ -51,6 +51,11 @@ def main(argv):
                   'with --before and/or --after.')
             sys.exit(1)
     else:
+        if args.before and not args.after or not args.before and args.after:
+            print('Error: Either both --before and --after or neither options '
+                  'must be used.')
+            sys.exit(1)
+
         if not args.before and not args.after:
             args.scheduled = 'today'
         elif not args.before:
