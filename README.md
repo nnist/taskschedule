@@ -9,6 +9,12 @@ Features:
 
 ## Requirements
 - taskwarrior
+- in `.taskrc`:
+    ```
+    # User Defined Attributes
+    uda.estimate.type=duration
+    uda.estimate.label=Est
+    ```
 
 ## Usage
 1. Start taskschedule
