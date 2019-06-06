@@ -2,6 +2,7 @@
 
 import argparse
 import time
+import sys
 
 from taskschedule.screen import Screen
 
@@ -23,6 +24,12 @@ def main(argv):
         type=str, default='tomorrow'
     )
     parser.add_argument(
+        '-s', '--scheduled',
+        help="""scheduled date: ex. 'today', 'tomorrow'
+                (overrides --after and --before)""",
+        type=str, default=None
+    )
+    parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
         action='store_true', default=False
     )
@@ -38,9 +45,16 @@ def main(argv):
 
     hide_empty = not args.all
 
+    if args.scheduled:
+        if args.before != 'tomorrow' or args.after != 'today':
+            print('Error: The --scheduled option can not be used together '
+                  'with --before and/or --after.')
+            sys.exit(1)
+
     screen = Screen(hide_empty=hide_empty,
                     scheduled_before=args.before,
                     scheduled_after=args.after,
+                    scheduled=args.scheduled,
                     completed=args.completed, hide_projects=args.project)
 
     try:

@@ -7,13 +7,20 @@ from taskschedule.schedule import Schedule
 class Screen():
     """This class handles the rendering of the schedule."""
     def __init__(self, refresh_rate=1, hide_empty=True, scheduled_before='tomorrow',
-                 scheduled_after='today',
+                 scheduled_after='today', scheduled='tomorrow',
                  completed=True, hide_projects=False):
         self.stdscr = curses.initscr()
         self.refresh_rate = refresh_rate
         self.completed = completed
-        self.scheduled_before = scheduled_before
-        self.scheduled_after = scheduled_after
+
+        self.scheduled = scheduled
+        if scheduled != 'tomorrow':
+            self.scheduled_before = scheduled_before
+            self.scheduled_after = scheduled_after
+        else:
+            self.scheduled_before = 'tomorrow'
+            self.scheduled_after = 'today'
+
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
         self.buffer = []
@@ -99,6 +106,7 @@ class Screen():
 
         schedule.load_tasks(scheduled_before=self.scheduled_before,
                             scheduled_after=self.scheduled_after,
+                            scheduled=self.scheduled,
                             completed=self.completed)
 
         as_dict = schedule.as_dict()
