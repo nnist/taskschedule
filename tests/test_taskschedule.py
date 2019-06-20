@@ -1,6 +1,5 @@
 # pylint: disable=missing-docstring,no-self-use
 
-import subprocess
 import unittest
 import os
 from datetime import datetime
@@ -59,32 +58,6 @@ class TaskscheduleTest(unittest.TestCase):
         assert str(task.description) == 'test_16:10_to_16:34'
         assert str(task.start) == '{} 16:10:00+02:00'.format(date_str)
         assert str(task.end) == '{} 16:34:00+02:00'.format(date_str)
-
-    def test_cli_invalid_date_prints_error(self):
-        try:
-            process = subprocess.run(
-                ['python3 __main__.py --from asdfafk --until tomorrow'],
-                shell=True,
-                timeout=10,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, check=True)
-            output = process.stdout.split(b'\n')
-            self.assertEqual(output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
-        except subprocess.CalledProcessError:
-            pass
-
-    def test_cli_valid_date_does_not_error(self):
-        # Ensure it times out, because that means it atleast
-        # entered the main loop
-        try:
-            subprocess.run(
-                ['python3 __main__.py --from today --until tomorrow'],
-                shell=True,
-                timeout=1,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, check=True)
-        except subprocess.TimeoutExpired:
-            pass
 
 #   def test_format_task_returns_correct_format(self):
 #       self.schedule.get_tasks()
@@ -164,15 +137,6 @@ class TaskscheduleTest(unittest.TestCase):
 #                                stdout=subprocess.PIPE,
 #                                stderr=subprocess.PIPE, check=True)
 #       assert process.returncode == 0
-
-    def test_cli_help_returns_help_message(self):
-        process = subprocess.run(['python3 __main__.py -h'],
-                                 shell=True,
-                                 timeout=10,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE, check=True)
-        output = process.stdout.split(b'\n')
-        assert output[0].startswith(b'usage:')
 
     def test_align_matrix(self):
         rows = [
