@@ -48,18 +48,18 @@ class TaskscheduleTest(unittest.TestCase):
 
         task = self.schedule.tasks[0]
         assert str(task.description) == 'test_9:00_to_10:11'
-        assert str(task.start) == '{} 09:00:00+02:00'.format(date_str)
-        assert str(task.end) == '{} 10:11:00+02:00'.format(date_str)
+        assert str(task.start)[0:-6] == '{} 09:00:00'.format(date_str)
+        assert str(task.end)[0:-6] == '{} 10:11:00'.format(date_str)
 
         task = self.schedule.tasks[1]
         assert str(task.description) == 'test_14:00_to_16:00'
-        assert str(task.start) == '{} 14:00:00+02:00'.format(date_str)
-        assert str(task.end) == '{} 16:00:00+02:00'.format(date_str)
+        assert str(task.start)[0:-6] == '{} 14:00:00'.format(date_str)
+        assert str(task.end)[0:-6] == '{} 16:00:00'.format(date_str)
 
         task = self.schedule.tasks[2]
         assert str(task.description) == 'test_16:10_to_16:34'
-        assert str(task.start) == '{} 16:10:00+02:00'.format(date_str)
-        assert str(task.end) == '{} 16:34:00+02:00'.format(date_str)
+        assert str(task.start)[0:-6] == '{} 16:10:00'.format(date_str)
+        assert str(task.end)[0:-6] == '{} 16:34:00'.format(date_str)
 
 #   def test_format_task_returns_correct_format(self):
 #       self.schedule.get_tasks()
@@ -200,8 +200,8 @@ class ScheduledTaskTest(unittest.TestCase):
 
         date_str = datetime.now().strftime('%Y-%m-%d')
         self.assertEqual(str(task.description), 'test_9:00_to_10:11')
-        self.assertEqual(str(task.start), '{} 09:00:00+02:00'.format(date_str))
-        self.assertEqual(str(task.end), '{} 10:11:00+02:00'.format(date_str))
+        self.assertEqual(str(task.start)[0:-6], '{} 09:00:00'.format(date_str))
+        self.assertEqual(str(task.end)[0:-6], '{} 10:11:00'.format(date_str))
 
         self.assertEqual(task.should_be_active, False)
 
