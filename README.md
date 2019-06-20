@@ -31,6 +31,7 @@ $ pip3 install --user -r requirements.txt
 $ python3 __main__.py
 ```
 ## Usage
+### Basic usage
 1. Start taskschedule:
 ```
 $ taskschedule
@@ -67,6 +68,20 @@ $ task 62 done
 16
 17 ○    17:00 Buy cat food        <-- barely visible
 18
+```
+### Show tomorrow's tasks
+```sh
+$ taskschedule -s tomorrow
+```
+### Show last week's tasks
+```sh
+$ taskschedule --from today-1week --to tomorrow
+```
+### Tips
+To move multiple scheduled tasks in taskwarrior:
+```sh
+# Move tasks forward in schedule by 30 minutes
+$ task 620,605,625,627 mod schedule:scheduled-30min
 ```
 ## Running the tests
 First go to the repo root, then run the tests:
