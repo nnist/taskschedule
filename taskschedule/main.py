@@ -22,7 +22,8 @@ def main(argv):
         type=str, dest='after'
     )
     parser.add_argument(
-        '--until', help="scheduled until date: ex. 'today', 'tomorrow'",
+        '--to', '--until',
+        help="scheduled until date: ex. 'today', 'tomorrow'",
         type=str, dest='before'
     )
     parser.add_argument(
