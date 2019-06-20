@@ -19,11 +19,31 @@ class CLITest(unittest.TestCase):
                 stderr=subprocess.PIPE, check=True)
         except subprocess.TimeoutExpired:
             pass
+        try:
+            subprocess.run(
+                ['python3 __main__.py --scheduled tomorrow'],
+                shell=True,
+                timeout=1,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, check=True)
+        except subprocess.TimeoutExpired:
+            pass
 
     def test_cli_invalid_date_prints_error(self):
         try:
             process = subprocess.run(
                 ['python3 __main__.py --from asdfafk --until tomorrow'],
+                shell=True,
+                timeout=10,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, check=True)
+            output = process.stdout.split(b'\n')
+            self.assertEqual(output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
+        except subprocess.CalledProcessError:
+            pass
+        try:
+            process = subprocess.run(
+                ['python3 __main__.py --scheduled asdfafk'],
                 shell=True,
                 timeout=10,
                 stdout=subprocess.PIPE,
@@ -41,3 +61,7 @@ class CLITest(unittest.TestCase):
                                  stderr=subprocess.PIPE, check=True)
         output = process.stdout.split(b'\n')
         assert output[0].startswith(b'usage:')
+
+
+if __name__ == '__main__':
+    unittest.main()
