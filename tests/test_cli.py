@@ -7,6 +7,12 @@ from .context import taskschedule
 
 
 class CLITest(unittest.TestCase):
+    def setUp(self):
+        with open('tests/test_data/.task/.taskrc', 'w') as file:
+            file.write('# User Defined Attributes\n')
+            file.write('uda.estimate.type=duration\n')
+            file.write('uda.estimate.label=Est\n')
+
     def test_cli_valid_date_does_not_error(self):
         # Ensure it times out, because that means it atleast
         # entered the main loop
