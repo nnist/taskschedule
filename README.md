@@ -1,3 +1,5 @@
+[![Build status](https://travis-ci.org/nnist/taskschedule.svg?branch=master)](https://travis-ci.org/nnist/taskschedule)
+
 # Taskschedule
 This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
