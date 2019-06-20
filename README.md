@@ -1,6 +1,8 @@
 # Taskschedule
 This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
+[https://github.com/nnist/taskschedule/blob/master/img/screenshot.png]
+
 ## Getting started
 ### Prerequisites
 - taskwarrior
