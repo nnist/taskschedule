@@ -1,7 +1,7 @@
 # Taskschedule
 This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
-[https://github.com/nnist/taskschedule/blob/master/img/screenshot.png]
+![screenshot](https://github.com/nnist/taskschedule/blob/master/img/screenshot.png "Screenshot")
 
 ## Getting started
 ### Prerequisites
