@@ -15,6 +15,8 @@ class TaskscheduleTest(unittest.TestCase):
     def setUp(self):
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True)
+        taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
+        taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
              schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
@@ -165,6 +167,8 @@ class ScheduledTaskTest(unittest.TestCase):
     def setUp(self):
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True)
+        taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
+        taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
              schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
