@@ -88,5 +88,8 @@ def main(argv):
             napms(50)
     except KeyboardInterrupt:
         pass
+    except ValueError as err:
+        screen.close()
+        print('Error: {}'.format(err))
     finally:
         screen.close()
