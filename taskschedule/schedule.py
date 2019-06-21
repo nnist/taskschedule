@@ -29,18 +29,29 @@ class TaskDirDoesNotExistError(Exception):
 class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
-    def __init__(self, tw_data_dir='~/.task', tw_data_dir_create=False,
-                 taskrc_location='~/.taskrc'):
+    def __init__(self, tw_data_dir=None, tw_data_dir_create=False,
+                 taskrc_location=None):
+        home = os.path.expanduser("~")
+
+        if tw_data_dir is None:
+            tw_data_dir = home + '/.task'
+
         self.tw_data_dir = tw_data_dir
-        self.tw_data_dir_create = tw_data_dir_create
+
+        if taskrc_location is None:
+            taskrc_location = home + '/.taskrc'
+
         self.taskrc_location = taskrc_location
-        self.tasks = []
+
+        self.tw_data_dir_create = tw_data_dir_create
 
         if os.path.isdir(self.tw_data_dir) is False:
             raise TaskDirDoesNotExistError('.task directory not found')
 
         if os.path.isfile(self.taskrc_location) is False:
             raise TaskrcDoesNotExistError('.taskrc not found')
+
+        self.tasks = []
 
     def load_tasks(self, scheduled_before=None, scheduled_after=None,
                    scheduled='today', completed=True):

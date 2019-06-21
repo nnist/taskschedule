@@ -1,16 +1,29 @@
 import curses
 import time
+import os
 
 from taskschedule.schedule import Schedule
 
 
 class Screen():
     """This class handles the rendering of the schedule."""
-    def __init__(self, tw_data_dir='~/.task', taskrc_location='~/.taskrc',
+    def __init__(self, tw_data_dir=None, taskrc_location=None,
                  refresh_rate=1,
                  hide_empty=True, scheduled_before=None,
                  scheduled_after=None, scheduled=None,
                  completed=True, hide_projects=False):
+        home = os.path.expanduser("~")
+
+        if tw_data_dir is None:
+            tw_data_dir = home + '/.task'
+
+        self.tw_data_dir = tw_data_dir
+
+        if taskrc_location is None:
+            taskrc_location = home + '/.taskrc'
+
+        self.taskrc_location = taskrc_location
+
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
         curses.noecho()
