@@ -3,6 +3,7 @@
 import subprocess
 import unittest
 import os
+import shutil
 
 from .context import taskschedule
 
@@ -25,9 +26,19 @@ class CLITest(unittest.TestCase):
             file.write('uda.estimate.type=duration\n')
             file.write('uda.estimate.label=Est\n')
 
+        os.makedirs(home + '/.task')
+
     def tearDown(self):
         home = os.path.expanduser("~")
-        os.remove(home + '/.taskrc')
+        try:
+            os.remove(home + '/.taskrc')
+        except FileNotFoundError:
+            pass
+
+        try:
+            shutil.rmtree(home + '/.task')
+        except FileNotFoundError:
+            pass
 
     def test_cli_valid_date_does_not_error(self):
         # Ensure it times out, because that means it atleast
