@@ -59,6 +59,19 @@ class CLITest(unittest.TestCase):
         except subprocess.CalledProcessError:
             pass
 
+    def test_cli_no_args_does_not_error(self):
+        # Ensure it times out, because that means it atleast
+        # entered the main loop
+        try:
+            subprocess.run(
+                ['python3 __main__.py'],
+                shell=True,
+                timeout=1,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE, check=True)
+        except subprocess.TimeoutExpired:
+            pass
+
     def test_cli_help_returns_help_message(self):
         process = subprocess.run(['python3 __main__.py -h'],
                                  shell=True,
