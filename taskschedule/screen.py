@@ -6,7 +6,8 @@ from taskschedule.schedule import Schedule
 
 class Screen():
     """This class handles the rendering of the schedule."""
-    def __init__(self, tw_data_dir='~/.task', refresh_rate=1,
+    def __init__(self, tw_data_dir='~/.task', taskrc_location='~/.taskrc',
+                 refresh_rate=1,
                  hide_empty=True, scheduled_before=None,
                  scheduled_after=None, scheduled=None,
                  completed=True, hide_projects=False):
@@ -27,7 +28,8 @@ class Screen():
         self.prev_buffer = []
         self.init_colors()
 
-        self.schedule = Schedule(tw_data_dir=tw_data_dir)
+        self.schedule = Schedule(tw_data_dir=tw_data_dir,
+                                 taskrc_location=taskrc_location)
 
     def close(self):
         """Close the curses screen."""

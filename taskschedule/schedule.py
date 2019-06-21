@@ -9,15 +9,18 @@ from taskschedule.scheduled_task import ScheduledTask
 class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
-    def __init__(self, tw_data_dir='~/.task', tw_data_dir_create=False):
+    def __init__(self, tw_data_dir='~/.task', tw_data_dir_create=False,
+                 taskrc_location='~/.taskrc'):
         self.tw_data_dir = tw_data_dir
         self.tw_data_dir_create = tw_data_dir_create
+        self.taskrc_location = taskrc_location
         self.tasks = []
 
     def load_tasks(self, scheduled_before=None, scheduled_after=None,
                    scheduled='today', completed=True):
         """Retrieve today's scheduled tasks from taskwarrior."""
-        taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create)
+        taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
+                                  taskrc_location=self.taskrc_location)
         scheduled_tasks = []
         filtered_tasks = []
 

@@ -38,6 +38,11 @@ def main(argv):
         type=str, dest='data_location'
     )
     parser.add_argument(
+        '-t', '--taskrc-location',
+        help="""taskrc location (e.g. ~/.taskrc)""",
+        type=str, dest='taskrc_location'
+    )
+    parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
         action='store_true', default=False
     )
@@ -72,6 +77,7 @@ def main(argv):
             args.after = 'yesterday'
 
     screen = Screen(tw_data_dir=args.data_location,
+                    taskrc_location=args.taskrc_location,
                     hide_empty=hide_empty,
                     scheduled_before=args.before,
                     scheduled_after=args.after,
