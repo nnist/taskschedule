@@ -18,7 +18,7 @@ class CLITest(unittest.TestCase):
         # entered the main loop
         try:
             subprocess.run(
-                ['python3 __main__.py --from today --until tomorrow'],
+                ['python3 __main__.py -d tests/test_data/.task/.taskrc --from today --until tomorrow'],
                 shell=True,
                 timeout=1,
                 stdout=subprocess.PIPE,
@@ -27,7 +27,7 @@ class CLITest(unittest.TestCase):
             pass
         try:
             subprocess.run(
-                ['python3 __main__.py --scheduled tomorrow'],
+                ['python3 __main__.py -d tests/test_data/.task/.taskrc --scheduled tomorrow'],
                 shell=True,
                 timeout=1,
                 stdout=subprocess.PIPE,

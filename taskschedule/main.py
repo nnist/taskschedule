@@ -33,6 +33,11 @@ def main(argv):
         type=str
     )
     parser.add_argument(
+        '-d', '--data-location',
+        help="""data location (e.g. ~/.task)""",
+        type=str, dest='data_location'
+    )
+    parser.add_argument(
         '-a', '--all', help="show all hours, even if empty",
         action='store_true', default=False
     )
@@ -66,7 +71,8 @@ def main(argv):
         elif not args.after:
             args.after = 'yesterday'
 
-    screen = Screen(hide_empty=hide_empty,
+    screen = Screen(tw_data_dir=args.data_location,
+                    hide_empty=hide_empty,
                     scheduled_before=args.before,
                     scheduled_after=args.after,
                     scheduled=args.scheduled,
