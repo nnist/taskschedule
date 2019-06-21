@@ -254,9 +254,9 @@ class ScheduledTaskTest(unittest.TestCase):
         os.makedirs(self.task_dir_path)
 
         taskwarrior = TaskWarrior(
-            data_location='tests/test_data/.task',
+            data_location=self.task_dir_path,
             create=True,
-            taskrc_location='tests/test_data/.taskrc')
+            taskrc_location=self.taskrc_path)
         taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
         taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
@@ -270,9 +270,9 @@ class ScheduledTaskTest(unittest.TestCase):
 
         self.tasks = taskwarrior.tasks.filter(status='pending')
         self.schedule = Schedule(
-            tw_data_dir='tests/test_data/.task',
+            tw_data_dir=self.task_dir_path,
             tw_data_dir_create=True,
-            taskrc_location='tests/test_data/.taskrc')
+            taskrc_location=self.taskrc_path)
         self.schedule.load_tasks()
 
     def tearDown(self):
