@@ -32,6 +32,9 @@ class ScreenTest(unittest.TestCase):
         # Create a sample empty .task directory
         os.makedirs(self.task_dir_path)
 
+        self.screen = Screen(tw_data_dir=self.task_dir_path,
+                             taskrc_location=self.taskrc_path)
+
     def tearDown(self):
         try:
             os.remove(self.taskrc_path)
@@ -43,16 +46,18 @@ class ScreenTest(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-    def test_screen_refresh_buffer(self):
-        screen = Screen(tw_data_dir=self.task_dir_path,
-                        taskrc_location=self.taskrc_path)
-        screen.refresh_buffer()
-
-        # Attempt to gracefully quit curses mode to prevent messing up terminal
+        # Attempt to gracefully quit curses mode if it is active
+        # to prevent messing up terminal
         try:
             curses.endwin()
         except:
             pass
+
+    def test_screen_refresh_buffer(self):
+        self.screen.refresh_buffer()
+
+    def test_screen_draw(self):
+        self.screen.draw()
 
 
 if __name__ == '__main__':
