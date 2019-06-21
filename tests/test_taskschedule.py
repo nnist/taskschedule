@@ -117,6 +117,12 @@ class TaskscheduleTest(unittest.TestCase):
         os.remove(os.path.dirname(__file__) + '/test_data/.task/pending.data')
         os.remove(os.path.dirname(__file__) + '/test_data/.task/undo.data')
 
+    def test_screen_can_change_color(self):
+        import curses
+        curses.initscr()
+        self.assertEqual(curses.can_change_color(), True)
+        curses.endwin()
+
     def test_schedule_can_be_initialized(self):
         schedule = Schedule()
         assert schedule is not None
