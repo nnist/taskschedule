@@ -7,7 +7,8 @@ from taskschedule.scheduled_task import ScheduledTask
 
 
 class UDADoesNotExistError(Exception):
-    # pylint: disable=unnecessary-pass,missing-docstring
+    """Raised when UDA is not found in .taskrc file."""
+    # pylint: disable=unnecessary-pass
     pass
 
 
