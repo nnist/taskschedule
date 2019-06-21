@@ -4,8 +4,32 @@ import subprocess
 import unittest
 import os
 import shutil
+import time
+import sys
 
 from .context import taskschedule
+
+
+class Timeout(Exception):
+    pass
+
+
+def run(command, timeout=10):
+    proc = subprocess.Popen(command, bufsize=0)
+    poll_seconds = .250
+    deadline = time.time()+timeout
+    while time.time() < deadline and proc.poll() is None:
+        time.sleep(poll_seconds)
+
+    if proc.poll() is None:
+        if float(sys.version[:3]) >= 2.6:
+            proc.terminate()
+            proc.wait()
+
+        raise Timeout()
+
+    stdout, stderr = proc.communicate()
+    return stdout, stderr, proc.returncode
 
 
 class CLITest(unittest.TestCase):
@@ -92,15 +116,8 @@ class CLITest(unittest.TestCase):
         # Ensure it times out, because that means it atleast
         # entered the main loop
         try:
-            subprocess.run(
-                ['python3 __main__.py'],
-                shell=True,
-                timeout=1,
-                check=True)
-        except subprocess.CalledProcessError as err:
-            print(err)
-            print(err.output)
-        except subprocess.TimeoutExpired:
+            run(["python3", "__main__.py"], timeout=2)
+        except Timeout:
             pass
 
     def test_cli_help_returns_help_message(self):
