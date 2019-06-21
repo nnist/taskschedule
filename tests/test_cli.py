@@ -71,12 +71,16 @@ class CLITest(unittest.TestCase):
         # Ensure it times out, because that means it atleast
         # entered the main loop
         try:
-            subprocess.run(
+            process = subprocess.run(
                 ['python3 __main__.py'],
                 shell=True,
                 timeout=1,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, check=True)
+            std_out = process.stdout.split(b'\n')
+            std_err = process.stderr.split(b'\n')
+            print(std_out)
+            print(std_err)
         except subprocess.TimeoutExpired:
             pass
 
