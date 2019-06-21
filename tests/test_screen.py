@@ -44,19 +44,15 @@ class ScreenTest(unittest.TestCase):
             pass
 
     def test_screen_refresh_buffer(self):
-        try:
-            screen = Screen(tw_data_dir=self.task_dir_path,
-                            taskrc_location=self.taskrc_path)
-        except TaskDirDoesNotExistError as err:
-            print('Error: {}'.format(err))
-            sys.exit(1)
-        except TaskrcDoesNotExistError as err:
-            print('Error: {}'.format(err))
-            sys.exit(1)
-        finally:
-            curses.endwin()
-
+        screen = Screen(tw_data_dir=self.task_dir_path,
+                        taskrc_location=self.taskrc_path)
         screen.refresh_buffer()
+
+        # Attempt to gracefully quit curses mode to prevent messing up terminal
+        try:
+            curses.endwin()
+        except:
+            pass
 
 
 if __name__ == '__main__':
