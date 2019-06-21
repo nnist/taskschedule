@@ -27,6 +27,8 @@ class CLITest(unittest.TestCase):
             file.write('uda.estimate.label=Est\n')
 
         os.makedirs(home + '/.task')
+        self.assertEqual(os.path.isfile(home + '/.taskrc'), True)
+        self.assertEqual(os.path.isdir(home + '/.task'), True)
 
     def tearDown(self):
         home = os.path.expanduser("~")
