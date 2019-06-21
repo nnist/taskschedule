@@ -6,6 +6,7 @@ import sys
 from datetime import datetime
 import shutil
 import curses
+import time
 
 from tasklib import TaskWarrior, Task
 
@@ -56,8 +57,18 @@ class ScreenTest(unittest.TestCase):
     def test_screen_refresh_buffer(self):
         self.screen.refresh_buffer()
 
-    def test_screen_draw(self):
+    def test_screen_draw_once(self):
         self.screen.draw()
+
+    def test_screen_draw_3x(self):
+        self.screen.draw()
+        self.screen.refresh_buffer()
+        time.sleep(0.1)
+        self.screen.draw()
+        self.screen.refresh_buffer()
+        time.sleep(0.1)
+        self.screen.draw()
+        self.screen.refresh_buffer()
 
 
 if __name__ == '__main__':
