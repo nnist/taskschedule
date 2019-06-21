@@ -57,15 +57,28 @@ class ScreenTest(unittest.TestCase):
     def test_screen_refresh_buffer(self):
         self.screen.refresh_buffer()
 
-    def test_screen_draw_once(self):
+    def test_screen_draw_no_tasks_to_display(self):
         self.screen.draw()
 
-    def test_screen_draw_3x(self):
+    def test_screen_draw(self):
+        taskwarrior = TaskWarrior(
+            data_location=self.task_dir_path,
+            create=True,
+            taskrc_location=self.taskrc_path)
+        Task(taskwarrior, description='test_yesterday',
+             schedule='yesterday', estimate='20min').save()
+        Task(taskwarrior, description='test_9:00_to_10:11',
+             schedule='today+9hr', estimate='71min', project='test').save()
+
         self.screen.draw()
         self.screen.refresh_buffer()
+        Task(taskwarrior, description='test_14:00_to_16:00',
+             schedule='today+14hr', estimate='2hr').save()
         time.sleep(0.1)
         self.screen.draw()
         self.screen.refresh_buffer()
+        Task(taskwarrior, description='test_tomorrow',
+             schedule='tomorrow', estimate='24min').save()
         time.sleep(0.1)
         self.screen.draw()
         self.screen.refresh_buffer()
