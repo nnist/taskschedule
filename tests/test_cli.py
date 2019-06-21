@@ -9,8 +9,9 @@ from .context import taskschedule
 
 class CLITest(unittest.TestCase):
     def setUp(self):
-        if not os.path.isfile('~/.taskrc'):
-            with open('~/.taskrc', 'w+') as file:
+        home = os.path.expanduser("~")
+        if not os.path.isfile(home + '/.taskrc'):
+            with open(home + '/.taskrc', 'w+') as file:
                 file.write('# User Defined Attributes\n')
                 file.write('uda.estimate.type=duration\n')
                 file.write('uda.estimate.label=Est\n')
