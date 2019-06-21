@@ -34,7 +34,8 @@ class ScreenTest(unittest.TestCase):
         os.makedirs(self.task_dir_path)
 
         self.screen = Screen(tw_data_dir=self.task_dir_path,
-                             taskrc_location=self.taskrc_path)
+                             taskrc_location=self.taskrc_path,
+                             scheduled='today')
 
     def tearDown(self):
         try:
