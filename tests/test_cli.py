@@ -34,37 +34,26 @@ def run(command, timeout=10):
 
 class CLITest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
-        home = os.path.expanduser("~")
-        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
-        self.assertEqual(os.path.isdir(home + '/.task'), False)
+        self.taskrc_path = 'tests/test_data/.taskrc'
+        self.task_dir_path = 'tests/test_data/.task'
+        self.assertEqual(os.path.isfile(self.taskrc_path), False)
+        self.assertEqual(os.path.isdir(self.task_dir_path), False)
 
-        # Create a sample ~/.taskrc
-        with open(home + '/.taskrc', 'w+') as file:
+        # Create a sample .taskrc
+        with open(self.taskrc_path, 'w+') as file:
             file.write('# User Defined Attributes\n')
             file.write('uda.estimate.type=duration\n')
             file.write('uda.estimate.label=Est\n')
 
-        with open('tests/test_data/.task/.taskrc', 'w') as file:
-            file.write('# User Defined Attributes\n')
-            file.write('uda.estimate.type=duration\n')
-            file.write('uda.estimate.label=Est\n')
+        # Create a sample empty .task directory
+        os.makedirs(self.task_dir_path)
 
-        os.makedirs(home + '/.task')
-        self.assertEqual(os.path.isfile(home + '/.taskrc'), True)
-        self.assertEqual(os.path.isdir(home + '/.task'), True)
+        self.assertEqual(os.path.isfile(self.taskrc_path), True)
+        self.assertEqual(os.path.isdir(self.task_dir_path), True)
 
     def tearDown(self):
-        home = os.path.expanduser("~")
-        try:
-            os.remove(home + '/.taskrc')
-        except FileNotFoundError:
-            pass
-
-        try:
-            shutil.rmtree(home + '/.task')
-        except FileNotFoundError:
-            pass
+        os.remove(self.taskrc_path)
+        shutil.rmtree(self.task_dir_path)
 
     def test_cli_valid_date_does_not_error(self):
         # Ensure it times out, because that means it atleast

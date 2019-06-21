@@ -16,8 +16,8 @@ from .context import taskschedule
 
 class MissingDataTest(unittest.TestCase):
     def setUp(self):
-        self.taskrc_path = 'test_data/.task'
-        self.task_dir_path = 'test_data/.taskrc'
+        self.taskrc_path = 'tests/test_data/.taskrc'
+        self.task_dir_path = 'tests/test_data/.task'
         self.assertEqual(os.path.isdir(self.taskrc_path), False)
         self.assertEqual(os.path.isdir(self.task_dir_path), False)
 
@@ -63,26 +63,24 @@ class MissingDataTest(unittest.TestCase):
 
 class TaskscheduleTest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
-        home = os.path.expanduser("~")
-        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
-        self.assertEqual(os.path.isdir(home + '/.task'), False)
+        self.taskrc_path = 'tests/test_data/.taskrc'
+        self.task_dir_path = 'tests/test_data/.task'
+        self.assertEqual(os.path.isdir(self.taskrc_path), False)
+        self.assertEqual(os.path.isdir(self.task_dir_path), False)
 
-        # Create a sample ~/.taskrc
-        home = os.path.expanduser("~")
-        with open(home + '/.taskrc', 'w+') as file:
+        # Create a sample .taskrc
+        with open(self.taskrc_path, 'w+') as file:
             file.write('# User Defined Attributes\n')
             file.write('uda.estimate.type=duration\n')
             file.write('uda.estimate.label=Est\n')
 
-        # Create a sample empty ~/.task directory
-        home = os.path.expanduser("~")
-        os.makedirs(home + '/.task')
+        # Create a sample empty .task directory
+        os.makedirs(self.task_dir_path)
 
         taskwarrior = TaskWarrior(
             data_location='tests/test_data/.task',
             create=True,
-            taskrc_location='tests/test_data/.task/.taskrc')
+            taskrc_location='tests/test_data/.taskrc')
         Task(taskwarrior, description='test_yesterday',
              schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
@@ -96,30 +94,25 @@ class TaskscheduleTest(unittest.TestCase):
 
         self.schedule = Schedule(
             tw_data_dir='tests/test_data/.task',
-            tw_data_dir_create=True,
-            taskrc_location='tests/test_data/.task/.taskrc')
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc')
 
     def tearDown(self):
-        home = os.path.expanduser("~")
         try:
-            os.remove(home + '/.taskrc')
+            os.remove(self.taskrc_path)
         except FileNotFoundError:
             pass
 
         try:
-            shutil.rmtree(home + '/.task')
+            shutil.rmtree(self.task_dir_path)
         except FileNotFoundError:
             pass
-
-        task_dir = os.path.dirname(__file__) + '/test_data/.task'
-
-        os.remove(task_dir + '/backlog.data')
-        os.remove(task_dir + '/completed.data')
-        os.remove(task_dir + '/pending.data')
-        os.remove(task_dir + '/undo.data')
 
     def test_schedule_can_be_initialized(self):
-        schedule = Schedule()
+        schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc')
         assert schedule is not None
 
     def test_get_tasks_returns_correct_tasks(self):
@@ -246,15 +239,24 @@ class TaskscheduleTest(unittest.TestCase):
 
 class ScheduledTaskTest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
-        home = os.path.expanduser("~")
-        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
-        self.assertEqual(os.path.isdir(home + '/.task'), False)
+        self.taskrc_path = 'tests/test_data/.taskrc'
+        self.task_dir_path = 'tests/test_data/.task'
+        self.assertEqual(os.path.isdir(self.taskrc_path), False)
+        self.assertEqual(os.path.isdir(self.task_dir_path), False)
+
+        # Create a sample .taskrc
+        with open(self.taskrc_path, 'w+') as file:
+            file.write('# User Defined Attributes\n')
+            file.write('uda.estimate.type=duration\n')
+            file.write('uda.estimate.label=Est\n')
+
+        # Create a sample empty .task directory
+        os.makedirs(self.task_dir_path)
 
         taskwarrior = TaskWarrior(
             data_location='tests/test_data/.task',
             create=True,
-            taskrc_location='tests/test_data/.task/.taskrc')
+            taskrc_location='tests/test_data/.taskrc')
         taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
         taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
@@ -270,16 +272,19 @@ class ScheduledTaskTest(unittest.TestCase):
         self.schedule = Schedule(
             tw_data_dir='tests/test_data/.task',
             tw_data_dir_create=True,
-            taskrc_location='tests/test_data/.task/.taskrc')
+            taskrc_location='tests/test_data/.taskrc')
         self.schedule.load_tasks()
 
     def tearDown(self):
-        task_dir = os.path.dirname(__file__) + '/test_data/.task'
+        try:
+            os.remove(self.taskrc_path)
+        except FileNotFoundError:
+            pass
 
-        os.remove(task_dir + '/backlog.data')
-        os.remove(task_dir + '/completed.data')
-        os.remove(task_dir + '/pending.data')
-        os.remove(task_dir + '/undo.data')
+        try:
+            shutil.rmtree(self.task_dir_path)
+        except FileNotFoundError:
+            pass
 
     def test_init_works_correctly(self):
         task = ScheduledTask(self.tasks[1], self.schedule)
