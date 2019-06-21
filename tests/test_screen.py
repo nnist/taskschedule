@@ -51,9 +51,12 @@ class ScreenTest(unittest.TestCase):
         # Attempt to gracefully quit curses mode if it is active
         # to prevent messing up terminal
         try:
-            curses.endwin()
+            self.screen.close()
         except:
-            pass
+            try:
+                curses.endwin()
+            except:
+                pass
 
     def test_screen_refresh_buffer(self):
         self.screen.refresh_buffer()
