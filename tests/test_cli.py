@@ -2,12 +2,21 @@
 
 import subprocess
 import unittest
+import os.path
 
 from .context import taskschedule
 
 
 class CLITest(unittest.TestCase):
     def setUp(self):
+        try:
+            os.path.isfile('~/.taskrc')
+        except FileNotFoundError:
+            with open('~/.taskrc', 'r') as file:
+                file.write('# User Defined Attributes\n')
+                file.write('uda.estimate.type=duration\n')
+                file.write('uda.estimate.label=Est\n')
+
         with open('tests/test_data/.task/.taskrc', 'w') as file:
             file.write('# User Defined Attributes\n')
             file.write('uda.estimate.type=duration\n')
