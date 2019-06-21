@@ -2,24 +2,31 @@
 
 import subprocess
 import unittest
-import os.path
+import os
 
 from .context import taskschedule
 
 
 class CLITest(unittest.TestCase):
     def setUp(self):
+        # Make sure ~/.taskrc does not exist to prevent damage
         home = os.path.expanduser("~")
-        if not os.path.isfile(home + '/.taskrc'):
-            with open(home + '/.taskrc', 'w+') as file:
-                file.write('# User Defined Attributes\n')
-                file.write('uda.estimate.type=duration\n')
-                file.write('uda.estimate.label=Est\n')
+        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+
+        # Create a sample ~/.taskrc
+        with open(home + '/.taskrc', 'w+') as file:
+            file.write('# User Defined Attributes\n')
+            file.write('uda.estimate.type=duration\n')
+            file.write('uda.estimate.label=Est\n')
 
         with open('tests/test_data/.task/.taskrc', 'w') as file:
             file.write('# User Defined Attributes\n')
             file.write('uda.estimate.type=duration\n')
             file.write('uda.estimate.label=Est\n')
+
+    def tearDown(self):
+        home = os.path.expanduser("~")
+        os.remove(home + '/.taskrc')
 
     def test_cli_valid_date_does_not_error(self):
         # Ensure it times out, because that means it atleast

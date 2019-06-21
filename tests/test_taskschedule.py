@@ -6,18 +6,34 @@ from datetime import datetime
 
 from tasklib import TaskWarrior, Task
 
-from taskschedule.schedule import Schedule
+from taskschedule.schedule import Schedule, UDADoesNotExistError
 from taskschedule.scheduled_task import ScheduledTask
 from .context import taskschedule
 
 
+class UDATest(unittest.TestCase):
+    def setUp(self):
+        # Make sure ~/.taskrc does not exist to prevent damage
+        home = os.path.expanduser("~")
+        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+
+    def create_schedule(self):
+        schedule = Schedule()
+        schedule.load_tasks()
+
+    def test_no_uda_estimate_raises_exception(self):
+        self.assertRaises(UDADoesNotExistError, self.create_schedule)
+
+
 class TaskscheduleTest(unittest.TestCase):
     def setUp(self):
+        # Make sure ~/.taskrc does not exist to prevent damage
+        home = os.path.expanduser("~")
+        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True,
                                   taskrc_location='tests/test_data/.task/.taskrc')
-        taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
-        taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
              schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
@@ -167,6 +183,10 @@ class TaskscheduleTest(unittest.TestCase):
 
 class ScheduledTaskTest(unittest.TestCase):
     def setUp(self):
+        # Make sure ~/.taskrc does not exist to prevent damage
+        home = os.path.expanduser("~")
+        self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True,
                                   taskrc_location='tests/test_data/.task/.taskrc')
