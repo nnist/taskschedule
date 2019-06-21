@@ -9,9 +9,10 @@ from .context import taskschedule
 
 class CLITest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc does not exist to prevent damage
+        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
         home = os.path.expanduser("~")
         self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+        self.assertEqual(os.path.isdir(home + '/.task'), False)
 
         # Create a sample ~/.taskrc
         with open(home + '/.taskrc', 'w+') as file:

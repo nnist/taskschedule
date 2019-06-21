@@ -1,6 +1,8 @@
 """This module provides a Schedule class, which is used for retrieving
    scheduled tasks from taskwarrior and displaying them in a table."""
 
+import os
+
 from tasklib import TaskWarrior
 
 from taskschedule.scheduled_task import ScheduledTask
@@ -8,6 +10,18 @@ from taskschedule.scheduled_task import ScheduledTask
 
 class UDADoesNotExistError(Exception):
     """Raised when UDA is not found in .taskrc file."""
+    # pylint: disable=unnecessary-pass
+    pass
+
+
+class TaskrcDoesNotExistError(Exception):
+    """Raised when the .taskrc file has not been found."""
+    # pylint: disable=unnecessary-pass
+    pass
+
+
+class TaskDirDoesNotExistError(Exception):
+    """Raised when the .task directory has not been found."""
     # pylint: disable=unnecessary-pass
     pass
 
@@ -21,6 +35,12 @@ class Schedule():
         self.tw_data_dir_create = tw_data_dir_create
         self.taskrc_location = taskrc_location
         self.tasks = []
+
+        if os.path.isdir(self.tw_data_dir) is False:
+            raise TaskDirDoesNotExistError('.task directory not found')
+
+        if os.path.isfile(self.taskrc_location) is False:
+            raise TaskrcDoesNotExistError('.taskrc not found')
 
     def load_tasks(self, scheduled_before=None, scheduled_after=None,
                    scheduled='today', completed=True):

@@ -8,7 +8,9 @@ import os
 from curses import napms, KEY_RESIZE
 
 from taskschedule.screen import Screen
-from taskschedule.schedule import UDADoesNotExistError
+from taskschedule.schedule import UDADoesNotExistError,\
+                                  TaskrcDoesNotExistError,\
+                                  TaskDirDoesNotExistError
 
 
 def main(argv):
@@ -78,13 +80,20 @@ def main(argv):
         elif not args.after:
             args.after = 'yesterday'
 
-    screen = Screen(tw_data_dir=args.data_location,
-                    taskrc_location=args.taskrc_location,
-                    hide_empty=hide_empty,
-                    scheduled_before=args.before,
-                    scheduled_after=args.after,
-                    scheduled=args.scheduled,
-                    completed=args.completed, hide_projects=args.project)
+    try:
+        screen = Screen(tw_data_dir=args.data_location,
+                        taskrc_location=args.taskrc_location,
+                        hide_empty=hide_empty,
+                        scheduled_before=args.before,
+                        scheduled_after=args.after,
+                        scheduled=args.scheduled,
+                        completed=args.completed, hide_projects=args.project)
+    except TaskDirDoesNotExistError as err:
+        print('Error: {}'.format(err))
+        sys.exit(1)
+    except TaskrcDoesNotExistError as err:
+        print('Error: {}'.format(err))
+        sys.exit(1)
 
     last_refresh_time = 0
     try:

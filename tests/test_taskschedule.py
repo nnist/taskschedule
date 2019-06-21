@@ -3,19 +3,35 @@
 import unittest
 import os
 from datetime import datetime
+import shutil
 
 from tasklib import TaskWarrior, Task
 
-from taskschedule.schedule import Schedule, UDADoesNotExistError
+from taskschedule.schedule import Schedule, UDADoesNotExistError,\
+                                  TaskrcDoesNotExistError,\
+                                  TaskDirDoesNotExistError
 from taskschedule.scheduled_task import ScheduledTask
 from .context import taskschedule
 
 
-class UDATest(unittest.TestCase):
+class MissingDataTest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc does not exist to prevent damage
+        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
         home = os.path.expanduser("~")
         self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+        self.assertEqual(os.path.isdir(home + '/.task'), False)
+
+    def tearDown(self):
+        home = os.path.expanduser("~")
+        try:
+            os.remove(home + '/.taskrc')
+        except FileNotFoundError:
+            pass
+
+        try:
+            shutil.rmtree(home + '/.task')
+        except FileNotFoundError:
+            pass
 
     def create_schedule(self):
         schedule = Schedule()
@@ -24,12 +40,43 @@ class UDATest(unittest.TestCase):
     def test_no_uda_estimate_raises_exception(self):
         self.assertRaises(UDADoesNotExistError, self.create_schedule)
 
+    def test_no_task_dir_raises_exception(self):
+        home = os.path.expanduser("~")
+        with open(home + '/.taskrc', 'w+') as file:
+            file.write('# User Defined Attributes\n')
+            file.write('uda.estimate.type=duration\n')
+            file.write('uda.estimate.label=Est\n')
+        self.assertRaises(TaskDirDoesNotExistError, self.create_schedule)
+        os.remove(home + '/.taskrc')
+
+    def test_no_taskrc_raises_exception(self):
+        home = os.path.expanduser("~")
+        os.makedirs(home + '/.task')
+        self.assertRaises(TaskrcDoesNotExistError, self.create_schedule)
+
+        try:
+            shutil.rmtree(home + '/.task')
+        except FileNotFoundError:
+            pass
+
 
 class TaskscheduleTest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc does not exist to prevent damage
+        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
         home = os.path.expanduser("~")
         self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+        self.assertEqual(os.path.isdir(home + '/.task'), False)
+
+        # Create a sample ~/.taskrc
+        home = os.path.expanduser("~")
+        with open(home + '/.taskrc', 'w+') as file:
+            file.write('# User Defined Attributes\n')
+            file.write('uda.estimate.type=duration\n')
+            file.write('uda.estimate.label=Est\n')
+
+        # Create a sample empty ~/.task directory
+        home = os.path.expanduser("~")
+        os.makedirs(home + '/.task')
 
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True,
@@ -50,6 +97,17 @@ class TaskscheduleTest(unittest.TestCase):
                                  taskrc_location='tests/test_data/.task/.taskrc')
 
     def tearDown(self):
+        home = os.path.expanduser("~")
+        try:
+            os.remove(home + '/.taskrc')
+        except FileNotFoundError:
+            pass
+
+        try:
+            shutil.rmtree(home + '/.task')
+        except FileNotFoundError:
+            pass
+
         os.remove(os.path.dirname(__file__) + '/test_data/.task/backlog.data')
         os.remove(os.path.dirname(__file__) + '/test_data/.task/completed.data')
         os.remove(os.path.dirname(__file__) + '/test_data/.task/pending.data')
@@ -183,9 +241,10 @@ class TaskscheduleTest(unittest.TestCase):
 
 class ScheduledTaskTest(unittest.TestCase):
     def setUp(self):
-        # Make sure ~/.taskrc does not exist to prevent damage
+        # Make sure ~/.taskrc and ~/.task/ do not exist to prevent damage
         home = os.path.expanduser("~")
         self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
+        self.assertEqual(os.path.isdir(home + '/.task'), False)
 
         taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
                                   create=True,
