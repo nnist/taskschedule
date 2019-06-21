@@ -70,22 +70,15 @@ class CLITest(unittest.TestCase):
         # Ensure it times out, because that means it atleast
         # entered the main loop
         try:
-            subprocess.run(
-                ['python3 __main__.py -t tests/test_data/.task/.taskrc -d tests/test_data/.task/ --from today --until tomorrow'],
-                shell=True,
-                timeout=1,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, check=True)
-        except subprocess.TimeoutExpired:
+            run(['python3', '__main__.py', '--from', 'today', '--until',
+                 'tomorrow'], timeout=2)
+        except Timeout:
             pass
+
         try:
-            subprocess.run(
-                ['python3 __main__.py -t tests/test_data/.task/.taskrc -d tests/test_data/.task/ --scheduled tomorrow'],
-                shell=True,
-                timeout=1,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, check=True)
-        except subprocess.TimeoutExpired:
+            run(['python3', '__main__.py', '--scheduled', 'tomorrow'],
+                timeout=2)
+        except Timeout:
             pass
 
     def test_cli_invalid_date_prints_error(self):
