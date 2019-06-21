@@ -6,6 +6,11 @@ from tasklib import TaskWarrior
 from taskschedule.scheduled_task import ScheduledTask
 
 
+class UDADoesNotExistError(Exception):
+    # pylint: disable=unnecessary-pass,missing-docstring
+    pass
+
+
 class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
@@ -21,6 +26,16 @@ class Schedule():
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
                                   taskrc_location=self.taskrc_location)
+
+        # Disable _forcecolor because it breaks tw config output
+        taskwarrior.overrides.update({'_forcecolor': 'off'})
+        if taskwarrior.config.get('uda.estimate.type') is None:
+            raise UDADoesNotExistError(('uda.estimate.type does not exist '
+                                        'in .taskrc'))
+        if taskwarrior.config.get('uda.estimate.label') is None:
+            raise UDADoesNotExistError(('uda.estimate.label does not exist '
+                                        'in .taskrc'))
+
         scheduled_tasks = []
         filtered_tasks = []
 

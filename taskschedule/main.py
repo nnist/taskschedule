@@ -3,10 +3,12 @@
 import argparse
 import time
 import sys
+import os
 
 from curses import napms, KEY_RESIZE
 
 from taskschedule.screen import Screen
+from taskschedule.schedule import UDADoesNotExistError
 
 
 def main(argv):
@@ -101,6 +103,9 @@ def main(argv):
     except KeyboardInterrupt:
         pass
     except ValueError as err:
+        screen.close()
+        print('Error: {}'.format(err))
+    except UDADoesNotExistError as err:
         screen.close()
         print('Error: {}'.format(err))
     finally:
