@@ -52,34 +52,50 @@ class Screen():
         """Initialize the colors."""
         curses.curs_set(0)
         curses.start_color()
-        curses.init_pair(1, 20, curses.COLOR_BLACK)
-        curses.init_pair(2, 8, 0)  # Hours
-        curses.init_pair(3, 20, 234)  # Alternating background
-        curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
-        curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
-        curses.init_pair(6, 19, 234)  # Completed task - alternating background
-        curses.init_pair(7, 19, 0)  # Completed task
-        curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
-        curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
-        curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
-        curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
-        curses.init_pair(12, curses.COLOR_YELLOW, 234)  # Overdue task alt
-        curses.init_pair(13, curses.COLOR_GREEN, 234)  # Should-be-active task alt
+        if curses.can_change_color():
+            curses.init_pair(1, 20, curses.COLOR_BLACK)
+            curses.init_pair(2, 8, 0)  # Hours
+            curses.init_pair(3, 20, 234)  # Alternating background
+            curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
+            curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
+            curses.init_pair(6, 19, 234)  # Completed task - alternating background
+            curses.init_pair(7, 19, 0)  # Completed task
+            curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
+            curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
+            curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
+            curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
+            curses.init_pair(12, curses.COLOR_YELLOW, 234)  # Overdue task alt
+            curses.init_pair(13, curses.COLOR_GREEN, 234)  # Should-be-active task alt
 
-        # pylint: disable=invalid-name
-        self.COLOR_DEFAULT = curses.color_pair(1)
-        self.COLOR_DEFAULT_ALTERNATE = curses.color_pair(3)
-        self.COLOR_HEADER = curses.color_pair(4) | curses.A_UNDERLINE
-        self.COLOR_HOUR = curses.color_pair(2)
-        self.COLOR_HOUR_CURRENT = curses.color_pair(5)
-        self.COLOR_ACTIVE = curses.color_pair(8)
-        self.COLOR_SHOULD_BE_ACTIVE = curses.color_pair(10)
-        self.COLOR_SHOULD_BE_ACTIVE_ALTERNATE = curses.color_pair(13)
-        self.COLOR_OVERDUE = curses.color_pair(11)
-        self.COLOR_OVERDUE_ALTERNATE = curses.color_pair(12)
-        self.COLOR_COMPLETED = curses.color_pair(7)
-        self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(6)
-        self.COLOR_GLYPH = curses.color_pair(9)
+            # pylint: disable=invalid-name
+            self.COLOR_DEFAULT = curses.color_pair(1)
+            self.COLOR_DEFAULT_ALTERNATE = curses.color_pair(3)
+            self.COLOR_HEADER = curses.color_pair(4) | curses.A_UNDERLINE
+            self.COLOR_HOUR = curses.color_pair(2)
+            self.COLOR_HOUR_CURRENT = curses.color_pair(5)
+            self.COLOR_ACTIVE = curses.color_pair(8)
+            self.COLOR_SHOULD_BE_ACTIVE = curses.color_pair(10)
+            self.COLOR_SHOULD_BE_ACTIVE_ALTERNATE = curses.color_pair(13)
+            self.COLOR_OVERDUE = curses.color_pair(11)
+            self.COLOR_OVERDUE_ALTERNATE = curses.color_pair(12)
+            self.COLOR_COMPLETED = curses.color_pair(7)
+            self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(6)
+            self.COLOR_GLYPH = curses.color_pair(9)
+        else:
+            # pylint: disable=invalid-name
+            self.COLOR_DEFAULT = curses.color_pair(0)
+            self.COLOR_DEFAULT_ALTERNATE = curses.color_pair(0)
+            self.COLOR_HEADER = curses.color_pair(0)
+            self.COLOR_HOUR = curses.color_pair(0)
+            self.COLOR_HOUR_CURRENT = curses.color_pair(0)
+            self.COLOR_ACTIVE = curses.color_pair(0)
+            self.COLOR_SHOULD_BE_ACTIVE = curses.color_pair(0)
+            self.COLOR_SHOULD_BE_ACTIVE_ALTERNATE = curses.color_pair(0)
+            self.COLOR_OVERDUE = curses.color_pair(0)
+            self.COLOR_OVERDUE_ALTERNATE = curses.color_pair(0)
+            self.COLOR_COMPLETED = curses.color_pair(0)
+            self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(0)
+            self.COLOR_GLYPH = curses.color_pair(0)
 
     def get_task_color(self, task, alternate):
         """Return the color for the given task."""
