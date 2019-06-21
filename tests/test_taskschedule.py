@@ -82,9 +82,10 @@ class TaskscheduleTest(unittest.TestCase):
         home = os.path.expanduser("~")
         os.makedirs(home + '/.task')
 
-        taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
-                                  create=True,
-                                  taskrc_location='tests/test_data/.task/.taskrc')
+        taskwarrior = TaskWarrior(
+            data_location='tests/test_data/.task',
+            create=True,
+            taskrc_location='tests/test_data/.task/.taskrc')
         Task(taskwarrior, description='test_yesterday',
              schedule='yesterday', estimate='20min').save()
         Task(taskwarrior, description='test_9:00_to_10:11',
@@ -96,9 +97,10 @@ class TaskscheduleTest(unittest.TestCase):
         Task(taskwarrior, description='test_tomorrow',
              schedule='tomorrow', estimate='24min').save()
 
-        self.schedule = Schedule(tw_data_dir='tests/test_data/.task',
-                                 tw_data_dir_create=True,
-                                 taskrc_location='tests/test_data/.task/.taskrc')
+        self.schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=True,
+            taskrc_location='tests/test_data/.task/.taskrc')
 
     def tearDown(self):
         home = os.path.expanduser("~")
@@ -112,10 +114,12 @@ class TaskscheduleTest(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/backlog.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/completed.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/pending.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/undo.data')
+        task_dir = os.path.dirname(__file__) + '/test_data/.task'
+
+        os.remove(task_dir + '/backlog.data')
+        os.remove(task_dir + '/completed.data')
+        os.remove(task_dir + '/pending.data')
+        os.remove(task_dir + '/undo.data')
 
     def test_schedule_can_be_initialized(self):
         schedule = Schedule()
@@ -250,9 +254,10 @@ class ScheduledTaskTest(unittest.TestCase):
         self.assertEqual(os.path.isfile(home + '/.taskrc'), False)
         self.assertEqual(os.path.isdir(home + '/.task'), False)
 
-        taskwarrior = TaskWarrior(data_location='tests/test_data/.task',
-                                  create=True,
-                                  taskrc_location='tests/test_data/.task/.taskrc')
+        taskwarrior = TaskWarrior(
+            data_location='tests/test_data/.task',
+            create=True,
+            taskrc_location='tests/test_data/.task/.taskrc')
         taskwarrior.overrides.update({'uda.estimate.type': 'duration'})
         taskwarrior.overrides.update({'uda.estimate.label': 'Est'})
         Task(taskwarrior, description='test_yesterday',
@@ -265,16 +270,19 @@ class ScheduledTaskTest(unittest.TestCase):
              schedule='tomorrow', estimate='24min').save()
 
         self.tasks = taskwarrior.tasks.filter(status='pending')
-        self.schedule = Schedule(tw_data_dir='tests/test_data/.task',
-                                 tw_data_dir_create=True,
-                                 taskrc_location='tests/test_data/.task/.taskrc')
+        self.schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=True,
+            taskrc_location='tests/test_data/.task/.taskrc')
         self.schedule.load_tasks()
 
     def tearDown(self):
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/backlog.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/completed.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/pending.data')
-        os.remove(os.path.dirname(__file__) + '/test_data/.task/undo.data')
+        task_dir = os.path.dirname(__file__) + '/test_data/.task'
+
+        os.remove(task_dir + '/backlog.data')
+        os.remove(task_dir + '/completed.data')
+        os.remove(task_dir + '/pending.data')
+        os.remove(task_dir + '/undo.data')
 
     def test_init_works_correctly(self):
         task = ScheduledTask(self.tasks[1], self.schedule)
