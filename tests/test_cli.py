@@ -96,8 +96,7 @@ class CLITest(unittest.TestCase):
                 ['python3 __main__.py'],
                 shell=True,
                 timeout=1,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE, check=True)
+                check=True)
         except subprocess.CalledProcessError as err:
             print(err)
             print(err.output)
