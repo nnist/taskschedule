@@ -114,8 +114,10 @@ def main(argv):
     except ValueError as err:
         screen.close()
         print('Error: {}'.format(err))
+        sys.exit(1)
     except UDADoesNotExistError as err:
         screen.close()
         print('Error: {}'.format(err))
+        sys.exit(1)
     finally:
         screen.close()
