@@ -2,7 +2,7 @@
 
 import unittest
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import shutil
 
 from tasklib import TaskWarrior, Task
@@ -134,6 +134,19 @@ class TaskscheduleTest(unittest.TestCase):
         assert str(task.description) == 'test_16:10_to_16:34'
         assert str(task.start)[0:-6] == '{} 16:10:00'.format(date_str)
         assert str(task.end)[0:-6] == '{} 16:34:00'.format(date_str)
+
+    def test_get_calculated_date_returns_correct_values(self):
+        calculated = self.schedule.get_calculated_date('today').date()
+        expected = datetime.now().date()
+        self.assertEqual(calculated, expected)
+
+        calculated = self.schedule.get_calculated_date('now+1day').date()
+        expected = datetime.now().date() + timedelta(days=1)
+        self.assertEqual(calculated, expected)
+
+        calculated = self.schedule.get_calculated_date('now+1week').date()
+        expected = datetime.now().date() + timedelta(days=7)
+        self.assertEqual(calculated, expected)
 
 #   def test_format_task_returns_correct_format(self):
 #       self.schedule.get_tasks()

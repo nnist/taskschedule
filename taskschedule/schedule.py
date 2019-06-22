@@ -4,7 +4,7 @@
 import os
 import datetime
 
-from tasklib import TaskWarrior
+from tasklib import TaskWarrior, Task
 
 from taskschedule.scheduled_task import ScheduledTask
 
@@ -105,6 +105,15 @@ class Schedule():
         scheduled_tasks.sort(key=lambda task: task.start)
         self.tasks = scheduled_tasks
 
+    def get_calculated_date(self, synonym):
+        """Leverage the `task calc` command to convert a date synonym string
+           to a datetime object."""
+
+        taskwarrior = TaskWarrior()
+        task = Task(taskwarrior, description='dummy')
+        task['due'] = synonym
+        return task['due']
+
     def get_time_slots(self):
         """Return a dict with dates and their tasks.
         >>> get_time_slots()
@@ -115,8 +124,23 @@ class Schedule():
         end_time = '23:00'
         slot_time = 60
 
-        start_date = datetime.datetime.now().date() - datetime.timedelta(days=0)
-        end_date = datetime.datetime.now().date() + datetime.timedelta(days=1)
+        start_date = self.get_calculated_date(self.scheduled_after)
+        end_date = self.get_calculated_date(self.scheduled_before)
+        scheduled_date = self.get_calculated_date(self.scheduled)
+
+        if scheduled_date is None:
+            if start_date is None and end_date is None:
+                start_date = self.get_calculated_date('today')
+                end_date = self.get_calculated_date('today+23hr+59min')
+            elif start_date is not None and end_date is not None:
+                start_date = start_date.date()
+                end_date = end_date.date()
+            else:
+                start_date = self.get_calculated_date('today').date()
+                end_date = self.get_calculated_date('today+23hr+59min').date()
+        else:
+            start_date = scheduled_date.date()
+            end_date = scheduled_date.date() + datetime.timedelta(hours=23, minutes=59)
 
         days = {}
         date = start_date
