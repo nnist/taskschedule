@@ -132,8 +132,12 @@ class Screen():
 
         return color
 
-    def scroll(self, direction):
+    def get_maxyx(self):
         max_y, max_x = self.stdscr.getmaxyx()
+        return max_y, max_x
+
+    def scroll(self, direction):
+        max_y, max_x = self.get_maxyx()
         self.scroll_level += direction
         if self.scroll_level < 0:
             self.scroll_level = 0
@@ -142,7 +146,7 @@ class Screen():
         self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
 
     def draw_footnote(self):
-        max_y, max_x = self.stdscr.getmaxyx()
+        max_y, max_x = self.get_maxyx()
         if self.scheduled_before and self.scheduled_after:
             footnote = '{} tasks - from {} until {}'.format(
                 len(self.schedule.tasks),
@@ -158,7 +162,7 @@ class Screen():
 
     def draw(self, force=False):
         """Draw the current buffer."""
-        max_y, max_x = self.stdscr.getmaxyx()
+        max_y, max_x = self.get_maxyx()
         if not self.buffer:
             self.stdscr.clear()
             self.stdscr.addstr(0, 0, 'No tasks to display.',
@@ -181,7 +185,7 @@ class Screen():
 
     def refresh_buffer(self):
         """Refresh the buffer."""
-        max_y, max_x = self.stdscr.getmaxyx()
+        max_y, max_x = self.get_maxyx()
         self.prev_buffer = self.buffer
         self.buffer = []
 
