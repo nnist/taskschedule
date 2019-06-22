@@ -27,7 +27,12 @@ class Screen():
 
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
+        self.stdscr.scrollok(True)
+        self.stdscr.idlok(True)
         curses.noecho()
+
+        self.pad = curses.newpad(800, 800)
+        self.scroll_level = 0
 
         self.refresh_rate = refresh_rate
         self.completed = completed
@@ -127,7 +132,17 @@ class Screen():
 
         return color
 
-    def draw_footnote(self, y):
+    def scroll(self, direction):
+        max_y, max_x = self.stdscr.getmaxyx()
+        self.scroll_level += direction
+        if self.scroll_level < 0:
+            self.scroll_level = 0
+        else:
+            self.stdscr.refresh()
+            self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
+
+    def draw_footnote(self):
+        max_y, max_x = self.stdscr.getmaxyx()
         if self.scheduled_before and self.scheduled_after:
             footnote = '{} tasks - from {} until {}'.format(
                 len(self.schedule.tasks),
@@ -137,33 +152,31 @@ class Screen():
             footnote = '{} tasks - {}'.format(len(self.schedule.tasks),
                                               self.scheduled)
 
-        self.stdscr.addstr(y + 2, 0,
+        self.stdscr.addstr(max_y - 1, 0,
                            footnote,
                            self.COLOR_DEFAULT)
 
-    def draw(self):
+    def draw(self, force=False):
         """Draw the current buffer."""
-        last_line = 0
+        max_y, max_x = self.stdscr.getmaxyx()
         if not self.buffer:
             self.stdscr.clear()
             self.stdscr.addstr(0, 0, 'No tasks to display.',
                                self.COLOR_DEFAULT)
-            self.draw_footnote(last_line)
+            self.draw_footnote()
             self.stdscr.refresh()
         else:
-            if self.prev_buffer != self.buffer:
-                self.stdscr.clear()
+            if force or self.prev_buffer != self.buffer:
+                #self.pad.clear()
                 for line, offset, string, color in self.buffer:
-                    max_y, max_x = self.stdscr.getmaxyx()
-                    if line < max_y - 2:
+                    if line == 0:
                         self.stdscr.addstr(line, offset, string, color)
-                        self.stdscr.refresh()
                     else:
-                        break
+                        self.pad.addstr(line, offset, string, color)
 
-                    last_line = line
-
-                self.draw_footnote(last_line)
+                self.draw_footnote()
+                self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
+                                 max_x-1)
                 self.stdscr.refresh()
 
     def refresh_buffer(self):

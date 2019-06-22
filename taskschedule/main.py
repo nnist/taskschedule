@@ -5,7 +5,7 @@ import time
 import sys
 import os
 
-from curses import napms, KEY_RESIZE
+from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
 
 from taskschedule.screen import Screen
 from taskschedule.schedule import UDADoesNotExistError,\
@@ -101,7 +101,10 @@ def main(argv):
             key = screen.stdscr.getch()
             if key == 113:
                 break
-
+            if key == 65:
+                screen.scroll(-1)
+            if key == 66:
+                screen.scroll(1)
             if (key == KEY_RESIZE or
                     time.time() > last_refresh_time + args.refresh):
                 last_refresh_time = time.time()
