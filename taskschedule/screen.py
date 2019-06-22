@@ -255,10 +255,10 @@ class Screen():
 
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour
-                    if int(hour) == current_hour:
-                        if day == datetime.datetime.now().date().isoformat():
-                            self.buffer.append((current_line, 0, hour,
-                                                self.COLOR_HOUR_CURRENT))
+                    if int(hour) == current_hour and \
+                            day == datetime.datetime.now().date().isoformat():
+                        self.buffer.append((current_line, 0, hour,
+                                            self.COLOR_HOUR_CURRENT))
                     else:
                         self.buffer.append((current_line, 0, hour,
                                             self.COLOR_HOUR))
@@ -278,10 +278,10 @@ class Screen():
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour
                     if hour_ != '':
-                        if int(hour) == current_hour:
-                            if day == datetime.datetime.now().date().isoformat():
-                                self.buffer.append((current_line, 0, hour_,
-                                                    self.COLOR_HOUR_CURRENT))
+                        if int(hour) == current_hour and \
+                                day == datetime.datetime.now().date().isoformat():
+                            self.buffer.append((current_line, 0, hour_,
+                                                self.COLOR_HOUR_CURRENT))
                         else:
                             self.buffer.append((current_line, 0, hour_,
                                                 self.COLOR_HOUR))
