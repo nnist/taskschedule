@@ -1,6 +1,7 @@
 import curses
 import time
 import os
+import datetime
 
 from taskschedule.schedule import Schedule
 
@@ -242,8 +243,9 @@ class Screen():
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour
                     if int(hour) == current_hour:
-                        self.buffer.append((current_line, 0, hour,
-                                            self.COLOR_HOUR_CURRENT))
+                        if day == datetime.datetime.now().date().isoformat():
+                            self.buffer.append((current_line, 0, hour,
+                                                self.COLOR_HOUR_CURRENT))
                     else:
                         self.buffer.append((current_line, 0, hour,
                                             self.COLOR_HOUR))
@@ -264,8 +266,9 @@ class Screen():
                     current_hour = time.localtime().tm_hour
                     if hour_ != '':
                         if int(hour) == current_hour:
-                            self.buffer.append((current_line, 0, hour_,
-                                                self.COLOR_HOUR_CURRENT))
+                            if day == datetime.datetime.now().date().isoformat():
+                                self.buffer.append((current_line, 0, hour_,
+                                                    self.COLOR_HOUR_CURRENT))
                         else:
                             self.buffer.append((current_line, 0, hour_,
                                                 self.COLOR_HOUR))
