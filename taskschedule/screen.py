@@ -76,6 +76,8 @@ class Screen():
             curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
             curses.init_pair(12, curses.COLOR_YELLOW, 234)  # Overdue task alt
             curses.init_pair(13, curses.COLOR_GREEN, 234)  # Should-be-active task alt
+            curses.init_pair(14, 19, 0)  # Completed task
+            curses.init_pair(15, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
 
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(1)
@@ -91,6 +93,8 @@ class Screen():
             self.COLOR_COMPLETED = curses.color_pair(7)
             self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(6)
             self.COLOR_GLYPH = curses.color_pair(9)
+            self.COLOR_DIVIDER = curses.color_pair(14)
+            self.COLOR_DIVIDER_ACTIVE = curses.color_pair(15)
         else:
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(0)
@@ -106,6 +110,8 @@ class Screen():
             self.COLOR_COMPLETED = curses.color_pair(0)
             self.COLOR_COMPLETED_ALTERNATE = curses.color_pair(0)
             self.COLOR_GLYPH = curses.color_pair(0)
+            self.COLOR_DIVIDER = curses.color_pair(0)
+            self.COLOR_DIVIDER_ACTIVE = curses.color_pair(0)
 
     def get_task_color(self, task, alternate):
         """Return the color for the given task."""
@@ -242,10 +248,29 @@ class Screen():
 
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
-            divider = '---- ' + day + ' --------------------'
-            self.buffer.append((current_line, 0, divider,
-                                self.COLOR_HOUR))
+            # Draw divider
+            divider_pt1 = '╴' * (offsets[2] - 2) + '╱'
+            self.buffer.append((current_line, 0, divider_pt1,
+                                self.COLOR_DIVIDER))
+
+            divider_pt2 = ' ' + day + ' '
+            if day == datetime.datetime.now().date().isoformat():
+                self.buffer.append((current_line, len(divider_pt1),
+                                    divider_pt2,
+                                    self.COLOR_DIVIDER_ACTIVE))
+            else:
+                self.buffer.append((current_line, len(divider_pt1),
+                                    divider_pt2,
+                                    self.COLOR_DIVIDER))
+
+            divider_pt3 = '╲' + '╶' * (max_x -
+                                       (len(divider_pt1) + len(divider_pt2)))
+            self.buffer.append((current_line,
+                                len(divider_pt1) + len(divider_pt2),
+                                divider_pt3,
+                                self.COLOR_DIVIDER))
             current_line += 1
+
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
                 if not tasks:
