@@ -179,8 +179,6 @@ class Screen():
         if not self.schedule.tasks:
             return
 
-        as_dict = self.schedule.as_dict()
-
         # Determine offsets
         offsets = self.schedule.get_column_offsets()
         max_project_column_length = round(max_x / 8)
@@ -213,6 +211,7 @@ class Screen():
         alternate = True
         current_line = 1
 
+        # TODO Hide empty hours again
         if self.hide_empty:
             first_task = self.schedule.tasks[0].start
             first_hour = first_task.hour
@@ -222,42 +221,22 @@ class Screen():
             first_hour = 0
             last_hour = 23
 
-        for i in range(first_hour, last_hour + 1):
-            tasks = as_dict[i]
-            if not tasks:
-                # Add empty line
-                if alternate:
-                    color = self.COLOR_DEFAULT_ALTERNATE
-                else:
-                    color = self.COLOR_DEFAULT
+        time_slots = self.schedule.get_time_slots()
+        for day in time_slots:
+            for hour in time_slots[day]:
+                tasks = time_slots[day][hour]
+                if not tasks:
+                    # Add empty line
+                    if alternate:
+                        color = self.COLOR_DEFAULT_ALTERNATE
+                    else:
+                        color = self.COLOR_DEFAULT
 
-                # Fill line to screen length
-                self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
+                    # Fill line to screen length
+                    self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
 
-                # Draw hour column, highlight current hour
-                current_hour = time.localtime().tm_hour
-                if i == current_hour:
-                    self.buffer.append((current_line, 0, str(i),
-                                        self.COLOR_HOUR_CURRENT))
-                else:
-                    self.buffer.append((current_line, 0, str(i),
-                                        self.COLOR_HOUR))
-
-                current_line += 1
-                alternate = not alternate
-
-            for ii, task in enumerate(tasks):
-                color = self.get_task_color(task, alternate)
-
-                # Only draw hour once for multiple tasks
-                if ii == 0:
-                    hour = str(i)
-                else:
-                    hour = ''
-
-                # Draw hour column, highlight current hour
-                current_hour = time.localtime().tm_hour
-                if hour != '':
+                    # Draw hour column, highlight current hour
+                    current_hour = time.localtime().tm_hour
                     if int(hour) == current_hour:
                         self.buffer.append((current_line, 0, hour,
                                             self.COLOR_HOUR_CURRENT))
@@ -265,49 +244,71 @@ class Screen():
                         self.buffer.append((current_line, 0, hour,
                                             self.COLOR_HOUR))
 
-                # Fill line to screen length
-                self.buffer.append((current_line, 5, ' ' * (max_x - 5),
-                                    color))
+                    current_line += 1
+                    alternate = not alternate
 
-                # Draw glyph column
-                self.buffer.append((current_line, 3, task.glyph,
-                                    self.COLOR_GLYPH))
+                for ii, task in enumerate(tasks):
+                    color = self.get_task_color(task, alternate)
 
-                # Draw task id column
-                if task.task_id != 0:
-                    self.buffer.append((current_line, 5, str(task.task_id),
-                                        color))
-
-                # Draw time column
-                if task.end is None:
-                    formatted_time = '{}'.format(task.start_time)
-                else:
-                    end_time = '{}'.format(task.end.strftime('%H:%M'))
-                    formatted_time = '{}-{}'.format(task.start_time,
-                                                    end_time)
-
-                self.buffer.append((current_line, offsets[2],
-                                    formatted_time, color))
-
-                # Optionally draw project column
-                offset = 0
-                if not self.hide_projects:
-                    if task.project is None:
-                        project = ''
+                    # Only draw hour once for multiple tasks
+                    if ii == 0:
+                        hour_ = str(hour)
                     else:
-                        max_length = offsets[4] - offsets[3] - 1
-                        project = task.project[0:max_length]
+                        hour_ = ''
 
-                    self.buffer.append((current_line, offsets[3], project,
+                    # Draw hour column, highlight current hour
+                    current_hour = time.localtime().tm_hour
+                    if hour_ != '':
+                        if int(hour) == current_hour:
+                            self.buffer.append((current_line, 0, hour_,
+                                                self.COLOR_HOUR_CURRENT))
+                        else:
+                            self.buffer.append((current_line, 0, hour_,
+                                                self.COLOR_HOUR))
+
+                    # Fill line to screen length
+                    self.buffer.append((current_line, 5, ' ' * (max_x - 5),
                                         color))
-                    offset = offsets[4]
-                else:
-                    offset = offsets[3]
 
-                # Draw description column
-                description = task.description[0:max_x - offset]
-                self.buffer.append((current_line, offset,
-                                    description, color))
+                    # Draw glyph column
+                    self.buffer.append((current_line, 3, task.glyph,
+                                        self.COLOR_GLYPH))
 
-                current_line += 1
-                alternate = not alternate
+                    # Draw task id column
+                    if task.task_id != 0:
+                        self.buffer.append((current_line, 5, str(task.task_id),
+                                            color))
+
+                    # Draw time column
+                    if task.end is None:
+                        formatted_time = '{}'.format(task.start_time)
+                    else:
+                        end_time = '{}'.format(task.end.strftime('%H:%M'))
+                        formatted_time = '{}-{}'.format(task.start_time,
+                                                        end_time)
+
+                    self.buffer.append((current_line, offsets[2],
+                                        formatted_time, color))
+
+                    # Optionally draw project column
+                    offset = 0
+                    if not self.hide_projects:
+                        if task.project is None:
+                            project = ''
+                        else:
+                            max_length = offsets[4] - offsets[3] - 1
+                            project = task.project[0:max_length]
+
+                        self.buffer.append((current_line, offsets[3], project,
+                                            color))
+                        offset = offsets[4]
+                    else:
+                        offset = offsets[3]
+
+                    # Draw description column
+                    description = task.description[0:max_x - offset]
+                    self.buffer.append((current_line, offset,
+                                        description, color))
+
+                    current_line += 1
+                    alternate = not alternate

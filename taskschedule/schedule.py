@@ -2,6 +2,7 @@
    scheduled tasks from taskwarrior and displaying them in a table."""
 
 import os
+import datetime
 
 from tasklib import TaskWarrior
 
@@ -99,23 +100,40 @@ class Schedule():
         scheduled_tasks.sort(key=lambda task: task.start)
         self.tasks = scheduled_tasks
 
-    def as_dict(self):
-        """Return a dict with scheduled tasks.
-        >>> as_dict()
-        {1: [], 2: [], ..., 9: [task, task, task], 10: [task, task], ...}
+    def get_time_slots(self):
+        """Return a dict with dates and their tasks.
+        >>> get_time_slots()
+        {datetime.date(2019, 6, 27): {00: [], 01: [], ..., 23: [task, task]},
+         datetime.date(2019, 6, 28): {00: [], ..., 10: [task, task], ...}]
         """
-        as_dict = {}
-        for i in range(24):
-            task_list = []
-            for task in self.tasks:
-                start = task.start
-                if start.hour == i:
-                    task_list.append(task)
+        start_time = '0:00'
+        end_time = '23:00'
+        slot_time = 60
 
-            task_list = sorted(task_list, key=lambda k: k.start)
-            as_dict[i] = task_list
+        start_date = datetime.datetime.now().date() - datetime.timedelta(days=0)
+        end_date = datetime.datetime.now().date() + datetime.timedelta(days=1)
 
-        return as_dict
+        days = {}
+        date = start_date
+        while date <= end_date:
+            hours = {}
+            time = datetime.datetime.strptime(start_time, '%H:%M')
+            end = datetime.datetime.strptime(end_time, '%H:%M')
+            while time <= end:
+                task_list = []
+                for task in self.tasks:
+                    start = task.start
+                    if start.date() == date:
+                        if start.hour == int(time.strftime("%H")):
+                            task_list.append(task)
+
+                task_list = sorted(task_list, key=lambda k: k.start)
+                hours[time.strftime("%H")] = task_list
+                time += datetime.timedelta(minutes=slot_time)
+            date += datetime.timedelta(days=1)
+            days[date.isoformat()] = hours
+
+        return days
 
     def get_max_length(self, value):
         """Return the max string length of a given value of all tasks
