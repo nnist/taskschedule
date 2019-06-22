@@ -223,6 +223,10 @@ class Screen():
 
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
+            divider = '---- ' + day + ' --------------------'
+            self.buffer.append((current_line, 0, divider,
+                                self.COLOR_HOUR))
+            current_line += 1
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
                 if not tasks:
