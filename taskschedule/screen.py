@@ -78,6 +78,7 @@ class Screen():
             curses.init_pair(13, curses.COLOR_GREEN, 234)
             curses.init_pair(14, 8, 0)
             curses.init_pair(15, curses.COLOR_GREEN, curses.COLOR_BLACK)
+            curses.init_pair(16, 20, curses.COLOR_BLACK)
 
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(1)
@@ -95,6 +96,7 @@ class Screen():
             self.COLOR_GLYPH = curses.color_pair(9)
             self.COLOR_DIVIDER = curses.color_pair(14)
             self.COLOR_DIVIDER_ACTIVE = curses.color_pair(15)
+            self.COLOR_DIVIDER_TEXT = curses.color_pair(16)
         else:
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(0)
@@ -112,6 +114,7 @@ class Screen():
             self.COLOR_GLYPH = curses.color_pair(0)
             self.COLOR_DIVIDER = curses.color_pair(0)
             self.COLOR_DIVIDER_ACTIVE = curses.color_pair(0)
+            self.COLOR_DIVIDER_TEXT = curses.color_pair(0)
 
     def get_task_color(self, task, alternate):
         """Return the color for the given task."""
@@ -252,7 +255,7 @@ class Screen():
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
             # Draw divider
-            divider_pt1 = '╴' * (offsets[2] - 2) + '╱'
+            divider_pt1 = '─' * (offsets[2] - 1)
             self.buffer.append((current_line, 0, divider_pt1,
                                 self.COLOR_DIVIDER))
 
@@ -267,9 +270,9 @@ class Screen():
             else:
                 self.buffer.append((current_line, len(divider_pt1),
                                     divider_pt2,
-                                    self.COLOR_DIVIDER))
+                                    self.COLOR_DIVIDER_TEXT))
 
-            divider_pt3 = '╲' + '╶' * (max_x -
+            divider_pt3 = '─' * (max_x -
                                        (len(divider_pt1) + len(divider_pt2)))
             self.buffer.append((current_line,
                                 len(divider_pt1) + len(divider_pt2),
