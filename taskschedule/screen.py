@@ -270,6 +270,7 @@ class Screen():
                                 divider_pt3,
                                 self.COLOR_DIVIDER))
             current_line += 1
+            alternate = False
 
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
