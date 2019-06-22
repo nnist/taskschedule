@@ -101,11 +101,11 @@ def main(argv):
             key = screen.stdscr.getch()
             if key == 113:
                 break
-            if key == 65:
+            elif key == 65:
                 screen.scroll(-1)
-            if key == 66:
+            elif key == 66:
                 screen.scroll(1)
-            if (key == KEY_RESIZE or
+            elif (key == KEY_RESIZE or
                     time.time() > last_refresh_time + args.refresh):
                 last_refresh_time = time.time()
                 screen.refresh_buffer()
