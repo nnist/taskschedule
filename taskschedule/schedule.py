@@ -130,8 +130,8 @@ class Schedule():
                 task_list = sorted(task_list, key=lambda k: k.start)
                 hours[time.strftime("%H")] = task_list
                 time += datetime.timedelta(minutes=slot_time)
-            date += datetime.timedelta(days=1)
             days[date.isoformat()] = hours
+            date += datetime.timedelta(days=1)
 
         return days
 
