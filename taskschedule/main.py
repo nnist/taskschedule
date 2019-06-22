@@ -110,7 +110,7 @@ def main(argv):
             elif key == 53:
                 screen.scroll(-10)
             elif (key == KEY_RESIZE or
-                    time.time() > last_refresh_time + args.refresh):
+                  time.time() > last_refresh_time + args.refresh):
                 last_refresh_time = time.time()
                 screen.refresh_buffer()
                 screen.draw()
