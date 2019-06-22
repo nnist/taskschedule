@@ -103,14 +103,18 @@ def main(argv):
                 break
             elif key == 65 or key == 107:
                 screen.scroll(-1)
+                last_refresh_time = time.time()
             elif key == 66 or key == 106:
                 screen.scroll(1)
+                last_refresh_time = time.time()
             elif key == 54:
                 max_y, max_x = screen.get_maxyx()
                 screen.scroll(max_y - 4)
+                last_refresh_time = time.time()
             elif key == 53:
                 max_y, max_x = screen.get_maxyx()
                 screen.scroll(-(max_y - 4))
+                last_refresh_time = time.time()
             elif (key == KEY_RESIZE or
                   time.time() > last_refresh_time + args.refresh):
                 last_refresh_time = time.time()
