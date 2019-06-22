@@ -64,20 +64,20 @@ class Screen():
         curses.start_color()
         if curses.can_change_color():
             curses.init_pair(1, 20, curses.COLOR_BLACK)
-            curses.init_pair(2, 8, 0)  # Hours
-            curses.init_pair(3, 20, 234)  # Alternating background
-            curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Header
-            curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Current hour
-            curses.init_pair(6, 19, 234)  # Completed task - alternating background
-            curses.init_pair(7, 19, 0)  # Completed task
-            curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)  # Active task
-            curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)  # Glyph
-            curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
-            curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Overdue task
-            curses.init_pair(12, curses.COLOR_YELLOW, 234)  # Overdue task alt
-            curses.init_pair(13, curses.COLOR_GREEN, 234)  # Should-be-active task alt
-            curses.init_pair(14, 19, 0)  # Completed task
-            curses.init_pair(15, curses.COLOR_GREEN, curses.COLOR_BLACK)  # Active task
+            curses.init_pair(2, 8, 0)
+            curses.init_pair(3, 20, 234)
+            curses.init_pair(4, curses.COLOR_WHITE, curses.COLOR_BLACK)
+            curses.init_pair(5, curses.COLOR_GREEN, curses.COLOR_BLACK)
+            curses.init_pair(6, 19, 234)
+            curses.init_pair(7, 19, 0)
+            curses.init_pair(8, curses.COLOR_BLACK, curses.COLOR_GREEN)
+            curses.init_pair(9, curses.COLOR_BLACK, curses.COLOR_BLACK)
+            curses.init_pair(10, curses.COLOR_GREEN, curses.COLOR_BLACK)
+            curses.init_pair(11, curses.COLOR_YELLOW, curses.COLOR_BLACK)
+            curses.init_pair(12, curses.COLOR_YELLOW, 234)
+            curses.init_pair(13, curses.COLOR_GREEN, 234)
+            curses.init_pair(14, 8, 0)
+            curses.init_pair(15, curses.COLOR_GREEN, curses.COLOR_BLACK)
 
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(1)
