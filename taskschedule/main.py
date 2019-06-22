@@ -110,8 +110,9 @@ def main(argv):
                 last_refresh_time = time.time()
                 screen.refresh_buffer()
                 screen.draw()
+                napms(50)
 
-            napms(50)
+            napms(1)
     except KeyboardInterrupt:
         pass
     except ValueError as err:
