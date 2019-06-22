@@ -137,9 +137,9 @@ class Screen():
         self.scroll_level += direction
         if self.scroll_level < 0:
             self.scroll_level = 0
-        else:
-            self.stdscr.refresh()
-            self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
+
+        self.stdscr.refresh()
+        self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
 
     def draw_footnote(self):
         max_y, max_x = self.stdscr.getmaxyx()
