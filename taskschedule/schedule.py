@@ -31,7 +31,8 @@ class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
     def __init__(self, tw_data_dir=None, tw_data_dir_create=False,
-                 taskrc_location=None):
+                 taskrc_location=None, scheduled_before=None,
+                 scheduled_after=None, scheduled='today', completed=True):
         home = os.path.expanduser("~")
 
         if tw_data_dir is None:
@@ -54,8 +55,12 @@ class Schedule():
 
         self.tasks = []
 
-    def load_tasks(self, scheduled_before=None, scheduled_after=None,
-                   scheduled='today', completed=True):
+        self.scheduled_before = scheduled_before
+        self.scheduled_after = scheduled_after
+        self.scheduled = scheduled
+        self.completed = completed
+
+    def load_tasks(self, ):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
                                   taskrc_location=self.taskrc_location)
@@ -72,25 +77,25 @@ class Schedule():
         scheduled_tasks = []
         filtered_tasks = []
 
-        if scheduled_before is not None and scheduled_after is not None:
+        if self.scheduled_before is not None and self.scheduled_after is not None:
             filtered_tasks.extend(taskwarrior.tasks.filter(
-                scheduled__before=scheduled_before,
-                scheduled__after=scheduled_after,
+                scheduled__before=self.scheduled_before,
+                scheduled__after=self.scheduled_after,
                 status='pending'))
 
-            if completed:
+            if self.completed:
                 filtered_tasks.extend(taskwarrior.tasks.filter(
-                    scheduled__before=scheduled_before,
-                    scheduled__after=scheduled_after,
+                    scheduled__before=self.scheduled_before,
+                    scheduled__after=self.scheduled_after,
                     status='completed'))
         else:
             filtered_tasks.extend(taskwarrior.tasks.filter(
-                scheduled=scheduled,
+                scheduled=self.scheduled,
                 status='pending'))
 
-            if completed:
+            if self.completed:
                 filtered_tasks.extend(taskwarrior.tasks.filter(
-                    scheduled=scheduled,
+                    scheduled=self.scheduled,
                     status='completed'))
 
         for task in filtered_tasks:

@@ -48,7 +48,11 @@ class Screen():
         self.init_colors()
 
         self.schedule = Schedule(tw_data_dir=tw_data_dir,
-                                 taskrc_location=taskrc_location)
+                                 taskrc_location=taskrc_location,
+                                 scheduled_before=self.scheduled_before,
+                                 scheduled_after=self.scheduled_after,
+                                 scheduled=self.scheduled,
+                                 completed=self.completed)
 
     def close(self):
         """Close the curses screen."""
@@ -189,10 +193,7 @@ class Screen():
         self.prev_buffer = self.buffer
         self.buffer = []
 
-        self.schedule.load_tasks(scheduled_before=self.scheduled_before,
-                                 scheduled_after=self.scheduled_after,
-                                 scheduled=self.scheduled,
-                                 completed=self.completed)
+        self.schedule.load_tasks()
 
         if not self.schedule.tasks:
             return

@@ -101,9 +101,9 @@ def main(argv):
             key = screen.stdscr.getch()
             if key == 113:
                 break
-            elif key == 65:
+            elif key == 65 or key == 107:
                 screen.scroll(-1)
-            elif key == 66:
+            elif key == 66 or key == 106:
                 screen.scroll(1)
             elif key == 54:
                 max_y, max_x = screen.get_maxyx()
