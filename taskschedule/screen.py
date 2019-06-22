@@ -274,7 +274,7 @@ class Screen():
 
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
-                if not tasks:
+                if not tasks and not self.hide_empty:
                     # Add empty line
                     if alternate:
                         color = self.COLOR_DEFAULT_ALTERNATE
