@@ -143,10 +143,12 @@ class Screen():
         return color
 
     def get_maxyx(self):
+        """Return the screen's maximum height and width."""
         max_y, max_x = self.stdscr.getmaxyx()
         return max_y, max_x
 
     def scroll(self, direction):
+        """Scroll the curses pad by n lines."""
         max_y, max_x = self.get_maxyx()
         self.scroll_level += direction
         if self.scroll_level < 0:
@@ -156,6 +158,7 @@ class Screen():
         self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
 
     def draw_footnote(self):
+        """Draw the footnote at the bottom of the screen."""
         max_y, max_x = self.get_maxyx()
         if self.scheduled_before and self.scheduled_after:
             footnote = '{} tasks - from {} until {}'.format(
