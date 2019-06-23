@@ -41,6 +41,8 @@ class ScheduledTaskTest(unittest.TestCase):
              schedule='today+14hr', estimate='2hr').save()
         Task(taskwarrior, description='test_tomorrow',
              schedule='tomorrow', estimate='24min').save()
+        Task(taskwarrior, description='test_tomorrow_+_2_day',
+             schedule='tomorrow+2day').save()
 
         self.tasks = taskwarrior.tasks.filter(status='pending')
         self.schedule = Schedule(
