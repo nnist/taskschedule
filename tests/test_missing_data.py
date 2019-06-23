@@ -32,9 +32,15 @@ class MissingDataTest(unittest.TestCase):
                             taskrc_location=self.taskrc_path)
         schedule.load_tasks()
 
-    def test_no_uda_estimate_raises_exception(self):
+    def test_no_uda_estimate_type_raises_exception(self):
         with open(self.taskrc_path, 'w+') as file:
-            file.write('# dummy\n')
+            file.write('uda.estimate.label=Est\n')
+        os.makedirs(self.task_dir_path)
+        self.assertRaises(UDADoesNotExistError, self.create_schedule)
+
+    def test_no_uda_estimate_label_raises_exception(self):
+        with open(self.taskrc_path, 'w+') as file:
+            file.write('uda.estimate.type=duration\n')
         os.makedirs(self.task_dir_path)
         self.assertRaises(UDADoesNotExistError, self.create_schedule)
 
