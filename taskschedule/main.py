@@ -99,19 +99,19 @@ def main(argv):
     try:
         while True:
             key = screen.stdscr.getch()
-            if key == 113:
+            if key == 113:  # q
                 break
-            elif key == 65 or key == 107:
+            elif key == 65 or key == 107:  # Up / k
                 screen.scroll(-1)
                 last_refresh_time = time.time()
-            elif key == 66 or key == 106:
+            elif key == 66 or key == 106:  # Down / j
                 screen.scroll(1)
                 last_refresh_time = time.time()
-            elif key == 54:
+            elif key == 54:  # Page down
                 max_y, max_x = screen.get_maxyx()
                 screen.scroll(max_y - 4)
                 last_refresh_time = time.time()
-            elif key == 53:
+            elif key == 53:  # Page up
                 max_y, max_x = screen.get_maxyx()
                 screen.scroll(-(max_y - 4))
                 last_refresh_time = time.time()
