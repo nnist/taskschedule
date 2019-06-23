@@ -31,7 +31,9 @@ class CLITest(unittest.TestCase):
         shutil.rmtree(self.task_dir_path)
 
     def test_main(self):
-        main(['-r', '-1'])
+        main(['-r', '-1',
+              '--data-location', self.task_dir_path,
+              '--taskrc-location', self.taskrc_path])
 
 
 if __name__ == '__main__':
