@@ -123,6 +123,9 @@ def main(argv):
                 napms(50)
 
             napms(1)
+
+            if args.refresh < 0:
+                break
     except KeyboardInterrupt:
         pass
     except ValueError as err:
