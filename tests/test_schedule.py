@@ -176,6 +176,13 @@ class ScheduleTest(unittest.TestCase):
 #                                stderr=subprocess.PIPE, check=True)
 #       assert process.returncode == 0
 
+    def test_get_time_slots(self):
+        schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc')
+        schedule.get_time_slots()
+
     def test_align_matrix(self):
         rows = [
             ['', '', 'ID', 'Time', 'Description'],
