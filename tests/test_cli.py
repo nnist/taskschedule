@@ -79,7 +79,8 @@ class CLITest(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, check=True)
             output = process.stdout.split(b'\n')
-            self.assertEqual(output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
+            self.assertEqual(
+                output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
         except subprocess.CalledProcessError:
             pass
         try:
@@ -90,7 +91,8 @@ class CLITest(unittest.TestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE, check=True)
             output = process.stdout.split(b'\n')
-            self.assertEqual(output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
+            self.assertEqual(
+                output[0], b"Error: time data 'asdfafk' does not match format '%Y-%m-%dT%H:%M:%S'")
         except subprocess.CalledProcessError:
             pass
 

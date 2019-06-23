@@ -9,8 +9,8 @@ from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
 
 from taskschedule.screen import Screen
 from taskschedule.schedule import UDADoesNotExistError,\
-                                  TaskrcDoesNotExistError,\
-                                  TaskDirDoesNotExistError
+    TaskrcDoesNotExistError,\
+    TaskDirDoesNotExistError
 
 
 def main(argv):

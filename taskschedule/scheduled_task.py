@@ -5,6 +5,7 @@ from isodate import parse_duration
 
 class ScheduledTask():
     """A scheduled task."""
+
     def __init__(self, task, schedule):
         self.schedule = schedule
         self.task = task

@@ -30,6 +30,7 @@ class TaskDirDoesNotExistError(Exception):
 class Schedule():
     """This class provides methods to format tasks and display them in
        a schedule report."""
+
     def __init__(self, tw_data_dir=None, tw_data_dir_create=False,
                  taskrc_location=None, scheduled_before=None,
                  scheduled_after=None, scheduled='today', completed=True):
@@ -140,7 +141,8 @@ class Schedule():
                 end_date = self.get_calculated_date('today+23hr+59min').date()
         else:
             start_date = scheduled_date.date()
-            end_date = scheduled_date.date() + datetime.timedelta(hours=23, minutes=59)
+            end_date = scheduled_date.date() + datetime.timedelta(hours=23,
+                                                                  minutes=59)
 
         days = {}
         date = start_date

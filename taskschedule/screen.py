@@ -8,6 +8,7 @@ from taskschedule.schedule import Schedule
 
 class Screen():
     """This class handles the rendering of the schedule."""
+
     def __init__(self, tw_data_dir=None, taskrc_location=None,
                  refresh_rate=1,
                  hide_empty=True, scheduled_before=None,
@@ -187,7 +188,7 @@ class Screen():
             self.stdscr.refresh()
         else:
             if force or self.prev_buffer != self.buffer:
-                #self.pad.clear()
+                # self.pad.clear()
                 for line, offset, string, color in self.buffer:
                     if line == 0:
                         self.stdscr.addstr(line, offset, string, color)
@@ -243,12 +244,12 @@ class Screen():
         current_line = 1
 
         # TODO Hide empty hours again
-        #if self.hide_empty:
+        # if self.hide_empty:
         #    first_task = self.schedule.tasks[0].start
         #    first_hour = first_task.hour
         #    last_task = self.schedule.tasks[-1].start
         #    last_hour = last_task.hour
-        #else:
+        # else:
         #    first_hour = 0
         #    last_hour = 23
 
@@ -273,7 +274,7 @@ class Screen():
                                     self.COLOR_DIVIDER_TEXT))
 
             divider_pt3 = '─' * (max_x -
-                                       (len(divider_pt1) + len(divider_pt2)))
+                                 (len(divider_pt1) + len(divider_pt2)))
             self.buffer.append((current_line,
                                 len(divider_pt1) + len(divider_pt2),
                                 divider_pt3,
@@ -291,7 +292,8 @@ class Screen():
                         color = self.COLOR_DEFAULT
 
                     # Fill line to screen length
-                    self.buffer.append((current_line, 5, ' ' * (max_x - 5), color))
+                    self.buffer.append(
+                        (current_line, 5, ' ' * (max_x - 5), color))
 
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour

@@ -5,8 +5,8 @@ import os
 import shutil
 
 from taskschedule.schedule import Schedule, UDADoesNotExistError,\
-                                  TaskrcDoesNotExistError,\
-                                  TaskDirDoesNotExistError
+    TaskrcDoesNotExistError,\
+    TaskDirDoesNotExistError
 
 
 class MissingDataTest(unittest.TestCase):
