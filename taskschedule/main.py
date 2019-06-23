@@ -127,7 +127,7 @@ def main(argv):
             if args.refresh < 0:
                 break
     except KeyboardInterrupt:
-        pass
+        screen.close()
     except ValueError as err:
         screen.close()
         print('Error: {}'.format(err))
@@ -136,5 +136,3 @@ def main(argv):
         screen.close()
         print('Error: {}'.format(err))
         sys.exit(1)
-    finally:
-        screen.close()
