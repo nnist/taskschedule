@@ -129,20 +129,13 @@ class Schedule():
         end_date = self.get_calculated_date(self.scheduled_before)
         scheduled_date = self.get_calculated_date(self.scheduled)
 
-        if scheduled_date is None:
-            if start_date is None and end_date is None:
-                start_date = self.get_calculated_date('today')
-                end_date = self.get_calculated_date('today+23hr+59min')
-            elif start_date is not None and end_date is not None:
-                start_date = start_date.date()
-                end_date = end_date.date()
-            else:
-                start_date = self.get_calculated_date('today').date()
-                end_date = self.get_calculated_date('today+23hr+59min').date()
-        else:
+        if scheduled_date:
             start_date = scheduled_date.date()
             end_date = scheduled_date.date() + datetime.timedelta(hours=23,
                                                                   minutes=59)
+        else:
+            start_date = start_date.date()
+            end_date = end_date.date()
 
         days = {}
         date = start_date
