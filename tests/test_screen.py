@@ -52,6 +52,10 @@ class ScreenTest(unittest.TestCase):
             except:
                 pass
 
+    def test_screen_refresh_buffer_hide_empty_lines(self):
+        self.screen.hide_empty = False
+        self.screen.refresh_buffer()
+
     def test_screen_refresh_buffer(self):
         self.screen.refresh_buffer()
 
