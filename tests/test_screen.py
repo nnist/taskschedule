@@ -2,8 +2,6 @@
 
 import unittest
 import os
-import sys
-from datetime import datetime
 import shutil
 import curses
 import time
@@ -11,10 +9,6 @@ import time
 from tasklib import TaskWarrior, Task
 
 from taskschedule.screen import Screen
-from taskschedule.schedule import TaskDirDoesNotExistError,\
-                                  TaskrcDoesNotExistError
-
-from .context import taskschedule
 
 
 class ScreenTest(unittest.TestCase):
