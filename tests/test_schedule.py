@@ -97,6 +97,37 @@ class ScheduleTest(unittest.TestCase):
         expected = datetime.datetime.now().date() + datetime.timedelta(days=7)
         self.assertEqual(calculated, expected)
 
+    def test_get_timeslots_returns_correct_amount_of_days(self):
+        schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc',
+            scheduled_before='tomorrow+3days',
+            scheduled_after='tomorrow-3days',
+            scheduled=None)
+        output = schedule.get_time_slots()
+        self.assertEqual(len(output), 7)
+
+        schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc',
+            scheduled_before='today+15days',
+            scheduled_after='today',
+            scheduled=None)
+        output = schedule.get_time_slots()
+        self.assertEqual(len(output), 16)
+
+        schedule = Schedule(
+            tw_data_dir='tests/test_data/.task',
+            tw_data_dir_create=False,
+            taskrc_location='tests/test_data/.taskrc',
+            scheduled_before=None,
+            scheduled_after=None,
+            scheduled='today')
+        output = schedule.get_time_slots()
+        self.assertEqual(len(output), 1)
+
 #   def test_format_task_returns_correct_format(self):
 #       self.schedule.get_tasks()
 
