@@ -1,4 +1,4 @@
-[![Build status](https://travis-ci.org/nnist/taskschedule.svg?branch=master)](https://travis-ci.org/nnist/taskschedule) [![codecov](https://codecov.io/gh/nnist/taskschedule/branch/master/graph/badge.svg)](https://codecov.io/gh/nnist/taskschedule)
+[![Build status](https://travis-ci.org/nnist/taskschedule.svg?branch=master)](https://travis-ci.org/nnist/taskschedule) [![codecov](https://codecov.io/gh/nnist/taskschedule/branch/master/graph/badge.svg)](https://codecov.io/gh/nnist/taskschedule)  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Taskschedule
 This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
