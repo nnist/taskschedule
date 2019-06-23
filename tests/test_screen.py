@@ -81,6 +81,20 @@ class ScreenTest(unittest.TestCase):
         self.screen.draw()
         self.screen.refresh_buffer()
 
+    def test_screen_scroll_up_at_top_is_blocked(self):
+        current_scroll_level = self.screen.scroll_level
+        self.screen.scroll(-1)
+        self.assertEqual(current_scroll_level, self.screen.scroll_level)
+
+    def test_screen_scroll_down_and_up(self):
+        current_scroll_level = self.screen.scroll_level
+        self.screen.scroll(1)
+        self.assertEqual(current_scroll_level + 1, self.screen.scroll_level)
+
+        current_scroll_level = self.screen.scroll_level
+        self.screen.scroll(-1)
+        self.assertEqual(current_scroll_level - 1, self.screen.scroll_level)
+
 
 if __name__ == '__main__':
     unittest.main()
