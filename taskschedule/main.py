@@ -87,16 +87,10 @@ def main(argv):
                         scheduled_before=args.before,
                         scheduled_after=args.after,
                         scheduled=args.scheduled,
-                        completed=args.completed, hide_projects=args.project)
-    except TaskDirDoesNotExistError as err:
-        print('Error: {}'.format(err))
-        sys.exit(1)
-    except TaskrcDoesNotExistError as err:
-        print('Error: {}'.format(err))
-        sys.exit(1)
+                        completed=args.completed,
+                        hide_projects=args.project)
 
-    last_refresh_time = 0
-    try:
+        last_refresh_time = 0
         while True:
             key = screen.stdscr.getch()
             if key == 113:  # q
@@ -126,6 +120,12 @@ def main(argv):
 
             if args.refresh < 0:
                 break
+    except TaskDirDoesNotExistError as err:
+        print('Error: {}'.format(err))
+        sys.exit(1)
+    except TaskrcDoesNotExistError as err:
+        print('Error: {}'.format(err))
+        sys.exit(1)
     except KeyboardInterrupt:
         screen.close()
     except ValueError as err:
