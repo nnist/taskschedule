@@ -243,14 +243,14 @@ class Screen():
         current_line = 1
 
         # TODO Hide empty hours again
-        if self.hide_empty:
-            first_task = self.schedule.tasks[0].start
-            first_hour = first_task.hour
-            last_task = self.schedule.tasks[-1].start
-            last_hour = last_task.hour
-        else:
-            first_hour = 0
-            last_hour = 23
+        #if self.hide_empty:
+        #    first_task = self.schedule.tasks[0].start
+        #    first_hour = first_task.hour
+        #    last_task = self.schedule.tasks[-1].start
+        #    last_hour = last_task.hour
+        #else:
+        #    first_hour = 0
+        #    last_hour = 23
 
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
