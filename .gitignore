@@ -10,3 +10,4 @@ dist/
 htmlcov/
 tests/test_data/.task/
 tests/test_data/.taskrc
+.vimrc
