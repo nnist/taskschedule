@@ -136,3 +136,5 @@ def main(argv):
         screen.close()
         print('Error: {}'.format(err))
         sys.exit(1)
+    else:
+        screen.close()
