@@ -32,6 +32,13 @@ def run(command, timeout=10):
     return stdout, stderr, proc.returncode
 
 
+class Debug(unittest.TestCase):
+    """This class is used to debug the testing environment."""
+
+    def test_print_term_info(self):
+        print('TERM={}'.format(os.environ['TERM']))
+
+
 class CLITest(unittest.TestCase):
     def setUp(self):
         self.taskrc_path = 'tests/test_data/.taskrc'
