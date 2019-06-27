@@ -6,6 +6,7 @@ import sys
 import os
 
 from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
+from curses import error as curses_error
 
 from taskschedule.screen import Screen
 from taskschedule.schedule import UDADoesNotExistError,\
@@ -137,4 +138,7 @@ def main(argv):
         print('Error: {}'.format(err))
         sys.exit(1)
     else:
-        screen.close()
+        try:
+            screen.close()
+        except curses_error as err:
+            print(err.with_traceback)
