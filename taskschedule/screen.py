@@ -188,7 +188,7 @@ class Screen():
             self.stdscr.refresh()
         else:
             if force or self.prev_buffer != self.buffer:
-                # self.pad.clear()
+                self.pad.clear()
                 for line, offset, string, color in self.buffer:
                     if line == 0:
                         self.stdscr.addstr(line, offset, string, color)
