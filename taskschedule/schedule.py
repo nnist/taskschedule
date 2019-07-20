@@ -107,8 +107,15 @@ class Schedule():
         return scheduled_tasks
 
     def load_tasks(self):
-        """"Update the schedule's tasks."""
-        self.tasks = self.get_tasks()
+        """"Update the schedule's tasks. Return True if any tasks were updated,
+            otherwise return False."""
+        new_tasks = self.get_tasks()
+
+        if self.tasks == new_tasks:
+            return False
+
+        self.tasks = new_tasks
+        return True
 
     def get_calculated_date(self, synonym):
         """Leverage the `task calc` command to convert a date synonym string
