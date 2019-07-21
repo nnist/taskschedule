@@ -61,7 +61,7 @@ class Schedule():
         self.scheduled = scheduled
         self.completed = completed
 
-    def load_tasks(self, ):
+    def get_tasks(self):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
                                   taskrc_location=self.taskrc_location)
@@ -104,7 +104,18 @@ class Schedule():
             scheduled_tasks.append(scheduled_task)
 
         scheduled_tasks.sort(key=lambda task: task.start)
-        self.tasks = scheduled_tasks
+        return scheduled_tasks
+
+    def load_tasks(self):
+        """"Update the schedule's tasks. Return True if any tasks were updated,
+            otherwise return False."""
+        new_tasks = self.get_tasks()
+
+        if self.tasks == new_tasks:
+            return False
+
+        self.tasks = new_tasks
+        return True
 
     def get_calculated_date(self, synonym):
         """Leverage the `task calc` command to convert a date synonym string

@@ -1,4 +1,5 @@
 from datetime import datetime as dt
+import json
 
 from isodate import parse_duration
 
@@ -77,3 +78,7 @@ class ScheduledTask():
             return True
 
         return False
+
+    def as_dict(self):
+        data = self.task.export_data()
+        return json.loads(data)

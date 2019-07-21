@@ -81,6 +81,15 @@ def main(argv):
         elif not args.after:
             args.after = 'yesterday'
 
+    home = os.path.expanduser("~")
+    taskschedule_dir = home + '/.taskschedule'
+    hooks_directory = home + '/.taskschedule/hooks'
+
+    if not os.path.isdir(taskschedule_dir):
+        os.mkdir(taskschedule_dir)
+    if not os.path.isdir(hooks_directory):
+        os.mkdir(hooks_directory)
+
     try:
         screen = Screen(tw_data_dir=args.data_location,
                         taskrc_location=args.taskrc_location,
