@@ -5,6 +5,9 @@ This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
 ![screenshot](https://github.com/nnist/taskschedule/blob/master/img/screenshot.png "Screenshot")
 
+## Features
+- Hook support
+
 ## Getting started
 ### Prerequisites
 - taskwarrior
