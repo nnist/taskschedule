@@ -90,12 +90,6 @@ runs all scripts starting with `on-progress`, e.g. `on-progress-notify.py`.
 This can be used to for things like notification pop-ups, alarm sounds,
 push notifications, etc.
 
-### Tips
-To move multiple scheduled tasks in taskwarrior:
-```sh
-# Move tasks forward in schedule by 30 minutes
-$ task 620,605,625,627 mod schedule:scheduled-30min
-```
 ## Running the tests
 First go to the repo root, then run the tests:
 ```sh
