@@ -212,11 +212,6 @@ class Screen():
         self.schedule.load_tasks()
         tasks = self.schedule.tasks
 
-#        status = self.schedule.load_tasks()
-#        if status:
-#            # TODO Implement this more gracefully
-#            run_hooks('on-new-should-be-active')
-
         if not self.schedule.tasks:
             return
 

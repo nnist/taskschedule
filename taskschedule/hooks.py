@@ -1,8 +1,12 @@
 import subprocess
 import os
 
+
 def run_hooks(hook_type):
-    # TODO Assign types to hooks, i.e. 'on-modify', 'on-progress'
+    """Run hook scripts in the hooks directory.
+
+       :param hook_type: the hook type to run.
+                         valid values: 'on-progress'"""
 
     home = os.path.expanduser("~")
 
