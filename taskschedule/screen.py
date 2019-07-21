@@ -192,6 +192,10 @@ class Screen():
         else:
             if force or self.prev_buffer != self.buffer:
                 self.pad.clear()
+                if self.prev_buffer > self.buffer:
+                    self.stdscr.clear()
+                    self.stdscr.refresh()
+
                 for line, offset, string, color in self.buffer:
                     if line == 0:
                         self.stdscr.addstr(line, offset, string, color)
@@ -201,7 +205,6 @@ class Screen():
                 self.draw_footnote()
                 self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
                                  max_x-1)
-                self.stdscr.refresh()
 
     def refresh_buffer(self):
         """Refresh the buffer."""
