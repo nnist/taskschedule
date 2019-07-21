@@ -215,7 +215,7 @@ class Screen():
         if not self.schedule.tasks:
             return
 
-        # Determine if on-progress hook should run
+        # Run on-progress hook
         current_task = None
         for task in tasks:
             if task.should_be_active:
