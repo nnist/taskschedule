@@ -82,6 +82,14 @@ $ taskschedule -s tomorrow
 ```sh
 $ taskschedule --from today-1week --to tomorrow
 ```
+### Hooks
+Scripts in the hook directory (default: `~/.taskschedule/hooks/`) are
+automatically run on certain triggers. For example, the `on-progress` hook
+runs all scripts starting with `on-progress`, e.g. `on-progress-notify.py`.
+
+This can be used to for things like notification pop-ups, alarm sounds,
+push notifications, etc.
+
 ### Tips
 To move multiple scheduled tasks in taskwarrior:
 ```sh
