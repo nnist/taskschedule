@@ -22,6 +22,7 @@ def run_hooks(hook_type, data={'id': -1, 'description': 'none'}):
                 [home + '/.taskschedule/hooks/' + filename],
                 shell=True,
                 stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
                 input=input_data
             )
             #print(result.stdout.decode('utf-8'))
