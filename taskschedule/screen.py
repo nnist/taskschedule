@@ -225,6 +225,7 @@ class Screen():
         if current_task is not None:
             if self.current_task is None:
                 self.current_task = current_task
+                run_hooks('on-progress', data=current_task.as_dict())
             else:
                 if self.current_task.task_id != current_task.task_id:
                     self.current_task = current_task
