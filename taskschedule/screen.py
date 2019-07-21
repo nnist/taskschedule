@@ -206,7 +206,11 @@ class Screen():
         self.prev_buffer = self.buffer
         self.buffer = []
 
-        self.schedule.load_tasks()
+        status = self.schedule.load_tasks()
+        if status:
+            # TODO Implement this more gracefully
+            from taskschedule.hooks import run_hooks
+            run_hooks()
 
         if not self.schedule.tasks:
             return
