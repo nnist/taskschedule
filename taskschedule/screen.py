@@ -216,6 +216,7 @@ class Screen():
             return
 
         # Determine if on-progress hook should run
+        # TODO Run on-progress if self.current_task is None and first task in queue should be started
         current_task = None
         for task in tasks:
             if task.should_be_active:
@@ -227,7 +228,7 @@ class Screen():
             else:
                 if self.current_task.task_id != current_task.task_id:
                     self.current_task = current_task
-                    run_hooks('on-progress')
+                    run_hooks('on-progress', data=current_task.as_dict())
 
         # Determine offsets
         offsets = self.schedule.get_column_offsets()
