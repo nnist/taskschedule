@@ -4,6 +4,7 @@ import os
 import datetime
 
 from taskschedule.schedule import Schedule
+from taskschedule.hooks import run_hooks
 
 
 class Screen():
@@ -47,6 +48,8 @@ class Screen():
         self.buffer = []
         self.prev_buffer = []
         self.init_colors()
+
+        self.current_task = None
 
         self.schedule = Schedule(tw_data_dir=tw_data_dir,
                                  taskrc_location=taskrc_location,
@@ -206,14 +209,30 @@ class Screen():
         self.prev_buffer = self.buffer
         self.buffer = []
 
-        status = self.schedule.load_tasks()
-        if status:
-            # TODO Implement this more gracefully
-            from taskschedule.hooks import run_hooks
-            run_hooks()
+        self.schedule.load_tasks()
+        tasks = self.schedule.tasks
+
+#        status = self.schedule.load_tasks()
+#        if status:
+#            # TODO Implement this more gracefully
+#            run_hooks('on-new-should-be-active')
 
         if not self.schedule.tasks:
             return
+
+        # Determine if on-progress hook should run
+        current_task = None
+        for task in tasks:
+            if task.should_be_active:
+                current_task = task
+
+        if current_task is not None:
+            if self.current_task is None:
+                self.current_task = current_task
+            else:
+                if self.current_task.task_id != current_task.task_id:
+                    self.current_task = current_task
+                    run_hooks('on-progress')
 
         # Determine offsets
         offsets = self.schedule.get_column_offsets()
