@@ -20,6 +20,7 @@ class ScheduledTask():
 
         self.task_id = task['id']
 
+        self.active_start = task['start']
         self.start = task['scheduled']
         self.start_time = '{}'.format(self.start.strftime('%H:%M'))
 

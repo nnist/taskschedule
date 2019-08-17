@@ -3,6 +3,7 @@ import time
 import os
 import datetime
 from typing import List
+import math
 
 from taskschedule.schedule import Schedule
 from taskschedule.hooks import run_hooks
@@ -51,6 +52,8 @@ class Screen():
         self.init_colors()
 
         self.current_task = None
+
+        self.prev_refresh_time = time.time()
 
         self.schedule = Schedule(tw_data_dir=tw_data_dir,
                                  taskrc_location=taskrc_location,
@@ -171,6 +174,62 @@ class Screen():
     def draw_footnote(self):
         """Draw the footnote at the bottom of the screen."""
         max_y, max_x = self.get_maxyx()
+
+        # Draw pomodoro status
+        PROGRESS_PENDING_GLYPH: str = "◻"
+        PROGRESS_DONE_GLYPH: str = "◼"
+        active_pomodoro: bool = True
+
+        # TODO Refactor, this costs a lot of performance
+        active_tasks = []
+        for task in self.schedule.tasks:
+            if task.active:
+                active_tasks.append(task)
+
+        active_pomodoro = False
+        try:
+            most_recent_task = active_tasks[-1]
+            if most_recent_task.pom_estimate:
+                active_pomodoro = True
+        except IndexError:
+            pass
+
+        footnote_pom_left: str = ""
+        if active_pomodoro:
+            active_start_time: datetime.datetime = most_recent_task.active_start
+            # TODO Properly handle timezones
+            active_start_time.replace(tzinfo=None)
+            current_time = datetime.datetime.now()
+            active_time = current_time.timestamp() - active_start_time.timestamp()
+            max_duration = datetime.timedelta(minutes=25).total_seconds()
+            progress = (active_time / max_duration) * 100
+
+            # Draw 25 blocks to show progress
+            progress_done = math.ceil(progress / 4)
+            progress_remaining = int((100 - progress) / 4)
+            done_blocks: str = PROGRESS_DONE_GLYPH * progress_done
+            remaining_blocks: str = PROGRESS_PENDING_GLYPH * progress_remaining
+            progress_blocks: str = f"{done_blocks}{remaining_blocks}"
+            time_ = datetime.timedelta(seconds=active_time)
+            time2 = datetime.timedelta(minutes=25)
+            progress_num: str = f"{time_}/{time2}"
+            footnote_pom_left = f"current: {progress_blocks} {progress_num}"
+        else:
+            footnote_pom_left = "no active pomodoro"
+
+        break_in = 2  # TODO Show actual break
+        total = 4  # TODO Show actual total pomdoros of today
+
+        footnote_pom_right: str = f"break in: {break_in}    total: {total}"
+
+        self.stdscr.addstr(max_y - 2, 1,
+                           footnote_pom_left,
+                           self.COLOR_DEFAULT)
+        self.stdscr.addstr(max_y - 2, max_x - len(footnote_pom_right) - 1,
+                           footnote_pom_right,
+                           self.COLOR_DEFAULT)
+
+        # Draw footnote
         if self.scheduled_before and self.scheduled_after:
             footnote = '{} tasks - from {} until {}'.format(
                 len(self.schedule.tasks),
@@ -206,15 +265,15 @@ class Screen():
                     else:
                         self.pad.addstr(line, offset, string, color)
 
-                self.draw_footnote()
-                self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
-                                 max_x-1)
+            self.draw_footnote()
+            self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
+                             max_x-1)
 
     def render_pomodoros(self, task, color) -> List[dict]:
         """Render a task's pomodoro column."""
-        POMODORO_ESTIMATE_GLYPH = "◻"
-        POMODORO_DONE_GLYPH = "◼"
-        POMODORO_UNDERESTIMATE_GLYPH = "◆"
+        POMODORO_ESTIMATE_GLYPH: str = "◻"
+        POMODORO_DONE_GLYPH: str = "◼"
+        POMODORO_UNDERESTIMATE_GLYPH: str = "◆"
 
         pomodoros: List[dict] = []
         real = 0
