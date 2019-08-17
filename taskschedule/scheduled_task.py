@@ -32,8 +32,8 @@ class ScheduledTask():
             self.end = None
 
         try:
-            self.pom_estimate = task['pom_estimate']
-            self.pom_real = task['pom_real']
+            self.timebox_estimate = task['tb_estimate']
+            self.timebox_real = task['timebox_real']
         except TypeError:
             pass
 

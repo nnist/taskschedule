@@ -188,7 +188,7 @@ class Schedule():
         offsets = [0, 5]  # Hour, glyph
         offsets.append(5 + self.get_max_length('id') + 1)  # ID
         offsets.append(offsets[2] + 12)  # Time
-        offsets.append(offsets[3] + 10)  # Pomodoros
+        offsets.append(offsets[3] + 10)  # Timeboxes
 
         add_offset = self.get_max_length('project') + 1
 

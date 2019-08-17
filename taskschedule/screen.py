@@ -175,10 +175,10 @@ class Screen():
         """Draw the footnote at the bottom of the screen."""
         max_y, max_x = self.get_maxyx()
 
-        # Draw pomodoro status
+        # Draw timebox status
         PROGRESS_PENDING_GLYPH: str = "◻"
         PROGRESS_DONE_GLYPH: str = "◼"
-        active_pomodoro: bool = True
+        active_timebox: bool = True
 
         # TODO Refactor, this costs a lot of performance
         active_tasks = []
@@ -186,16 +186,16 @@ class Screen():
             if task.active:
                 active_tasks.append(task)
 
-        active_pomodoro = False
+        active_timebox = False
         try:
             most_recent_task = active_tasks[-1]
-            if most_recent_task.pom_estimate:
-                active_pomodoro = True
+            if most_recent_task.timebox_estimate:
+                active_timebox = True
         except IndexError:
             pass
 
-        footnote_pom_left: str = ""
-        if active_pomodoro:
+        footnote_timebox_left: str = ""
+        if active_timebox:
             active_start_time: datetime.datetime = most_recent_task.active_start
             # TODO Properly handle timezones
             active_start_time.replace(tzinfo=None)
@@ -213,20 +213,20 @@ class Screen():
             time_ = datetime.timedelta(seconds=active_time)
             time2 = datetime.timedelta(minutes=25)
             progress_num: str = f"{time_}/{time2}"
-            footnote_pom_left = f"current: {progress_blocks} {progress_num}"
+            footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
         else:
-            footnote_pom_left = "no active pomodoro"
+            footnote_timebox_left = "no active timebox"
 
         break_in = 2  # TODO Show actual break
-        total = 4  # TODO Show actual total pomdoros of today
+        total = 4  # TODO Show actual total timeboxes of today
 
-        footnote_pom_right: str = f"break in: {break_in}    total: {total}"
+        footnote_timebox_right: str = f"break in: {break_in}    total: {total}"
 
         self.stdscr.addstr(max_y - 2, 1,
-                           footnote_pom_left,
+                           footnote_timebox_left,
                            self.COLOR_DEFAULT)
-        self.stdscr.addstr(max_y - 2, max_x - len(footnote_pom_right) - 1,
-                           footnote_pom_right,
+        self.stdscr.addstr(max_y - 2, max_x - len(footnote_timebox_right) - 1,
+                           footnote_timebox_right,
                            self.COLOR_DEFAULT)
 
         # Draw footnote
@@ -269,29 +269,29 @@ class Screen():
             self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
                              max_x-1)
 
-    def render_pomodoros(self, task, color) -> List[dict]:
-        """Render a task's pomodoro column."""
-        POMODORO_ESTIMATE_GLYPH: str = "◻"
-        POMODORO_DONE_GLYPH: str = "◼"
-        POMODORO_UNDERESTIMATE_GLYPH: str = "◆"
+    def render_timeboxes(self, task, color) -> List[dict]:
+        """Render a task's timebox column."""
+        TIMEBOX_ESTIMATE_GLYPH: str = "◻"
+        TIMEBOX_DONE_GLYPH: str = "◼"
+        TIMEBOX_UNDERESTIMATE_GLYPH: str = "◆"
 
-        pomodoros: List[dict] = []
+        timeboxes: List[dict] = []
         real = 0
-        if task.pom_real:
-            real = task.pom_real
-            for i in range(task.pom_real):
-                if i >= task.pom_estimate:
-                    pomodoros.append({"char": POMODORO_UNDERESTIMATE_GLYPH,
+        if task.timebox_real:
+            real = task.timebox_real
+            for i in range(task.timebox_real):
+                if i >= task.timebox_estimate:
+                    timeboxes.append({"char": TIMEBOX_UNDERESTIMATE_GLYPH,
                                       "color": color})
                 else:
-                    pomodoros.append({"char": POMODORO_DONE_GLYPH,
+                    timeboxes.append({"char": TIMEBOX_DONE_GLYPH,
                                       "color": color})
-        if task.pom_estimate:
-            for i in range(task.pom_estimate - real):
-                pomodoros.append({"char": POMODORO_ESTIMATE_GLYPH,
+        if task.timebox_estimate:
+            for i in range(task.timebox_estimate - real):
+                timeboxes.append({"char": TIMEBOX_ESTIMATE_GLYPH,
                                   "color": color})
 
-        return pomodoros
+        return timeboxes
 
     def refresh_buffer(self):
         """Refresh the buffer."""
@@ -329,7 +329,7 @@ class Screen():
             offsets[5] = offsets[4] + max_project_column_length
 
         # Draw headers
-        headers = ['', '', 'ID', 'Time', 'Pomodoros', 'Project', 'Description']
+        headers = ['', '', 'ID', 'Time', 'Timeboxes', 'Project', 'Description']
         column_lengths = [2, 1]
         column_lengths.append(self.schedule.get_max_length('id'))
         column_lengths.append(11)
@@ -465,12 +465,12 @@ class Screen():
                     self.buffer.append((current_line, offsets[2],
                                         formatted_time, color))
 
-                    # Draw pomodoros column
-                    pomodoros = self.render_pomodoros(task, color)
-                    for i, pom in enumerate(pomodoros):
+                    # Draw timeboxes column
+                    timeboxes = self.render_timeboxes(task, color)
+                    for i, timebox in enumerate(timeboxes):
                         self.buffer.append((current_line, offsets[3] + i,
-                                            pom.get('char'),
-                                            pom.get('color')))
+                                            timebox.get('char'),
+                                            timebox.get('color')))
 
                     # Optionally draw project column
                     offset = 0
