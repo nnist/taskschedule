@@ -30,6 +30,12 @@ class ScheduledTask():
         except TypeError:
             self.end = None
 
+        try:
+            self.pom_estimate = task['pom_estimate']
+            self.pom_real = task['pom_real']
+        except TypeError:
+            pass
+
         self.description = task['description']
 
         self.project = task['project']

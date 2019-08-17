@@ -2,6 +2,7 @@ import curses
 import time
 import os
 import datetime
+from typing import List
 
 from taskschedule.schedule import Schedule
 from taskschedule.hooks import run_hooks
@@ -83,6 +84,7 @@ class Screen():
             curses.init_pair(14, 8, 0)
             curses.init_pair(15, curses.COLOR_GREEN, curses.COLOR_BLACK)
             curses.init_pair(16, 20, curses.COLOR_BLACK)
+            curses.init_pair(17, curses.COLOR_BLUE, curses.COLOR_BLACK)
 
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(1)
@@ -101,6 +103,7 @@ class Screen():
             self.COLOR_DIVIDER = curses.color_pair(14)
             self.COLOR_DIVIDER_ACTIVE = curses.color_pair(15)
             self.COLOR_DIVIDER_TEXT = curses.color_pair(16)
+            self.COLOR_BLUE = curses.color_pair(17)
         else:
             # pylint: disable=invalid-name
             self.COLOR_DEFAULT = curses.color_pair(0)
@@ -119,6 +122,7 @@ class Screen():
             self.COLOR_DIVIDER = curses.color_pair(0)
             self.COLOR_DIVIDER_ACTIVE = curses.color_pair(0)
             self.COLOR_DIVIDER_TEXT = curses.color_pair(0)
+            self.COLOR_BLUE = curses.color_pair(0)
 
     def get_task_color(self, task, alternate):
         """Return the color for the given task."""
@@ -206,6 +210,30 @@ class Screen():
                 self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
                                  max_x-1)
 
+    def render_pomodoros(self, task, color) -> List[dict]:
+        """Render a task's pomodoro column."""
+        POMODORO_ESTIMATE_GLYPH = "◻"
+        POMODORO_DONE_GLYPH = "◼"
+        POMODORO_UNDERESTIMATE_GLYPH = "◆"
+
+        pomodoros: List[dict] = []
+        real = 0
+        if task.pom_real:
+            real = task.pom_real
+            for i in range(task.pom_real):
+                if i >= task.pom_estimate:
+                    pomodoros.append({"char": POMODORO_UNDERESTIMATE_GLYPH,
+                                      "color": color})
+                else:
+                    pomodoros.append({"char": POMODORO_DONE_GLYPH,
+                                      "color": color})
+        if task.pom_estimate:
+            for i in range(task.pom_estimate - real):
+                pomodoros.append({"char": POMODORO_ESTIMATE_GLYPH,
+                                  "color": color})
+
+        return pomodoros
+
     def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.get_maxyx()
@@ -238,14 +266,15 @@ class Screen():
         # Determine offsets
         offsets = self.schedule.get_column_offsets()
         max_project_column_length = round(max_x / 8)
-        if offsets[4] - offsets[3] > max_project_column_length:
-            offsets[4] = offsets[3] + max_project_column_length
+        if offsets[5] - offsets[4] > max_project_column_length:
+            offsets[5] = offsets[4] + max_project_column_length
 
         # Draw headers
-        headers = ['', '', 'ID', 'Time', 'Project', 'Description']
+        headers = ['', '', 'ID', 'Time', 'Pomodoros', 'Project', 'Description']
         column_lengths = [2, 1]
         column_lengths.append(self.schedule.get_max_length('id'))
         column_lengths.append(11)
+        column_lengths.append(9)
         column_lengths.append(max_project_column_length - 1)
         column_lengths.append(self.schedule.get_max_length('description'))
 
@@ -259,9 +288,10 @@ class Screen():
         self.buffer.append((0, offsets[1], headers[2], self.COLOR_HEADER))
         self.buffer.append((0, offsets[2], headers[3], self.COLOR_HEADER))
         self.buffer.append((0, offsets[3], headers[4], self.COLOR_HEADER))
+        self.buffer.append((0, offsets[4], headers[5], self.COLOR_HEADER))
 
         if not self.hide_projects:
-            self.buffer.append((0, offsets[4], headers[5], self.COLOR_HEADER))
+            self.buffer.append((0, offsets[5], headers[6], self.COLOR_HEADER))
 
         # Draw schedule
         alternate = True
@@ -376,20 +406,27 @@ class Screen():
                     self.buffer.append((current_line, offsets[2],
                                         formatted_time, color))
 
+                    # Draw pomodoros column
+                    pomodoros = self.render_pomodoros(task, color)
+                    for i, pom in enumerate(pomodoros):
+                        self.buffer.append((current_line, offsets[3] + i,
+                                            pom.get('char'),
+                                            pom.get('color')))
+
                     # Optionally draw project column
                     offset = 0
                     if not self.hide_projects:
                         if task.project is None:
                             project = ''
                         else:
-                            max_length = offsets[4] - offsets[3] - 1
+                            max_length = offsets[5] - offsets[4] - 1
                             project = task.project[0:max_length]
 
-                        self.buffer.append((current_line, offsets[3], project,
+                        self.buffer.append((current_line, offsets[4], project,
                                             color))
-                        offset = offsets[4]
+                        offset = offsets[5]
                     else:
-                        offset = offsets[3]
+                        offset = offsets[4]
 
                     # Draw description column
                     description = task.description[0:max_x - offset]
