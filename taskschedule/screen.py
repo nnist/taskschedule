@@ -180,7 +180,7 @@ class Screen():
             footnote = '{} tasks - {}'.format(len(self.schedule.tasks),
                                               self.scheduled)
 
-        self.stdscr.addstr(max_y - 1, 0,
+        self.stdscr.addstr(max_y - 1, 1,
                            footnote,
                            self.COLOR_DEFAULT)
 
