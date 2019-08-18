@@ -7,6 +7,7 @@ import math
 
 from taskschedule.schedule import Schedule
 from taskschedule.hooks import run_hooks
+from taskschedule.config_parser import ConfigParser
 
 
 class Screen():
@@ -18,6 +19,8 @@ class Screen():
                  scheduled_after=None, scheduled=None,
                  completed=True, hide_projects=False):
         home = os.path.expanduser("~")
+        
+        self.config = ConfigParser().config()
 
         if tw_data_dir is None:
             tw_data_dir = home + '/.task'
@@ -176,8 +179,6 @@ class Screen():
         max_y, max_x = self.get_maxyx()
 
         # Draw timebox status
-        TIMEBOX_PROGRESS_PENDING_GLYPH: str = "◻"
-        TIMEBOX_PROGRESS_DONE_GLYPH: str = "◼"
         active_timebox: bool = True
 
         # TODO Refactor, this costs a lot of performance
@@ -202,17 +203,17 @@ class Screen():
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
-            max_duration = datetime.timedelta(minutes=25).total_seconds()
+            max_duration = datetime.timedelta(minutes=self.config['timebox']['time']).total_seconds()
             progress = (active_time / max_duration) * 100
 
             # Draw 25 blocks to show progress
             progress_done = math.ceil(progress / 4)
             progress_remaining = int((100 - progress) / 4)
-            done_blocks: str = TIMEBOX_PROGRESS_DONE_GLYPH * progress_done
-            remaining_blocks: str = TIMEBOX_PROGRESS_PENDING_GLYPH * progress_remaining
+            done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
+            remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
             progress_blocks: str = f"{done_blocks}{remaining_blocks}"
             time_ = datetime.timedelta(seconds=active_time)
-            time2 = datetime.timedelta(minutes=25)
+            time2 = datetime.timedelta(minutes=self.config['timebox']['time'])
             progress_num: str = f"{time_}/{time2}"
             footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
         else:
@@ -272,9 +273,6 @@ class Screen():
 
     def render_timeboxes(self, task, color) -> List[dict]:
         """Render a task's timebox column."""
-        TIMEBOX_ESTIMATE_GLYPH: str = "◻"
-        TIMEBOX_DONE_GLYPH: str = "◼"
-        TIMEBOX_UNDERESTIMATE_GLYPH: str = "◆"
 
         timeboxes: List[dict] = []
         real = 0
@@ -282,14 +280,14 @@ class Screen():
             real = task.timebox_real
             for i in range(task.timebox_real):
                 if i >= task.timebox_estimate:
-                    timeboxes.append({"char": TIMEBOX_UNDERESTIMATE_GLYPH,
+                    timeboxes.append({"char": self.config['timebox']['underestimated_glyph'],
                                       "color": color})
                 else:
-                    timeboxes.append({"char": TIMEBOX_DONE_GLYPH,
+                    timeboxes.append({"char": self.config['timebox']['done_glyph'],
                                       "color": color})
         if task.timebox_estimate:
             for i in range(task.timebox_estimate - real):
-                timeboxes.append({"char": TIMEBOX_ESTIMATE_GLYPH,
+                timeboxes.append({"char": self.config['timebox']['pending_glyph'],
                                   "color": color})
 
         return timeboxes
