@@ -187,12 +187,12 @@ class Screen():
         active_timebox = False
         for task in self.schedule.tasks:
             if task.active and task.timebox_estimate:
-                most_recent_task = task
+                timeboxed_task = task
                 active_timebox = True
 
         footnote_timebox_left: str = ""
         if active_timebox:
-            active_start_time: datetime.datetime = most_recent_task.active_start
+            active_start_time: datetime.datetime = timeboxed_task.active_start
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
@@ -201,13 +201,13 @@ class Screen():
 
             if progress > 99:
                 footnote_timebox_left = f"timebox done!"
-                most_recent_task.task.stop()
-                real = most_recent_task.task['tb_real']
+                timeboxed_task.task.stop()
+                real = timeboxed_task.task['tb_real']
                 if real:
-                    most_recent_task.task['tb_real'] = int(real) + 1
+                    timeboxed_task.task['tb_real'] = int(real) + 1
                 else:
-                    most_recent_task.task['tb_real'] = 1
-                most_recent_task.task.save()
+                    timeboxed_task.task['tb_real'] = 1
+                timeboxed_task.task.save()
                 self.stdscr.move(max_y - 2, 0)
                 self.stdscr.clrtoeol()
             else:
@@ -228,7 +228,7 @@ class Screen():
                 time2_minutes = str(time2_fmt).split(':', 2)[1]
                 time2_seconds = str(time2_fmt).split(':', 2)[2]
 
-                task_id = most_recent_task.task_id
+                task_id = timeboxed_task.task_id
                 progress_num: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
                 footnote_timebox_left = f"task {task_id}: {progress_blocks} {progress_num}"
         else:
