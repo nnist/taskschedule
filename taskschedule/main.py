@@ -9,9 +9,11 @@ from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
 from curses import error as curses_error
 
 from taskschedule.screen import Screen
-from taskschedule.schedule import UDADoesNotExistError,\
-    TaskrcDoesNotExistError,\
-    TaskDirDoesNotExistError
+from taskschedule.schedule import (
+    UDADoesNotExistError,
+    TaskrcDoesNotExistError,
+    TaskDirDoesNotExistError,
+)
 
 
 def main(argv):
@@ -20,44 +22,62 @@ def main(argv):
         description="""Display a schedule report for taskwarrior."""
     )
     parser.add_argument(
-        '-r', '--refresh', help="refresh every n seconds", type=int, default=1
+        "-r", "--refresh", help="refresh every n seconds", type=int, default=1
     )
     parser.add_argument(
-        '--from', help="scheduled from date: ex. 'today', 'tomorrow'",
-        type=str, dest='after'
+        "--from",
+        help="scheduled from date: ex. 'today', 'tomorrow'",
+        type=str,
+        dest="after",
     )
     parser.add_argument(
-        '--to', '--until',
+        "--to",
+        "--until",
         help="scheduled until date: ex. 'today', 'tomorrow'",
-        type=str, dest='before'
+        type=str,
+        dest="before",
     )
     parser.add_argument(
-        '-s', '--scheduled',
+        "-s",
+        "--scheduled",
         help="""scheduled date: ex. 'today', 'tomorrow'
                 (overrides --from and --until)""",
-        type=str
+        type=str,
     )
     parser.add_argument(
-        '-d', '--data-location',
+        "-d",
+        "--data-location",
         help="""data location (e.g. ~/.task)""",
-        type=str, dest='data_location'
+        type=str,
+        dest="data_location",
     )
     parser.add_argument(
-        '-t', '--taskrc-location',
+        "-t",
+        "--taskrc-location",
         help="""taskrc location (e.g. ~/.taskrc)""",
-        type=str, dest='taskrc_location'
+        type=str,
+        dest="taskrc_location",
     )
     parser.add_argument(
-        '-a', '--all', help="show all hours, even if empty",
-        action='store_true', default=False
+        "-a",
+        "--all",
+        help="show all hours, even if empty",
+        action="store_true",
+        default=False,
     )
     parser.add_argument(
-        '-c', '--completed', help="hide completed tasks",
-        action='store_false', default=True
+        "-c",
+        "--completed",
+        help="hide completed tasks",
+        action="store_false",
+        default=True,
     )
     parser.add_argument(
-        '-p', '--project', help="hide project column",
-        action='store_true', default=False
+        "-p",
+        "--project",
+        help="hide project column",
+        action="store_true",
+        default=False,
     )
     args = parser.parse_args(argv)
 
@@ -65,25 +85,29 @@ def main(argv):
 
     if args.scheduled:
         if args.before or args.after:
-            print('Error: The --scheduled option can not be used together '
-                  'with --until and/or --from.')
+            print(
+                "Error: The --scheduled option can not be used together "
+                "with --until and/or --from."
+            )
             sys.exit(1)
     else:
         if args.before and not args.after or not args.before and args.after:
-            print('Error: Either both --until and --from or neither options '
-                  'must be used.')
+            print(
+                "Error: Either both --until and --from or neither options "
+                "must be used."
+            )
             sys.exit(1)
 
         if not args.before and not args.after:
-            args.scheduled = 'today'
+            args.scheduled = "today"
         elif not args.before:
-            args.before = 'tomorrow'
+            args.before = "tomorrow"
         elif not args.after:
-            args.after = 'yesterday'
+            args.after = "yesterday"
 
     home = os.path.expanduser("~")
-    taskschedule_dir = home + '/.taskschedule'
-    hooks_directory = home + '/.taskschedule/hooks'
+    taskschedule_dir = home + "/.taskschedule"
+    hooks_directory = home + "/.taskschedule/hooks"
 
     if not os.path.isdir(taskschedule_dir):
         os.mkdir(taskschedule_dir)
@@ -91,14 +115,16 @@ def main(argv):
         os.mkdir(hooks_directory)
 
     try:
-        screen = Screen(tw_data_dir=args.data_location,
-                        taskrc_location=args.taskrc_location,
-                        hide_empty=hide_empty,
-                        scheduled_before=args.before,
-                        scheduled_after=args.after,
-                        scheduled=args.scheduled,
-                        completed=args.completed,
-                        hide_projects=args.project)
+        screen = Screen(
+            tw_data_dir=args.data_location,
+            taskrc_location=args.taskrc_location,
+            hide_empty=hide_empty,
+            scheduled_before=args.before,
+            scheduled_after=args.after,
+            scheduled=args.scheduled,
+            completed=args.completed,
+            hide_projects=args.project,
+        )
 
         # TODO Refresh on any file change in dir instead of every second
         last_refresh_time = 0.0
@@ -120,8 +146,7 @@ def main(argv):
                 max_y, max_x = screen.get_maxyx()
                 screen.scroll(-(max_y - 4))
                 last_refresh_time = time.time()
-            elif (key == KEY_RESIZE or
-                  time.time() > last_refresh_time + args.refresh):
+            elif key == KEY_RESIZE or time.time() > last_refresh_time + args.refresh:
                 last_refresh_time = time.time()
                 screen.refresh_buffer()
                 screen.draw()
@@ -132,20 +157,20 @@ def main(argv):
             if args.refresh < 0:
                 break
     except TaskDirDoesNotExistError as err:
-        print('Error: {}'.format(err))
+        print("Error: {}".format(err))
         sys.exit(1)
     except TaskrcDoesNotExistError as err:
-        print('Error: {}'.format(err))
+        print("Error: {}".format(err))
         sys.exit(1)
     except KeyboardInterrupt:
         screen.close()
     except ValueError as err:
         screen.close()
-        print('Error: {}'.format(err))
+        print("Error: {}".format(err))
         sys.exit(1)
     except UDADoesNotExistError as err:
         screen.close()
-        print('Error: {}'.format(err))
+        print("Error: {}".format(err))
         sys.exit(1)
     else:
         try:

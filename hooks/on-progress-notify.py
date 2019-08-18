@@ -15,11 +15,11 @@ SLEEP_TIME = 0.2
 
 home = os.path.expanduser("~")
 
-data = ''.join(sys.stdin.readlines())
+data = "".join(sys.stdin.readlines())
 json_data = json.loads(data)
 
-summary = "Scheduled task: {}".format(json_data['id'])
-body = "{}".format(json_data['description'])
+summary = "Scheduled task: {}".format(json_data["id"])
+body = "{}".format(json_data["description"])
 
 subprocess.run(["notify-send", "--urgency", "critical", summary, body])
 subprocess.run(["aplay", home + "/.taskschedule/hooks/drip.wav"])

@@ -9,25 +9,30 @@ from isodate import parse_duration
 
 # Patch TaskWarrior to return ScheduledTask instead of Task
 class PatchedTaskWarrior(TaskWarrior):
-    def __init__(self, data_location=None, create=True,
-                 taskrc_location=None, task_command='task',
-version_override=None):
+    def __init__(
+        self,
+        data_location=None,
+        create=True,
+        taskrc_location=None,
+        task_command="task",
+        version_override=None,
+    ):
         super(PatchedTaskWarrior, self).__init__()
         self.tasks = ScheduledTaskQuerySet(self)
 
     def filter_tasks(self, filter_obj):
         self.enforce_recurrence()
-        args = ['export'] + filter_obj.get_filter_params()
+        args = ["export"] + filter_obj.get_filter_params()
         tasks = []
         for line in self.execute_command(args):
             if line:
-                data = line.strip(',')
+                data = line.strip(",")
                 try:
                     filtered_task = ScheduledTask(self)
                     filtered_task._load_data(json.loads(data))
                     tasks.append(filtered_task)
                 except ValueError:
-                    raise TaskWarriorException('Invalid JSON: %s' % data)
+                    raise TaskWarriorException("Invalid JSON: %s" % data)
         return tasks
 
 
@@ -41,15 +46,15 @@ class ScheduledTask(Task):
     def __init__(self, backend, **kwargs):
         super(ScheduledTask, self).__init__(backend)
         # TODO Create reference to Schedule
-        self.glyph = '○'
+        self.glyph = "○"
 
     @property
     def scheduled_end_time(self):
         """Return the task's end time."""
         try:
-            estimate = self['estimate']
+            estimate = self["estimate"]
             duration = parse_duration(estimate)
-            return self['scheduled'] + duration
+            return self["scheduled"] + duration
         except TypeError:
             return None
 
@@ -57,15 +62,15 @@ class ScheduledTask(Task):
     def should_be_active(self):
         """Return true if the task should be active."""
 
-        if self['scheduled'] is not None:
-            start_ts = dt.timestamp(self['scheduled'])
+        if self["scheduled"] is not None:
+            start_ts = dt.timestamp(self["scheduled"])
         else:
             start_ts = None
 
         now = dt.now()
         now_ts = dt.timestamp(now)
 
-        if self['end'] is None:
+        if self["end"] is None:
             # TODO Implement get_next_task differently
             # next_task = self.schedule.get_next_task(self)
             next_task = None
@@ -74,7 +79,7 @@ class ScheduledTask(Task):
                 if now_ts > start_ts and next_task_start_ts > now_ts:
                     return True
         else:
-            end_ts = dt.timestamp(self['end'])
+            end_ts = dt.timestamp(self["end"])
             if now_ts > start_ts and end_ts > now_ts:
                 return True
 
@@ -87,14 +92,14 @@ class ScheduledTask(Task):
         now = dt.now()
         now_ts = dt.timestamp(now)
 
-        if self['end'] is None:
-            start_ts = dt.timestamp(self['scheduled'])
+        if self["end"] is None:
+            start_ts = dt.timestamp(self["scheduled"])
             if now_ts > start_ts:
                 return True
 
             return False
 
-        end_ts = dt.timestamp(self['end'])
+        end_ts = dt.timestamp(self["end"])
         if now_ts > end_ts:
             return True
 

@@ -4,15 +4,18 @@ import unittest
 import os
 import shutil
 
-from taskschedule.schedule import Schedule, UDADoesNotExistError,\
-    TaskrcDoesNotExistError,\
-    TaskDirDoesNotExistError
+from taskschedule.schedule import (
+    Schedule,
+    UDADoesNotExistError,
+    TaskrcDoesNotExistError,
+    TaskDirDoesNotExistError,
+)
 
 
 class MissingDataTest(unittest.TestCase):
     def setUp(self):
-        self.taskrc_path = 'tests/test_data/.taskrc'
-        self.task_dir_path = 'tests/test_data/.task'
+        self.taskrc_path = "tests/test_data/.taskrc"
+        self.task_dir_path = "tests/test_data/.task"
         self.assertEqual(os.path.isdir(self.taskrc_path), False)
         self.assertEqual(os.path.isdir(self.task_dir_path), False)
 
@@ -28,27 +31,28 @@ class MissingDataTest(unittest.TestCase):
             pass
 
     def create_schedule(self):
-        schedule = Schedule(tw_data_dir=self.task_dir_path,
-                            taskrc_location=self.taskrc_path)
+        schedule = Schedule(
+            tw_data_dir=self.task_dir_path, taskrc_location=self.taskrc_path
+        )
         schedule.load_tasks()
 
     def test_no_uda_estimate_type_raises_exception(self):
-        with open(self.taskrc_path, 'w+') as file:
-            file.write('uda.estimate.label=Est\n')
+        with open(self.taskrc_path, "w+") as file:
+            file.write("uda.estimate.label=Est\n")
         os.makedirs(self.task_dir_path)
         self.assertRaises(UDADoesNotExistError, self.create_schedule)
 
     def test_no_uda_estimate_label_raises_exception(self):
-        with open(self.taskrc_path, 'w+') as file:
-            file.write('uda.estimate.type=duration\n')
+        with open(self.taskrc_path, "w+") as file:
+            file.write("uda.estimate.type=duration\n")
         os.makedirs(self.task_dir_path)
         self.assertRaises(UDADoesNotExistError, self.create_schedule)
 
     def test_no_task_dir_raises_exception(self):
-        with open(self.taskrc_path, 'w+') as file:
-            file.write('# User Defined Attributes\n')
-            file.write('uda.estimate.type=duration\n')
-            file.write('uda.estimate.label=Est\n')
+        with open(self.taskrc_path, "w+") as file:
+            file.write("# User Defined Attributes\n")
+            file.write("uda.estimate.type=duration\n")
+            file.write("uda.estimate.label=Est\n")
         self.assertRaises(TaskDirDoesNotExistError, self.create_schedule)
         os.remove(self.taskrc_path)
 
@@ -62,5 +66,5 @@ class MissingDataTest(unittest.TestCase):
             pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

@@ -13,28 +13,30 @@ from taskschedule.screen import Screen
 
 class ScreenTest(unittest.TestCase):
     def setUp(self):
-        self.taskrc_path = 'tests/test_data/.taskrc'
-        self.task_dir_path = 'tests/test_data/.task'
+        self.taskrc_path = "tests/test_data/.taskrc"
+        self.task_dir_path = "tests/test_data/.task"
         self.assertEqual(os.path.isdir(self.taskrc_path), False)
         self.assertEqual(os.path.isdir(self.task_dir_path), False)
 
         # Create a sample .taskrc
-        with open(self.taskrc_path, 'w+') as file:
-            file.write('# User Defined Attributes\n')
-            file.write('uda.estimate.type=duration\n')
-            file.write('uda.estimate.label=Est\n')
-            file.write('# User Defined Attributes\n')
-            file.write('uda.tb_estimate.type=numeric\n')
-            file.write('uda.tb_estimate.label=Est\n')
-            file.write('uda.tb_real.type=numeric\n')
-            file.write('uda.tb_real.label=Real\n')
+        with open(self.taskrc_path, "w+") as file:
+            file.write("# User Defined Attributes\n")
+            file.write("uda.estimate.type=duration\n")
+            file.write("uda.estimate.label=Est\n")
+            file.write("# User Defined Attributes\n")
+            file.write("uda.tb_estimate.type=numeric\n")
+            file.write("uda.tb_estimate.label=Est\n")
+            file.write("uda.tb_real.type=numeric\n")
+            file.write("uda.tb_real.label=Real\n")
 
         # Create a sample empty .task directory
         os.makedirs(self.task_dir_path)
 
-        self.screen = Screen(tw_data_dir=self.task_dir_path,
-                             taskrc_location=self.taskrc_path,
-                             scheduled='today')
+        self.screen = Screen(
+            tw_data_dir=self.task_dir_path,
+            taskrc_location=self.taskrc_path,
+            scheduled="today",
+        )
 
     def tearDown(self):
         try:
@@ -103,21 +105,39 @@ class ScreenTest(unittest.TestCase):
         taskwarrior = TaskWarrior(
             data_location=self.task_dir_path,
             create=True,
-            taskrc_location=self.taskrc_path)
-        Task(taskwarrior, description='test_yesterday',
-             schedule='yesterday', estimate='20min').save()
-        Task(taskwarrior, description='test_9:00_to_10:11',
-             schedule='today+9hr', estimate='71min', project='test').save()
+            taskrc_location=self.taskrc_path,
+        )
+        Task(
+            taskwarrior,
+            description="test_yesterday",
+            schedule="yesterday",
+            estimate="20min",
+        ).save()
+        Task(
+            taskwarrior,
+            description="test_9:00_to_10:11",
+            schedule="today+9hr",
+            estimate="71min",
+            project="test",
+        ).save()
 
         self.screen.draw()
         self.screen.refresh_buffer()
-        Task(taskwarrior, description='test_14:00_to_16:00',
-             schedule='today+14hr', estimate='2hr').save()
+        Task(
+            taskwarrior,
+            description="test_14:00_to_16:00",
+            schedule="today+14hr",
+            estimate="2hr",
+        ).save()
         time.sleep(0.1)
         self.screen.draw()
         self.screen.refresh_buffer()
-        Task(taskwarrior, description='test_tomorrow',
-             schedule='tomorrow', estimate='24min').save()
+        Task(
+            taskwarrior,
+            description="test_tomorrow",
+            schedule="tomorrow",
+            estimate="24min",
+        ).save()
         time.sleep(0.1)
         self.screen.draw()
         self.screen.refresh_buffer()
@@ -137,5 +157,5 @@ class ScreenTest(unittest.TestCase):
         self.assertEqual(current_scroll_level - 1, self.screen.scroll_level)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

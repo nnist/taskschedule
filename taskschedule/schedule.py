@@ -8,53 +8,67 @@ import sys
 
 from tasklib import TaskWarrior, Task
 
-from taskschedule.scheduled_task import ScheduledTask, ScheduledTaskQuerySet, PatchedTaskWarrior
+from taskschedule.scheduled_task import (
+    ScheduledTask,
+    ScheduledTaskQuerySet,
+    PatchedTaskWarrior,
+)
 
 
 class UDADoesNotExistError(Exception):
     """Raised when UDA is not found in .taskrc file."""
+
     # pylint: disable=unnecessary-pass
     pass
 
 
 class TaskrcDoesNotExistError(Exception):
     """Raised when the .taskrc file has not been found."""
+
     # pylint: disable=unnecessary-pass
     pass
 
 
 class TaskDirDoesNotExistError(Exception):
     """Raised when the .task directory has not been found."""
+
     # pylint: disable=unnecessary-pass
     pass
 
 
-class Schedule():
+class Schedule:
     """This class provides methods to format tasks and display them in
        a schedule report."""
 
-    def __init__(self, tw_data_dir=None, tw_data_dir_create=False,
-                 taskrc_location=None, scheduled_before=None,
-                 scheduled_after=None, scheduled='today', completed=True):
+    def __init__(
+        self,
+        tw_data_dir=None,
+        tw_data_dir_create=False,
+        taskrc_location=None,
+        scheduled_before=None,
+        scheduled_after=None,
+        scheduled="today",
+        completed=True,
+    ):
         home = os.path.expanduser("~")
 
         if tw_data_dir is None:
-            tw_data_dir = home + '/.task'
+            tw_data_dir = home + "/.task"
 
         self.tw_data_dir = tw_data_dir
 
         if taskrc_location is None:
-            taskrc_location = home + '/.taskrc'
+            taskrc_location = home + "/.taskrc"
 
         self.taskrc_location = taskrc_location
 
         self.tw_data_dir_create = tw_data_dir_create
 
         if os.path.isdir(self.tw_data_dir) is False:
-            raise TaskDirDoesNotExistError('.task directory not found')
+            raise TaskDirDoesNotExistError(".task directory not found")
 
         if os.path.isfile(self.taskrc_location) is False:
-            raise TaskrcDoesNotExistError('.taskrc not found')
+            raise TaskrcDoesNotExistError(".taskrc not found")
 
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
@@ -68,23 +82,23 @@ class Schedule():
         """"Return today's estimated timebox count."""
         total = 0
         for task in self.tasks:
-            if task['tb_estimate']:
-                total += task['tb_estimate']
+            if task["tb_estimate"]:
+                total += task["tb_estimate"]
         return total
 
     def get_timebox_real_count(self):
         """"Return today's real timebox count."""
         total = 0
         for task in self.tasks:
-            if task['tb_real']:
-                total += task['tb_real']
+            if task["tb_real"]:
+                total += task["tb_real"]
         return total
 
     def get_active_timeboxed_task(self):
         """If a timeboxed task is currently active, return it. Otherwise,
            return None."""
         for task in self.tasks:
-            if task.active and task['tb_estimate']:
+            if task.active and task["tb_estimate"]:
                 self.timeboxed_task = task
 
         if self.timeboxed_task:
@@ -100,33 +114,44 @@ class Schedule():
 
     def get_tasks(self):
         """Retrieve scheduled tasks from taskwarrior."""
-        taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
-                                  taskrc_location=self.taskrc_location)
+        taskwarrior = TaskWarrior(
+            self.tw_data_dir,
+            self.tw_data_dir_create,
+            taskrc_location=self.taskrc_location,
+        )
 
         # Disable _forcecolor because it breaks tw config output
-        taskwarrior.overrides.update({'_forcecolor': 'off'})
-        if taskwarrior.config.get('uda.estimate.type') is None:
-            raise UDADoesNotExistError(('uda.estimate.type does not exist '
-                                        'in .taskrc'))
-        if taskwarrior.config.get('uda.estimate.label') is None:
-            raise UDADoesNotExistError(('uda.estimate.label does not exist '
-                                        'in .taskrc'))
+        taskwarrior.overrides.update({"_forcecolor": "off"})
+        if taskwarrior.config.get("uda.estimate.type") is None:
+            raise UDADoesNotExistError(
+                ("uda.estimate.type does not exist " "in .taskrc")
+            )
+        if taskwarrior.config.get("uda.estimate.label") is None:
+            raise UDADoesNotExistError(
+                ("uda.estimate.label does not exist " "in .taskrc")
+            )
 
-        taskwarrior = PatchedTaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
-                                  taskrc_location=self.taskrc_location)
+        taskwarrior = PatchedTaskWarrior(
+            self.tw_data_dir,
+            self.tw_data_dir_create,
+            taskrc_location=self.taskrc_location,
+        )
         backend = taskwarrior.tasks[0].backend
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend).filter(status__not='deleted')
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend).filter(
+            status__not="deleted"
+        )
 
         if self.scheduled_before is not None and self.scheduled_after is not None:
             queryset = queryset.filter(
                 scheduled__before=self.scheduled_before,
-                scheduled__after=self.scheduled_after)
+                scheduled__after=self.scheduled_after,
+            )
             if not self.completed:
-                queryset = queryset.filter(status__not='completed')
+                queryset = queryset.filter(status__not="completed")
         else:
             queryset = queryset.filter(scheduled=self.scheduled)
             if not self.completed:
-                queryset = queryset.filter(status__not='completed')
+                queryset = queryset.filter(status__not="completed")
 
         self.tasks = queryset
         return self.tasks
@@ -147,9 +172,9 @@ class Schedule():
            to a datetime object."""
 
         taskwarrior = TaskWarrior()
-        task = ScheduledTask(taskwarrior, description='dummy')
-        task['due'] = synonym
-        return task['due']
+        task = ScheduledTask(taskwarrior, description="dummy")
+        task["due"] = synonym
+        return task["due"]
 
     def get_time_slots(self):
         """Return a dict with dates and their tasks.
@@ -157,8 +182,8 @@ class Schedule():
         {datetime.date(2019, 6, 27): {00: [], 01: [], ..., 23: [task, task]},
          datetime.date(2019, 6, 28): {00: [], ..., 10: [task, task], ...}]
         """
-        start_time = '0:00'
-        end_time = '23:00'
+        start_time = "0:00"
+        end_time = "23:00"
         slot_time = 60
 
         start_date = self.get_calculated_date(self.scheduled_after)
@@ -167,8 +192,7 @@ class Schedule():
 
         if scheduled_date:
             start_date = scheduled_date.date()
-            end_date = scheduled_date.date() + datetime.timedelta(hours=23,
-                                                                  minutes=59)
+            end_date = scheduled_date.date() + datetime.timedelta(hours=23, minutes=59)
         else:
             start_date = start_date.date()
             end_date = end_date.date()
@@ -177,17 +201,17 @@ class Schedule():
         date = start_date
         while date <= end_date:
             hours = {}
-            time = datetime.datetime.strptime(start_time, '%H:%M')
-            end = datetime.datetime.strptime(end_time, '%H:%M')
+            time = datetime.datetime.strptime(start_time, "%H:%M")
+            end = datetime.datetime.strptime(end_time, "%H:%M")
             while time <= end:
                 task_list = []
                 for task in self.tasks:
-                    start = task['scheduled']
+                    start = task["scheduled"]
                     if start.date() == date:
                         if start.hour == int(time.strftime("%H")):
                             task_list.append(task)
 
-                task_list = sorted(task_list, key=lambda k: k['scheduled'])
+                task_list = sorted(task_list, key=lambda k: k["scheduled"])
                 hours[time.strftime("%H")] = task_list
                 time += datetime.timedelta(minutes=slot_time)
             days[date.isoformat()] = hours
@@ -211,11 +235,11 @@ class Schedule():
         """Return the offsets for each column in the schedule for rendering
            a table."""
         offsets = [0, 5]  # Hour, glyph
-        offsets.append(5 + self.get_max_length('id') + 1)  # ID
+        offsets.append(5 + self.get_max_length("id") + 1)  # ID
         offsets.append(offsets[2] + 12)  # Time
         offsets.append(offsets[3] + 10)  # Timeboxes
 
-        add_offset = self.get_max_length('project') + 1
+        add_offset = self.get_max_length("project") + 1
 
         if add_offset < 8:
             add_offset = 8
@@ -249,7 +273,7 @@ class Schedule():
         ncols = len(col_sizes)
         result = []
         for row in array:
-            row = list(row) + [''] * (ncols - len(row))
+            row = list(row) + [""] * (ncols - len(row))
             for i, col in enumerate(row):
                 row[i] = col.ljust(col_sizes[i])
 

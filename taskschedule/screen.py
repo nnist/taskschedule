@@ -12,25 +12,32 @@ from taskschedule.hooks import run_hooks
 from taskschedule.config_parser import ConfigParser
 
 
-class Screen():
+class Screen:
     """This class handles the rendering of the schedule."""
 
-    def __init__(self, tw_data_dir=None, taskrc_location=None,
-                 refresh_rate=1,
-                 hide_empty=True, scheduled_before=None,
-                 scheduled_after=None, scheduled=None,
-                 completed=True, hide_projects=False):
+    def __init__(
+        self,
+        tw_data_dir=None,
+        taskrc_location=None,
+        refresh_rate=1,
+        hide_empty=True,
+        scheduled_before=None,
+        scheduled_after=None,
+        scheduled=None,
+        completed=True,
+        hide_projects=False,
+    ):
         home = os.path.expanduser("~")
-        
+
         self.config = ConfigParser().config()
 
         if tw_data_dir is None:
-            tw_data_dir = home + '/.task'
+            tw_data_dir = home + "/.task"
 
         self.tw_data_dir = tw_data_dir
 
         if taskrc_location is None:
-            taskrc_location = home + '/.taskrc'
+            taskrc_location = home + "/.taskrc"
 
         self.taskrc_location = taskrc_location
 
@@ -60,12 +67,14 @@ class Screen():
 
         self.prev_refresh_time = time.time()
 
-        self.schedule = Schedule(tw_data_dir=tw_data_dir,
-                                 taskrc_location=taskrc_location,
-                                 scheduled_before=self.scheduled_before,
-                                 scheduled_after=self.scheduled_after,
-                                 scheduled=self.scheduled,
-                                 completed=self.completed)
+        self.schedule = Schedule(
+            tw_data_dir=tw_data_dir,
+            taskrc_location=taskrc_location,
+            scheduled_before=self.scheduled_before,
+            scheduled_after=self.scheduled_after,
+            scheduled=self.scheduled,
+            completed=self.completed,
+        )
 
     def close(self):
         """Close the curses screen."""
@@ -174,7 +183,7 @@ class Screen():
             self.scroll_level = 0
 
         self.stdscr.refresh()
-        self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3, max_x-1)
+        self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y - 3, max_x - 1)
 
     def draw_footnote(self):
         """Draw the footnote at the bottom of the screen."""
@@ -183,20 +192,22 @@ class Screen():
         # Draw timebox status
         timeboxed_task: ScheduledTask = self.schedule.get_active_timeboxed_task()
         if timeboxed_task:
-            active_start_time: datetime.datetime = timeboxed_task['start']
+            active_start_time: datetime.datetime = timeboxed_task["start"]
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
-            max_duration = datetime.timedelta(minutes=self.config['timebox']['time']).total_seconds()
+            max_duration = datetime.timedelta(
+                minutes=self.config["timebox"]["time"]
+            ).total_seconds()
             progress: float = (active_time / max_duration) * 100
 
             if progress > 99:
                 self.schedule.stop_active_timeboxed_task()
-                real = timeboxed_task['tb_real']
+                real = timeboxed_task["tb_real"]
                 if real:
-                    timeboxed_task['tb_real'] = int(real) + 1
+                    timeboxed_task["tb_real"] = int(real) + 1
                 else:
-                    timeboxed_task['tb_real'] = 1
+                    timeboxed_task["tb_real"] = 1
                 timeboxed_task.save()
                 self.stdscr.move(max_y - 2, 0)
                 self.stdscr.clrtoeol()
@@ -205,74 +216,82 @@ class Screen():
                 progress_remaining: int = int((100 - progress) / 4)
 
                 # Draw task id
-                task_id = timeboxed_task['id']
+                task_id = timeboxed_task["id"]
                 task_id_str = f"task {task_id}: "
-                self.stdscr.addstr(max_y - 2, 1,
-                                   task_id_str,
-                                   self.COLOR_DEFAULT)
+                self.stdscr.addstr(max_y - 2, 1, task_id_str, self.COLOR_DEFAULT)
 
                 # Draw completed blocks
-                completed_blocks: str = self.config['timebox']['progress_done_glyph'] * progress_done
-                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str),
-                                   completed_blocks,
-                                   self.COLOR_BLUE)
+                completed_blocks: str = self.config["timebox"][
+                    "progress_done_glyph"
+                ] * progress_done
+                self.stdscr.addstr(
+                    max_y - 2, 1 + len(task_id_str), completed_blocks, self.COLOR_BLUE
+                )
 
                 # Draw pending blocks
-                pending_blocks: str = self.config['timebox']['progress_pending_glyph'] * progress_remaining
-                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str) + len(completed_blocks),
-                                   pending_blocks,
-                                   self.COLOR_HOUR)
+                pending_blocks: str = self.config["timebox"][
+                    "progress_pending_glyph"
+                ] * progress_remaining
+                self.stdscr.addstr(
+                    max_y - 2,
+                    1 + len(task_id_str) + len(completed_blocks),
+                    pending_blocks,
+                    self.COLOR_HOUR,
+                )
 
                 # Draw time
                 time1 = datetime.timedelta(seconds=active_time)
-                time1_fmt = str(time1).split('.', 2)[0]
-                time1_minutes = str(time1_fmt).split(':', 2)[1]
-                time1_seconds = str(time1_fmt).split(':', 2)[2]
+                time1_fmt = str(time1).split(".", 2)[0]
+                time1_minutes = str(time1_fmt).split(":", 2)[1]
+                time1_seconds = str(time1_fmt).split(":", 2)[2]
 
-                time2 = datetime.timedelta(minutes=self.config['timebox']['time'])
-                time2_fmt = str(time2).split('.', 2)[0]
-                time2_minutes = str(time2_fmt).split(':', 2)[1]
-                time2_seconds = str(time2_fmt).split(':', 2)[2]
+                time2 = datetime.timedelta(minutes=self.config["timebox"]["time"])
+                time2_fmt = str(time2).split(".", 2)[0]
+                time2_minutes = str(time2_fmt).split(":", 2)[1]
+                time2_seconds = str(time2_fmt).split(":", 2)[2]
 
                 progress_time: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
-                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str) + len(completed_blocks) + len(pending_blocks) + 1,
-                                   progress_time,
-                                   self.COLOR_DEFAULT)
+                self.stdscr.addstr(
+                    max_y - 2,
+                    1
+                    + len(task_id_str)
+                    + len(completed_blocks)
+                    + len(pending_blocks)
+                    + 1,
+                    progress_time,
+                    self.COLOR_DEFAULT,
+                )
         else:
-            self.stdscr.addstr(max_y - 2, 1,
-                               "no active timebox",
-                               self.COLOR_DEFAULT)
+            self.stdscr.addstr(max_y - 2, 1, "no active timebox", self.COLOR_DEFAULT)
 
         estimated_count = self.schedule.get_timebox_estimate_count()
         real_count = self.schedule.get_timebox_real_count()
 
         footnote_timebox_right: str = f"total: {real_count} / {estimated_count}"
 
-        self.stdscr.addstr(max_y - 2, max_x - len(footnote_timebox_right) - 1,
-                           footnote_timebox_right,
-                           self.COLOR_DEFAULT)
+        self.stdscr.addstr(
+            max_y - 2,
+            max_x - len(footnote_timebox_right) - 1,
+            footnote_timebox_right,
+            self.COLOR_DEFAULT,
+        )
 
         # Draw footnote
         if self.scheduled_before and self.scheduled_after:
-            footnote = '{} tasks - from {} until {}'.format(
-                len(self.schedule.tasks),
-                self.scheduled_after,
-                self.scheduled_before)
+            footnote = "{} tasks - from {} until {}".format(
+                len(self.schedule.tasks), self.scheduled_after, self.scheduled_before
+            )
         else:
-            footnote = '{} tasks - {}'.format(len(self.schedule.tasks),
-                                              self.scheduled)
+            footnote = "{} tasks - {}".format(len(self.schedule.tasks), self.scheduled)
 
-        self.stdscr.addstr(max_y - 1, 1,
-                           footnote,
-                           self.COLOR_DEFAULT)
+        self.stdscr.addstr(max_y - 1, 1, footnote, self.COLOR_DEFAULT)
 
     def draw(self, force=False):
         """Draw the current buffer."""
         max_y, max_x = self.get_maxyx()
         if not self.buffer:
             self.stdscr.clear()
-            self.stdscr.addstr(0, 0, 'No tasks to display.',
-                               self.COLOR_DEFAULT)
+            self.stdscr.addstr(0, 0, "No tasks to display.", self.COLOR_DEFAULT)
             self.draw_footnote()
             self.stdscr.refresh()
         else:
@@ -289,27 +308,32 @@ class Screen():
                         self.pad.addstr(line, offset, string, color)
 
             self.draw_footnote()
-            self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y-3,
-                             max_x-1)
+            self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y - 3, max_x - 1)
 
     def render_timeboxes(self, task, color) -> List[dict]:
         """Render a task's timebox column."""
 
         timeboxes: List[dict] = []
         real = 0
-        if task['tb_real']:
-            real = task['tb_real']
-            for i in range(task['tb_real']):
-                if i >= task['tb_estimate']:
-                    timeboxes.append({"char": self.config['timebox']['underestimated_glyph'],
-                                      "color": color})
+        if task["tb_real"]:
+            real = task["tb_real"]
+            for i in range(task["tb_real"]):
+                if i >= task["tb_estimate"]:
+                    timeboxes.append(
+                        {
+                            "char": self.config["timebox"]["underestimated_glyph"],
+                            "color": color,
+                        }
+                    )
                 else:
-                    timeboxes.append({"char": self.config['timebox']['done_glyph'],
-                                      "color": color})
-        if task['tb_estimate']:
-            for i in range(task['tb_estimate'] - real):
-                timeboxes.append({"char": self.config['timebox']['pending_glyph'],
-                                  "color": color})
+                    timeboxes.append(
+                        {"char": self.config["timebox"]["done_glyph"], "color": color}
+                    )
+        if task["tb_estimate"]:
+            for i in range(task["tb_estimate"] - real):
+                timeboxes.append(
+                    {"char": self.config["timebox"]["pending_glyph"], "color": color}
+                )
 
         return timeboxes
 
@@ -334,13 +358,13 @@ class Screen():
         if current_task is not None:
             if self.current_task is None:
                 self.current_task = current_task
-                if current_task['id'] != 0:
-                    run_hooks('on-progress', data=current_task.as_dict())
+                if current_task["id"] != 0:
+                    run_hooks("on-progress", data=current_task.as_dict())
             else:
-                if self.current_task['id'] != current_task['id']:
+                if self.current_task["id"] != current_task["id"]:
                     self.current_task = current_task
-                    if current_task['id'] != 0:
-                        run_hooks('on-progress', data=current_task.as_dict())
+                    if current_task["id"] != 0:
+                        run_hooks("on-progress", data=current_task.as_dict())
 
         # Determine offsets
         offsets = self.schedule.get_column_offsets()
@@ -349,18 +373,18 @@ class Screen():
             offsets[5] = offsets[4] + max_project_column_length
 
         # Draw headers
-        headers = ['', '', 'ID', 'Time', 'Timeboxes', 'Project', 'Description']
+        headers = ["", "", "ID", "Time", "Timeboxes", "Project", "Description"]
         column_lengths = [2, 1]
-        column_lengths.append(self.schedule.get_max_length('id'))
+        column_lengths.append(self.schedule.get_max_length("id"))
         column_lengths.append(11)
         column_lengths.append(9)
         column_lengths.append(max_project_column_length - 1)
-        column_lengths.append(self.schedule.get_max_length('description'))
+        column_lengths.append(self.schedule.get_max_length("description"))
 
         for i, header in enumerate(headers):
             try:
                 extra_length = column_lengths[i] - len(header)
-                headers[i] += ' ' * extra_length
+                headers[i] += " " * extra_length
             except IndexError:
                 pass
 
@@ -389,29 +413,42 @@ class Screen():
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
             # Draw divider
-            divider_pt1 = '─' * (offsets[2] - 1)
-            self.buffer.append((current_line, 0, divider_pt1,
-                                self.COLOR_DIVIDER))
+            divider_pt1 = "─" * (offsets[2] - 1)
+            self.buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
 
-            date_format = '%a %d %b %Y'
-            formatted_date = self.schedule.get_calculated_date(day).\
-                strftime(date_format)
-            divider_pt2 = ' ' + formatted_date + ' '
+            date_format = "%a %d %b %Y"
+            formatted_date = self.schedule.get_calculated_date(day).strftime(
+                date_format
+            )
+            divider_pt2 = " " + formatted_date + " "
             if day == datetime.datetime.now().date().isoformat():
-                self.buffer.append((current_line, len(divider_pt1),
-                                    divider_pt2,
-                                    self.COLOR_DIVIDER_ACTIVE))
+                self.buffer.append(
+                    (
+                        current_line,
+                        len(divider_pt1),
+                        divider_pt2,
+                        self.COLOR_DIVIDER_ACTIVE,
+                    )
+                )
             else:
-                self.buffer.append((current_line, len(divider_pt1),
-                                    divider_pt2,
-                                    self.COLOR_DIVIDER_TEXT))
+                self.buffer.append(
+                    (
+                        current_line,
+                        len(divider_pt1),
+                        divider_pt2,
+                        self.COLOR_DIVIDER_TEXT,
+                    )
+                )
 
-            divider_pt3 = '─' * (max_x -
-                                 (len(divider_pt1) + len(divider_pt2)))
-            self.buffer.append((current_line,
-                                len(divider_pt1) + len(divider_pt2),
-                                divider_pt3,
-                                self.COLOR_DIVIDER))
+            divider_pt3 = "─" * (max_x - (len(divider_pt1) + len(divider_pt2)))
+            self.buffer.append(
+                (
+                    current_line,
+                    len(divider_pt1) + len(divider_pt2),
+                    divider_pt3,
+                    self.COLOR_DIVIDER,
+                )
+            )
             current_line += 1
             alternate = False
 
@@ -425,18 +462,19 @@ class Screen():
                         color = self.COLOR_DEFAULT
 
                     # Fill line to screen length
-                    self.buffer.append(
-                        (current_line, 5, ' ' * (max_x - 5), color))
+                    self.buffer.append((current_line, 5, " " * (max_x - 5), color))
 
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour
-                    if int(hour) == current_hour and \
-                            day == datetime.datetime.now().date().isoformat():
-                        self.buffer.append((current_line, 0, hour,
-                                            self.COLOR_HOUR_CURRENT))
+                    if (
+                        int(hour) == current_hour
+                        and day == datetime.datetime.now().date().isoformat()
+                    ):
+                        self.buffer.append(
+                            (current_line, 0, hour, self.COLOR_HOUR_CURRENT)
+                        )
                     else:
-                        self.buffer.append((current_line, 0, hour,
-                                            self.COLOR_HOUR))
+                        self.buffer.append((current_line, 0, hour, self.COLOR_HOUR))
 
                     current_line += 1
                     alternate = not alternate
@@ -449,70 +487,76 @@ class Screen():
                     if ii == 0:
                         hour_ = str(hour)
                     else:
-                        hour_ = ''
+                        hour_ = ""
 
                     # Draw hour column, highlight current hour
                     current_hour = time.localtime().tm_hour
-                    if hour_ != '':
-                        if int(hour) == current_hour and \
-                                day == datetime.datetime.now().date().isoformat():
-                            self.buffer.append((current_line, 0, hour_,
-                                                self.COLOR_HOUR_CURRENT))
+                    if hour_ != "":
+                        if (
+                            int(hour) == current_hour
+                            and day == datetime.datetime.now().date().isoformat()
+                        ):
+                            self.buffer.append(
+                                (current_line, 0, hour_, self.COLOR_HOUR_CURRENT)
+                            )
                         else:
-                            self.buffer.append((current_line, 0, hour_,
-                                                self.COLOR_HOUR))
+                            self.buffer.append(
+                                (current_line, 0, hour_, self.COLOR_HOUR)
+                            )
 
                     # Fill line to screen length
-                    self.buffer.append((current_line, 5, ' ' * (max_x - 5),
-                                        color))
+                    self.buffer.append((current_line, 5, " " * (max_x - 5), color))
 
                     # Draw glyph column
-                    self.buffer.append((current_line, 3, task.glyph,
-                                        self.COLOR_GLYPH))
+                    self.buffer.append((current_line, 3, task.glyph, self.COLOR_GLYPH))
 
                     # Draw task id column
-                    if task['id'] != 0:
-                        self.buffer.append((current_line, 5, str(task['id']),
-                                            color))
+                    if task["id"] != 0:
+                        self.buffer.append((current_line, 5, str(task["id"]), color))
 
                     # Draw time column
-                    start_time = '{}'.format(task['scheduled'].strftime('%H:%M'))
+                    start_time = "{}".format(task["scheduled"].strftime("%H:%M"))
                     if task.scheduled_end_time is None:
                         formatted_time = start_time
                     else:
-                        end_time = '{}'.format(task.scheduled_end_time.strftime('%H:%M'))
-                        formatted_time = '{}-{}'.format(start_time,
-                                                        end_time)
+                        end_time = "{}".format(
+                            task.scheduled_end_time.strftime("%H:%M")
+                        )
+                        formatted_time = "{}-{}".format(start_time, end_time)
 
-                    self.buffer.append((current_line, offsets[2],
-                                        formatted_time, color))
+                    self.buffer.append(
+                        (current_line, offsets[2], formatted_time, color)
+                    )
 
                     # Draw timeboxes column
                     timeboxes = self.render_timeboxes(task, color)
                     for i, timebox in enumerate(timeboxes):
-                        self.buffer.append((current_line, offsets[3] + i,
-                                            timebox.get('char'),
-                                            timebox.get('color')))
+                        self.buffer.append(
+                            (
+                                current_line,
+                                offsets[3] + i,
+                                timebox.get("char"),
+                                timebox.get("color"),
+                            )
+                        )
 
                     # Optionally draw project column
                     offset = 0
                     if not self.hide_projects:
-                        if task['project'] is None:
-                            project = ''
+                        if task["project"] is None:
+                            project = ""
                         else:
                             max_length = offsets[5] - offsets[4] - 1
-                            project = task['project'][0:max_length]
+                            project = task["project"][0:max_length]
 
-                        self.buffer.append((current_line, offsets[4], project,
-                                            color))
+                        self.buffer.append((current_line, offsets[4], project, color))
                         offset = offsets[5]
                     else:
                         offset = offsets[4]
 
                     # Draw description column
-                    description = task['description'][0:max_x - offset]
-                    self.buffer.append((current_line, offset,
-                                        description, color))
+                    description = task["description"][0 : max_x - offset]
+                    self.buffer.append((current_line, offset, description, color))
 
                     current_line += 1
                     alternate = not alternate
