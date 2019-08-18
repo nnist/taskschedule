@@ -197,7 +197,7 @@ class Screen():
 
         # TODO Refactor, a lot of this should be in ScheduledTask
         footnote_timebox_left: str = ""
-        if active_timebox:
+        if active_tasks and active_timebox:
             active_start_time: datetime.datetime = most_recent_task.active_start
             # TODO Properly handle timezones
             active_start_time.replace(tzinfo=None)
@@ -206,16 +206,27 @@ class Screen():
             max_duration = datetime.timedelta(minutes=self.config['timebox']['time']).total_seconds()
             progress = (active_time / max_duration) * 100
 
-            # Draw 25 blocks to show progress
-            progress_done = math.ceil(progress / 4)
-            progress_remaining = int((100 - progress) / 4)
-            done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
-            remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
-            progress_blocks: str = f"{done_blocks}{remaining_blocks}"
-            time_ = datetime.timedelta(seconds=active_time)
-            time2 = datetime.timedelta(minutes=self.config['timebox']['time'])
-            progress_num: str = f"{time_}/{time2}"
-            footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
+            # TODO Definitely move to ScheduledTask
+            if progress > 99:
+                footnote_timebox_left = f"timebox done!"
+                most_recent_task.task.stop()
+                real = most_recent_task.task['tb_real']
+                if real:
+                    most_recent_task.task['tb_real'] = int(real) + 1
+                else:
+                    most_recent_task.task['tb_real'] = 1
+                most_recent_task.task.save()
+            else:
+                # Draw 25 blocks to show progress
+                progress_done = math.ceil(progress / 4)
+                progress_remaining = int((100 - progress) / 4)
+                done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
+                remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
+                progress_blocks: str = f"{done_blocks}{remaining_blocks}"
+                time_ = datetime.timedelta(seconds=active_time)
+                time2 = datetime.timedelta(minutes=self.config['timebox']['time'])
+                progress_num: str = f"{time_}/{time2}"
+                footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
         else:
             footnote_timebox_left = "no active timebox"
 

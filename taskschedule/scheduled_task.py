@@ -1,15 +1,16 @@
 from datetime import datetime as dt
 import json
 
+from tasklib import Task
 from isodate import parse_duration
 
 
 class ScheduledTask():
     """A scheduled task."""
 
-    def __init__(self, task, schedule):
+    def __init__(self, task: Task, schedule):
         self.schedule = schedule
-        self.task = task
+        self.task: Task = task
         self.glyph = '○'
         self.active = task.active
 
