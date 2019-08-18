@@ -213,6 +213,8 @@ class Screen():
                 else:
                     most_recent_task.task['tb_real'] = 1
                 most_recent_task.task.save()
+                self.stdscr.move(max_y - 2, 0)
+                self.stdscr.clrtoeol()
             else:
                 # Draw 25 blocks to show progress
                 progress_done = math.ceil(progress / 4)
