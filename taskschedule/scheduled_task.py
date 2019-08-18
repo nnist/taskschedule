@@ -1,67 +1,80 @@
 from datetime import datetime as dt
 import json
 
-from tasklib import Task
+from tasklib.task import Task, TaskQuerySet
+from tasklib.backends import TaskWarriorException
+from tasklib import TaskWarrior
 from isodate import parse_duration
 
 
-class ScheduledTask():
+# Patch TaskWarrior to return ScheduledTask instead of Task
+class PatchedTaskWarrior(TaskWarrior):
+    def __init__(self, data_location=None, create=True,
+                 taskrc_location=None, task_command='task',
+version_override=None):
+        super(PatchedTaskWarrior, self).__init__()
+        self.tasks = ScheduledTaskQuerySet(self)
+
+    def filter_tasks(self, filter_obj):
+        self.enforce_recurrence()
+        args = ['export'] + filter_obj.get_filter_params()
+        tasks = []
+        for line in self.execute_command(args):
+            if line:
+                data = line.strip(',')
+                try:
+                    filtered_task = ScheduledTask(self)
+                    filtered_task._load_data(json.loads(data))
+                    tasks.append(filtered_task)
+                except ValueError:
+                    raise TaskWarriorException('Invalid JSON: %s' % data)
+        return tasks
+
+
+class ScheduledTaskQuerySet(TaskQuerySet):
+    ...
+
+
+class ScheduledTask(Task):
     """A scheduled task."""
 
-    def __init__(self, task: Task, schedule):
-        self.schedule = schedule
-        self.task: Task = task
+    def __init__(self, backend, **kwargs):
+        super(ScheduledTask, self).__init__(backend)
+        # TODO Create reference to Schedule
         self.glyph = '○'
-        self.active = task.active
 
-        if task['status'] == 'completed':
-            self.completed = True
-        else:
-            self.completed = False
-
-        self.task_id = task['id']
-
-        self.active_start = task['start']
-        self.start = task['scheduled']
-        self.start_time = '{}'.format(self.start.strftime('%H:%M'))
-
+    @property
+    def scheduled_end_time(self):
+        """Return the task's end time."""
         try:
-            estimate = task['estimate']
+            estimate = self['estimate']
             duration = parse_duration(estimate)
-            self.end = self.start + duration
+            return self['scheduled'] + duration
         except TypeError:
-            self.end = None
-
-        try:
-            self.timebox_estimate: int = task['tb_estimate']
-            self.timebox_real: int = task['tb_real']
-        except TypeError:
-            pass
-
-        self.description = task['description']
-
-        self.project = task['project']
+            return None
 
     @property
     def should_be_active(self):
         """Return true if the task should be active."""
 
-        if self.start is not None:
-            start_ts = dt.timestamp(self.start)
+        if self['scheduled'] is not None:
+            start_ts = dt.timestamp(self['scheduled'])
         else:
             start_ts = None
 
         now = dt.now()
         now_ts = dt.timestamp(now)
 
-        if self.end is None:
-            next_task = self.schedule.get_next_task(self)
+        if self['end'] is None:
+            # TODO Implement get_next_task differently
+            # next_task = self.schedule.get_next_task(self)
+            next_task = None
             if next_task is not None:
                 next_task_start_ts = dt.timestamp(next_task.start)
                 if now_ts > start_ts and next_task_start_ts > now_ts:
                     return True
         else:
-            end_ts = dt.timestamp(self.end)
+            end_ts = dt.timestamp(self['end'])
             if now_ts > start_ts and end_ts > now_ts:
                 return True
 
@@ -74,19 +87,19 @@ class ScheduledTask():
         now = dt.now()
         now_ts = dt.timestamp(now)
 
-        if self.end is None:
-            start_ts = dt.timestamp(self.start)
+        if self['end'] is None:
+            start_ts = dt.timestamp(self['scheduled'])
             if now_ts > start_ts:
                 return True
 
             return False
 
-        end_ts = dt.timestamp(self.end)
+        end_ts = dt.timestamp(self['end'])
         if now_ts > end_ts:
             return True
 
         return False
 
     def as_dict(self):
-        data = self.task.export_data()
+        data = self.export_data()
         return json.loads(data)

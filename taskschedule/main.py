@@ -100,7 +100,8 @@ def main(argv):
                         completed=args.completed,
                         hide_projects=args.project)
 
-        last_refresh_time = 0
+        # TODO Refresh on any file change in dir instead of every second
+        last_refresh_time = 0.0
         while True:
             key = screen.stdscr.getch()
             if key == 113:  # q
