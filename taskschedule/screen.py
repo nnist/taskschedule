@@ -223,9 +223,18 @@ class Screen():
                 done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
                 remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
                 progress_blocks: str = f"{done_blocks}{remaining_blocks}"
-                time_ = datetime.timedelta(seconds=active_time)
+
+                time1 = datetime.timedelta(seconds=active_time)
+                time1_fmt = str(time1).split('.', 2)[0]
+                time1_minutes = str(time1_fmt).split(':', 2)[1]
+                time1_seconds = str(time1_fmt).split(':', 2)[2]
+
                 time2 = datetime.timedelta(minutes=self.config['timebox']['time'])
-                progress_num: str = f"{time_}/{time2}"
+                time2_fmt = str(time2).split('.', 2)[0]
+                time2_minutes = str(time2_fmt).split(':', 2)[1]
+                time2_seconds = str(time2_fmt).split(':', 2)[2]
+
+                progress_num: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
                 footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
         else:
             footnote_timebox_left = "no active timebox"
