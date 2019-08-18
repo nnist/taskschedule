@@ -195,18 +195,15 @@ class Screen():
         except IndexError:
             pass
 
-        # TODO Refactor, a lot of this should be in ScheduledTask
         footnote_timebox_left: str = ""
         if active_tasks and active_timebox:
             active_start_time: datetime.datetime = most_recent_task.active_start
-            # TODO Properly handle timezones
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
             max_duration = datetime.timedelta(minutes=self.config['timebox']['time']).total_seconds()
             progress = (active_time / max_duration) * 100
 
-            # TODO Definitely move to ScheduledTask
             if progress > 99:
                 footnote_timebox_left = f"timebox done!"
                 most_recent_task.task.stop()
@@ -239,10 +236,9 @@ class Screen():
         else:
             footnote_timebox_left = "no active timebox"
 
-        break_in = 2  # TODO Show actual break
         total = 4  # TODO Show actual total timeboxes of today
 
-        footnote_timebox_right: str = f"break in: {break_in}    total: {total}"
+        footnote_timebox_right: str = f"total: {total}"
 
         self.stdscr.addstr(max_y - 2, 1,
                            footnote_timebox_left,
