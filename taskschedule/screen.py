@@ -181,17 +181,9 @@ class Screen():
         max_y, max_x = self.get_maxyx()
 
         # Draw timebox status
-        active_timebox: bool = True
-
-        # TODO Refactor, this costs a lot of performance
-        active_timebox = False
-        for task in self.schedule.tasks:
-            if task.active and task.timebox_estimate:
-                timeboxed_task = task
-                active_timebox = True
-
+        timeboxed_task: ScheduledTask = self.schedule.get_active_timeboxed_task()
         footnote_timebox_left: str = ""
-        if active_timebox:
+        if timeboxed_task:
             active_start_time: datetime.datetime = timeboxed_task.active_start
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
