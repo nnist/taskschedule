@@ -115,7 +115,7 @@ class Schedule():
         taskwarrior = PatchedTaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
                                   taskrc_location=self.taskrc_location)
         backend = taskwarrior.tasks[0].backend
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend)
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend).filter(status__not='deleted')
 
         if self.scheduled_before is not None and self.scheduled_after is not None:
             queryset = queryset.filter(
