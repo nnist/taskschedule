@@ -194,6 +194,7 @@ class Screen():
         except IndexError:
             pass
 
+        # TODO Refactor, a lot of this should be in ScheduledTask
         footnote_timebox_left: str = ""
         if active_timebox:
             active_start_time: datetime.datetime = most_recent_task.active_start
