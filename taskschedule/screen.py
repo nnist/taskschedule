@@ -206,8 +206,8 @@ class Screen():
                 # Draw 25 blocks to show progress
                 progress_done: int = math.ceil(progress / 4)
                 progress_remaining: int = int((100 - progress) / 4)
-                done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
-                remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
+                done_blocks: str = self.config['timebox']['progress_done_glyph'] * progress_done
+                remaining_blocks: str = self.config['timebox']['progress_pending_glyph'] * progress_remaining
                 progress_blocks: str = f"{done_blocks}{remaining_blocks}"
 
                 time1 = datetime.timedelta(seconds=active_time)

@@ -4,6 +4,8 @@ DEFAULTS: dict = {
         'pending_glyph': '◻',
         'done_glyph': '◼',
         'underestimated_glyph': '◆',
+        'progress_pending_glyph': '◻',
+        'progress_done_glyph': '◼',
     }
 }
 
