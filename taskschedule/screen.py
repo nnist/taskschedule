@@ -7,6 +7,7 @@ import math
 from tasklib import Task
 
 from taskschedule.schedule import Schedule
+from taskschedule.scheduled_task import ScheduledTask
 from taskschedule.hooks import run_hooks
 from taskschedule.config_parser import ConfigParser
 
@@ -190,7 +191,7 @@ class Screen():
 
         active_timebox = False
         try:
-            most_recent_task = active_tasks[-1]
+            most_recent_task: ScheduledTask = active_tasks[-1]
             if most_recent_task.timebox_estimate:
                 active_timebox = True
         except IndexError:
@@ -234,8 +235,9 @@ class Screen():
                 time2_minutes = str(time2_fmt).split(':', 2)[1]
                 time2_seconds = str(time2_fmt).split(':', 2)[2]
 
+                task_id = most_recent_task.task_id
                 progress_num: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
-                footnote_timebox_left = f"current: {progress_blocks} {progress_num}"
+                footnote_timebox_left = f"task {task_id}: {progress_blocks} {progress_num}"
         else:
             footnote_timebox_left = "no active timebox"
 
