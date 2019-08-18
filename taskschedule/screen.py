@@ -184,21 +184,14 @@ class Screen():
         active_timebox: bool = True
 
         # TODO Refactor, this costs a lot of performance
-        active_tasks: List[Task] = []
-        for task in self.schedule.tasks:
-            if task.active:
-                active_tasks.append(task)
-
         active_timebox = False
-        try:
-            most_recent_task: ScheduledTask = active_tasks[-1]
-            if most_recent_task.timebox_estimate:
+        for task in self.schedule.tasks:
+            if task.active and task.timebox_estimate:
+                most_recent_task = task
                 active_timebox = True
-        except IndexError:
-            pass
 
         footnote_timebox_left: str = ""
-        if active_tasks and active_timebox:
+        if active_timebox:
             active_start_time: datetime.datetime = most_recent_task.active_start
             active_start_time.replace(tzinfo=None)
             current_time = datetime.datetime.now()
