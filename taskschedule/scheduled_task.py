@@ -33,7 +33,7 @@ class ScheduledTask():
 
         try:
             self.timebox_estimate = task['tb_estimate']
-            self.timebox_real = task['timebox_real']
+            self.timebox_real = task['tb_real']
         except TypeError:
             pass
 

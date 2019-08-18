@@ -176,8 +176,8 @@ class Screen():
         max_y, max_x = self.get_maxyx()
 
         # Draw timebox status
-        PROGRESS_PENDING_GLYPH: str = "◻"
-        PROGRESS_DONE_GLYPH: str = "◼"
+        TIMEBOX_PROGRESS_PENDING_GLYPH: str = "◻"
+        TIMEBOX_PROGRESS_DONE_GLYPH: str = "◼"
         active_timebox: bool = True
 
         # TODO Refactor, this costs a lot of performance
@@ -207,8 +207,8 @@ class Screen():
             # Draw 25 blocks to show progress
             progress_done = math.ceil(progress / 4)
             progress_remaining = int((100 - progress) / 4)
-            done_blocks: str = PROGRESS_DONE_GLYPH * progress_done
-            remaining_blocks: str = PROGRESS_PENDING_GLYPH * progress_remaining
+            done_blocks: str = TIMEBOX_PROGRESS_DONE_GLYPH * progress_done
+            remaining_blocks: str = TIMEBOX_PROGRESS_PENDING_GLYPH * progress_remaining
             progress_blocks: str = f"{done_blocks}{remaining_blocks}"
             time_ = datetime.timedelta(seconds=active_time)
             time2 = datetime.timedelta(minutes=25)
