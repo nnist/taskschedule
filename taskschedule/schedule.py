@@ -63,6 +63,22 @@ class Schedule():
 
         self.timeboxed_task: ScheduledTask = None
 
+    def get_timebox_estimate_count(self):
+        """"Return today's estimated timebox count."""
+        total = 0
+        for task in self.tasks:
+            if task.timebox_estimate:
+                total += task.timebox_estimate
+        return total
+
+    def get_timebox_real_count(self):
+        """"Return today's real timebox count."""
+        total = 0
+        for task in self.tasks:
+            if task.timebox_real:
+                total += task.timebox_real
+        return total
+
     def get_active_timeboxed_task(self):
         """If a timeboxed task is currently active, return it. Otherwise,
            return None."""

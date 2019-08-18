@@ -243,9 +243,10 @@ class Screen():
                                "no active timebox",
                                self.COLOR_DEFAULT)
 
-        total = 4  # TODO Show actual total timeboxes of today
+        estimated_count = self.schedule.get_timebox_estimate_count()
+        real_count = self.schedule.get_timebox_real_count()
 
-        footnote_timebox_right: str = f"total: {total}"
+        footnote_timebox_right: str = f"total: {real_count} / {estimated_count}"
 
         self.stdscr.addstr(max_y - 2, max_x - len(footnote_timebox_right) - 1,
                            footnote_timebox_right,
