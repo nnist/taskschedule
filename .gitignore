@@ -11,3 +11,4 @@ htmlcov/
 tests/test_data/.task/
 tests/test_data/.taskrc
 .vimrc
+.mypy_cache/

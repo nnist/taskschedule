@@ -66,7 +66,7 @@ class ScreenTest(unittest.TestCase):
 
         self.screen.hide_empty = False
         self.screen.refresh_buffer()
-        self.assertEqual(len(self.screen.buffer), 60)
+        self.assertEqual(len(self.screen.buffer), 61)
 
     def test_screen_refresh_buffer_first_time_fills_buffer(self):
         self.assertEqual(self.screen.buffer, [])
@@ -81,7 +81,7 @@ class ScreenTest(unittest.TestCase):
              schedule='today+9hr', estimate='71min', project='test').save()
 
         self.screen.refresh_buffer()
-        self.assertEqual(len(self.screen.buffer), 14)
+        self.assertEqual(len(self.screen.buffer), 15)
 
     def test_screen_refresh_buffer_no_tasks(self):
         self.assertEqual(self.screen.buffer, [])

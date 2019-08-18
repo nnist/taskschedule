@@ -1,15 +1,16 @@
 from datetime import datetime as dt
 import json
 
+from tasklib import Task
 from isodate import parse_duration
 
 
 class ScheduledTask():
     """A scheduled task."""
 
-    def __init__(self, task, schedule):
+    def __init__(self, task: Task, schedule):
         self.schedule = schedule
-        self.task = task
+        self.task: Task = task
         self.glyph = '○'
         self.active = task.active
 
@@ -20,6 +21,7 @@ class ScheduledTask():
 
         self.task_id = task['id']
 
+        self.active_start = task['start']
         self.start = task['scheduled']
         self.start_time = '{}'.format(self.start.strftime('%H:%M'))
 
@@ -29,6 +31,12 @@ class ScheduledTask():
             self.end = self.start + duration
         except TypeError:
             self.end = None
+
+        try:
+            self.timebox_estimate: int = task['tb_estimate']
+            self.timebox_real: int = task['tb_real']
+        except TypeError:
+            pass
 
         self.description = task['description']
 

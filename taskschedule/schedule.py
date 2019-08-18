@@ -61,6 +61,42 @@ class Schedule():
         self.scheduled = scheduled
         self.completed = completed
 
+        self.timeboxed_task: ScheduledTask = None
+
+    def get_timebox_estimate_count(self):
+        """"Return today's estimated timebox count."""
+        total = 0
+        for task in self.tasks:
+            if task.timebox_estimate:
+                total += task.timebox_estimate
+        return total
+
+    def get_timebox_real_count(self):
+        """"Return today's real timebox count."""
+        total = 0
+        for task in self.tasks:
+            if task.timebox_real:
+                total += task.timebox_real
+        return total
+
+    def get_active_timeboxed_task(self):
+        """If a timeboxed task is currently active, return it. Otherwise,
+           return None."""
+        for task in self.tasks:
+            if task.active and task.timebox_estimate:
+                self.timeboxed_task = task
+
+        if self.timeboxed_task:
+            return self.timeboxed_task
+
+        return None
+
+    def stop_active_timeboxed_task(self):
+        """Stop the current timeboxed task."""
+        timeboxed_task = self.get_active_timeboxed_task()
+        timeboxed_task.task.stop()
+        self.timeboxed_task = None
+
     def get_tasks(self):
         """Retrieve today's scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
@@ -188,13 +224,14 @@ class Schedule():
         offsets = [0, 5]  # Hour, glyph
         offsets.append(5 + self.get_max_length('id') + 1)  # ID
         offsets.append(offsets[2] + 12)  # Time
+        offsets.append(offsets[3] + 10)  # Timeboxes
 
         add_offset = self.get_max_length('project') + 1
 
         if add_offset < 8:
             add_offset = 8
 
-        offsets.append(offsets[3] + add_offset)  # Project
+        offsets.append(offsets[4] + add_offset)  # Project
         return offsets
 
     def get_next_task(self, task):
