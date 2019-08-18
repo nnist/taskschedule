@@ -7,6 +7,7 @@ This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
 
 ## Features
 - Hook support
+- Timebox support
 
 ## Getting started
 ### Prerequisites
@@ -16,6 +17,14 @@ This is a time schedule report for [taskwarrior](https://taskwarrior.org/).
     # User Defined Attributes
     uda.estimate.type=duration
     uda.estimate.label=Est
+    ```
+- for timebox support, in `.taskrc`:
+    ```
+    # Timebox UDAs
+    uda.tb_estimate.type=numeric
+    uda.tb_estimate.label=Est
+    uda.tb_real.type=numeric
+    uda.tb_real.label=Real
     ```
 ### Installing
 First, clone the repo:
@@ -89,6 +98,17 @@ runs all scripts starting with `on-progress`, e.g. `on-progress-notify.py`.
 
 This can be used to for things like notification pop-ups, alarm sounds,
 push notifications, etc.
+
+### Timebox
+The timeboxing functionality relies on two new UDAs, namely `tb_estimate` and
+`tb_real`. Scheduled tasks with `tb_estimate` will have their completed
+and pending timeboxes rendered in the Timeboxes column.
+
+When a timeboxed task is started, its time is tracked and a progress bar
+will be shown. After the timebox time is up, the task will automatically
+stop, `tb_real` will be incremented and the Timeboxes column will be updated.
+
+Currently only one active timeboxed task is supported.
 
 ## Running the tests
 First go to the repo root, then run the tests:
