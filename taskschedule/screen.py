@@ -215,13 +215,13 @@ class Screen():
                 completed_blocks: str = self.config['timebox']['progress_done_glyph'] * progress_done
                 self.stdscr.addstr(max_y - 2, 1 + len(task_id_str),
                                    completed_blocks,
-                                   self.COLOR_DEFAULT)
+                                   self.COLOR_BLUE)
 
                 # Draw pending blocks
                 pending_blocks: str = self.config['timebox']['progress_pending_glyph'] * progress_remaining
                 self.stdscr.addstr(max_y - 2, 1 + len(task_id_str) + len(completed_blocks),
                                    pending_blocks,
-                                   self.COLOR_DEFAULT)
+                                   self.COLOR_HOUR)
 
                 # Draw time
                 time1 = datetime.timedelta(seconds=active_time)
