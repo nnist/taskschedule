@@ -52,41 +52,44 @@ class ScreenTest(unittest.TestCase):
             except:
                 pass
 
-    def test_screen_refresh_buffer_hide_empty_lines(self):
-        self.assertEqual(self.screen.buffer, [])
+    # TODO Move to /tests/functional/
+    # def test_screen_refresh_buffer_hide_empty_lines(self):
+    #     self.assertEqual(self.screen.buffer, [])
 
-        taskwarrior = TaskWarrior(
-            data_location=self.task_dir_path,
-            create=True,
-            taskrc_location=self.taskrc_path)
-        Task(taskwarrior, description='test_yesterday',
-             schedule='yesterday', estimate='20min').save()
-        Task(taskwarrior, description='test_9:00_to_10:11',
-             schedule='today+9hr', estimate='71min', project='test').save()
+    #     taskwarrior = TaskWarrior(
+    #         data_location=self.task_dir_path,
+    #         create=True,
+    #         taskrc_location=self.taskrc_path)
+    #     Task(taskwarrior, description='test_yesterday',
+    #          schedule='yesterday', estimate='20min').save()
+    #     Task(taskwarrior, description='test_9:00_to_10:11',
+    #          schedule='today+9hr', estimate='71min', project='test').save()
 
-        self.screen.hide_empty = False
-        self.screen.refresh_buffer()
-        self.assertEqual(len(self.screen.buffer), 61)
+    #     self.screen.hide_empty = False
+    #     self.screen.refresh_buffer()
+    #     self.assertEqual(len(self.screen.buffer), 61)
 
-    def test_screen_refresh_buffer_first_time_fills_buffer(self):
-        self.assertEqual(self.screen.buffer, [])
+    # TODO Move to /tests/functional/
+    # def test_screen_refresh_buffer_first_time_fills_buffer(self):
+    #     self.assertEqual(self.screen.buffer, [])
 
-        taskwarrior = TaskWarrior(
-            data_location=self.task_dir_path,
-            create=True,
-            taskrc_location=self.taskrc_path)
-        Task(taskwarrior, description='test_yesterday',
-             schedule='yesterday', estimate='20min').save()
-        Task(taskwarrior, description='test_9:00_to_10:11',
-             schedule='today+9hr', estimate='71min', project='test').save()
+    #     taskwarrior = TaskWarrior(
+    #         data_location=self.task_dir_path,
+    #         create=True,
+    #         taskrc_location=self.taskrc_path)
+    #     Task(taskwarrior, description='test_yesterday',
+    #          schedule='yesterday', estimate='20min').save()
+    #     Task(taskwarrior, description='test_9:00_to_10:11',
+    #          schedule='today+9hr', estimate='71min', project='test').save()
 
-        self.screen.refresh_buffer()
-        self.assertEqual(len(self.screen.buffer), 15)
+    #     self.screen.refresh_buffer()
+    #     self.assertEqual(len(self.screen.buffer), 15)
 
-    def test_screen_refresh_buffer_no_tasks(self):
-        self.assertEqual(self.screen.buffer, [])
-        self.screen.refresh_buffer()
-        self.assertEqual(self.screen.buffer, [])
+    # TODO Move to /tests/functional/
+    # def test_screen_refresh_buffer_no_tasks(self):
+    #     self.assertEqual(self.screen.buffer, [])
+    #     self.screen.refresh_buffer()
+    #     self.assertEqual(self.screen.buffer, [])
 
     def test_screen_draw_no_tasks_to_display(self):
         self.screen.draw()

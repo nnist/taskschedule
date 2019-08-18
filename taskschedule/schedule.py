@@ -3,10 +3,12 @@
 
 import os
 import datetime
+import importlib
+import sys
 
 from tasklib import TaskWarrior, Task
 
-from taskschedule.scheduled_task import ScheduledTask
+from taskschedule.scheduled_task import ScheduledTask, ScheduledTaskQuerySet, PatchedTaskWarrior
 
 
 class UDADoesNotExistError(Exception):
@@ -54,36 +56,35 @@ class Schedule():
         if os.path.isfile(self.taskrc_location) is False:
             raise TaskrcDoesNotExistError('.taskrc not found')
 
-        self.tasks = []
-
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
         self.scheduled = scheduled
         self.completed = completed
 
         self.timeboxed_task: ScheduledTask = None
+        self.tasks: ScheduledTaskQuerySet = self.get_tasks()
 
     def get_timebox_estimate_count(self):
         """"Return today's estimated timebox count."""
         total = 0
         for task in self.tasks:
-            if task.timebox_estimate:
-                total += task.timebox_estimate
+            if task['tb_estimate']:
+                total += task['tb_estimate']
         return total
 
     def get_timebox_real_count(self):
         """"Return today's real timebox count."""
         total = 0
         for task in self.tasks:
-            if task.timebox_real:
-                total += task.timebox_real
+            if task['tb_real']:
+                total += task['tb_real']
         return total
 
     def get_active_timeboxed_task(self):
         """If a timeboxed task is currently active, return it. Otherwise,
            return None."""
         for task in self.tasks:
-            if task.active and task.timebox_estimate:
+            if task.active and task['tb_estimate']:
                 self.timeboxed_task = task
 
         if self.timeboxed_task:
@@ -94,11 +95,11 @@ class Schedule():
     def stop_active_timeboxed_task(self):
         """Stop the current timeboxed task."""
         timeboxed_task = self.get_active_timeboxed_task()
-        timeboxed_task.task.stop()
+        timeboxed_task.stop()
         self.timeboxed_task = None
 
     def get_tasks(self):
-        """Retrieve today's scheduled tasks from taskwarrior."""
+        """Retrieve scheduled tasks from taskwarrior."""
         taskwarrior = TaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
                                   taskrc_location=self.taskrc_location)
 
@@ -111,36 +112,24 @@ class Schedule():
             raise UDADoesNotExistError(('uda.estimate.label does not exist '
                                         'in .taskrc'))
 
-        scheduled_tasks = []
-        filtered_tasks = []
+        taskwarrior = PatchedTaskWarrior(self.tw_data_dir, self.tw_data_dir_create,
+                                  taskrc_location=self.taskrc_location)
+        backend = taskwarrior.tasks[0].backend
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend)
 
         if self.scheduled_before is not None and self.scheduled_after is not None:
-            filtered_tasks.extend(taskwarrior.tasks.filter(
+            queryset = queryset.filter(
                 scheduled__before=self.scheduled_before,
-                scheduled__after=self.scheduled_after,
-                status='pending'))
-
-            if self.completed:
-                filtered_tasks.extend(taskwarrior.tasks.filter(
-                    scheduled__before=self.scheduled_before,
-                    scheduled__after=self.scheduled_after,
-                    status='completed'))
+                scheduled__after=self.scheduled_after)
+            if not self.completed:
+                queryset = queryset.filter(status__not='completed')
         else:
-            filtered_tasks.extend(taskwarrior.tasks.filter(
-                scheduled=self.scheduled,
-                status='pending'))
+            queryset = queryset.filter(scheduled=self.scheduled)
+            if not self.completed:
+                queryset = queryset.filter(status__not='completed')
 
-            if self.completed:
-                filtered_tasks.extend(taskwarrior.tasks.filter(
-                    scheduled=self.scheduled,
-                    status='completed'))
-
-        for task in filtered_tasks:
-            scheduled_task = ScheduledTask(task, self)
-            scheduled_tasks.append(scheduled_task)
-
-        scheduled_tasks.sort(key=lambda task: task.start)
-        return scheduled_tasks
+        self.tasks = queryset
+        return self.tasks
 
     def load_tasks(self):
         """"Update the schedule's tasks. Return True if any tasks were updated,
@@ -158,7 +147,7 @@ class Schedule():
            to a datetime object."""
 
         taskwarrior = TaskWarrior()
-        task = Task(taskwarrior, description='dummy')
+        task = ScheduledTask(taskwarrior, description='dummy')
         task['due'] = synonym
         return task['due']
 
@@ -193,12 +182,12 @@ class Schedule():
             while time <= end:
                 task_list = []
                 for task in self.tasks:
-                    start = task.start
+                    start = task['scheduled']
                     if start.date() == date:
                         if start.hour == int(time.strftime("%H")):
                             task_list.append(task)
 
-                task_list = sorted(task_list, key=lambda k: k.start)
+                task_list = sorted(task_list, key=lambda k: k['scheduled'])
                 hours[time.strftime("%H")] = task_list
                 time += datetime.timedelta(minutes=slot_time)
             days[date.isoformat()] = hours
@@ -212,7 +201,7 @@ class Schedule():
         """
         max_length = 0
         for task in self.tasks:
-            length = len(str(task.task[value]))
+            length = len(str(task[value]))
             if length > max_length:
                 max_length = length
 

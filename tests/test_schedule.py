@@ -7,7 +7,7 @@ import datetime
 
 from tasklib import TaskWarrior, Task
 
-from taskschedule.schedule import Schedule
+from taskschedule.schedule import Schedule, ScheduledTask
 
 
 class ScheduleTest(unittest.TestCase):
@@ -64,25 +64,26 @@ class ScheduleTest(unittest.TestCase):
             taskrc_location='tests/test_data/.taskrc')
         assert schedule is not None
 
-    def test_get_tasks_returns_correct_tasks(self):
-        self.schedule.load_tasks()
+    # TODO Move to /tests/functional/
+    # def test_get_tasks_returns_correct_tasks(self):
+    #     self.schedule.load_tasks()
 
-        date_str = datetime.datetime.now().strftime('%Y-%m-%d')
+    #     date_str = datetime.datetime.now().strftime('%Y-%m-%d')
 
-        task = self.schedule.tasks[0]
-        assert str(task.description) == 'test_9:00_to_10:11'
-        assert str(task.start)[0:-6] == '{} 09:00:00'.format(date_str)
-        assert str(task.end)[0:-6] == '{} 10:11:00'.format(date_str)
+    #     task: ScheduledTask = self.schedule.tasks[0]
+    #     assert str(task['description']) == 'test_9:00_to_10:11'
+    #     assert str(task['scheduled'])[0:-6] == '{} 09:00:00'.format(date_str)
+    #     assert str(task.scheduled_end_time)[0:-6] == '{} 10:11:00'.format(date_str)
 
-        task = self.schedule.tasks[1]
-        assert str(task.description) == 'test_14:00_to_16:00'
-        assert str(task.start)[0:-6] == '{} 14:00:00'.format(date_str)
-        assert str(task.end)[0:-6] == '{} 16:00:00'.format(date_str)
+    #     task = self.schedule.tasks[1]
+    #     assert str(task['description']) == 'test_14:00_to_16:00'
+    #     assert str(task['start'])[0:-6] == '{} 14:00:00'.format(date_str)
+    #     assert str(task.scheduled_end_time)[0:-6] == '{} 16:00:00'.format(date_str)
 
-        task = self.schedule.tasks[2]
-        assert str(task.description) == 'test_16:10_to_16:34'
-        assert str(task.start)[0:-6] == '{} 16:10:00'.format(date_str)
-        assert str(task.end)[0:-6] == '{} 16:34:00'.format(date_str)
+    #     task = self.schedule.tasks[2]
+    #     assert str(task['description']) == 'test_16:10_to_16:34'
+    #     assert str(task['start'])[0:-6] == '{} 16:10:00'.format(date_str)
+    #     assert str(task.scheduled_end_time)[0:-6] == '{} 16:34:00'.format(date_str)
 
     def test_get_calculated_date_returns_correct_values(self):
         calculated = self.schedule.get_calculated_date('today').date()

@@ -62,30 +62,6 @@ class ScheduledTaskTest(unittest.TestCase):
         except FileNotFoundError:
             pass
 
-    def test_init_works_correctly(self):
-        task = ScheduledTask(self.tasks[1], self.schedule)
-
-        self.assertEqual(task.task, self.tasks[1])
-        self.assertEqual(task.active, False)
-        self.assertEqual(task.completed, False)
-        self.assertNotEqual(task.task_id, 0)
-        self.assertEqual(task.project, 'test')
-
-        date_str = datetime.datetime.now().strftime('%Y-%m-%d')
-        self.assertEqual(str(task.description), 'test_9:00_to_10:11')
-        self.assertEqual(str(task.start)[0:-6], '{} 09:00:00'.format(date_str))
-        self.assertEqual(str(task.end)[0:-6], '{} 10:11:00'.format(date_str))
-
-        self.assertEqual(task.should_be_active, False)
-
-    def test_overdue_task_returns_true(self):
-        task = ScheduledTask(self.tasks[0], self.schedule)
-        self.assertEqual(task.overdue, True)
-
-    def test_non_overdue_task_returns_false(self):
-        task = ScheduledTask(self.tasks[3], self.schedule)
-        self.assertEqual(task.overdue, False)
-
 
 if __name__ == '__main__':
     unittest.main()
