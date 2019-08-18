@@ -22,6 +22,11 @@ class ScheduleTest(unittest.TestCase):
             file.write('# User Defined Attributes\n')
             file.write('uda.estimate.type=duration\n')
             file.write('uda.estimate.label=Est\n')
+            file.write('# User Defined Attributes\n')
+            file.write('uda.tb_estimate.type=numeric\n')
+            file.write('uda.tb_estimate.label=Est\n')
+            file.write('uda.tb_real.type=numeric\n')
+            file.write('uda.tb_real.label=Real\n')
 
         # Create a sample empty .task directory
         os.makedirs(self.task_dir_path)
