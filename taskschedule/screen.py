@@ -4,6 +4,7 @@ import os
 import datetime
 from typing import List
 import math
+from tasklib import Task
 
 from taskschedule.schedule import Schedule
 from taskschedule.hooks import run_hooks
@@ -182,7 +183,7 @@ class Screen():
         active_timebox: bool = True
 
         # TODO Refactor, this costs a lot of performance
-        active_tasks = []
+        active_tasks: List[Task] = []
         for task in self.schedule.tasks:
             if task.active:
                 active_tasks.append(task)
@@ -202,7 +203,7 @@ class Screen():
             current_time = datetime.datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
             max_duration = datetime.timedelta(minutes=self.config['timebox']['time']).total_seconds()
-            progress = (active_time / max_duration) * 100
+            progress: float = (active_time / max_duration) * 100
 
             if progress > 99:
                 footnote_timebox_left = f"timebox done!"
@@ -217,8 +218,8 @@ class Screen():
                 self.stdscr.clrtoeol()
             else:
                 # Draw 25 blocks to show progress
-                progress_done = math.ceil(progress / 4)
-                progress_remaining = int((100 - progress) / 4)
+                progress_done: int = math.ceil(progress / 4)
+                progress_remaining: int = int((100 - progress) / 4)
                 done_blocks: str = self.config['timebox']['done_glyph'] * progress_done
                 remaining_blocks: str = self.config['timebox']['pending_glyph'] * progress_remaining
                 progress_blocks: str = f"{done_blocks}{remaining_blocks}"
