@@ -182,7 +182,6 @@ class Screen():
 
         # Draw timebox status
         timeboxed_task: ScheduledTask = self.schedule.get_active_timeboxed_task()
-        footnote_timebox_left: str = ""
         if timeboxed_task:
             active_start_time: datetime.datetime = timeboxed_task.active_start
             active_start_time.replace(tzinfo=None)
@@ -192,7 +191,6 @@ class Screen():
             progress: float = (active_time / max_duration) * 100
 
             if progress > 99:
-                footnote_timebox_left = f"timebox done!"
                 timeboxed_task.task.stop()
                 real = timeboxed_task.task['tb_real']
                 if real:
@@ -203,13 +201,29 @@ class Screen():
                 self.stdscr.move(max_y - 2, 0)
                 self.stdscr.clrtoeol()
             else:
-                # Draw 25 blocks to show progress
                 progress_done: int = math.ceil(progress / 4)
                 progress_remaining: int = int((100 - progress) / 4)
-                done_blocks: str = self.config['timebox']['progress_done_glyph'] * progress_done
-                remaining_blocks: str = self.config['timebox']['progress_pending_glyph'] * progress_remaining
-                progress_blocks: str = f"{done_blocks}{remaining_blocks}"
 
+                # Draw task id
+                task_id = timeboxed_task.task_id
+                task_id_str = f"task {task_id}: "
+                self.stdscr.addstr(max_y - 2, 1,
+                                   task_id_str,
+                                   self.COLOR_DEFAULT)
+
+                # Draw completed blocks
+                completed_blocks: str = self.config['timebox']['progress_done_glyph'] * progress_done
+                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str),
+                                   completed_blocks,
+                                   self.COLOR_DEFAULT)
+
+                # Draw pending blocks
+                pending_blocks: str = self.config['timebox']['progress_pending_glyph'] * progress_remaining
+                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str) + len(completed_blocks),
+                                   pending_blocks,
+                                   self.COLOR_DEFAULT)
+
+                # Draw time
                 time1 = datetime.timedelta(seconds=active_time)
                 time1_fmt = str(time1).split('.', 2)[0]
                 time1_minutes = str(time1_fmt).split(':', 2)[1]
@@ -220,19 +234,19 @@ class Screen():
                 time2_minutes = str(time2_fmt).split(':', 2)[1]
                 time2_seconds = str(time2_fmt).split(':', 2)[2]
 
-                task_id = timeboxed_task.task_id
-                progress_num: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
-                footnote_timebox_left = f"task {task_id}: {progress_blocks} {progress_num}"
+                progress_time: str = f"{time1_minutes}:{time1_seconds}/{time2_minutes}:{time2_seconds}"
+                self.stdscr.addstr(max_y - 2, 1 + len(task_id_str) + len(completed_blocks) + len(pending_blocks) + 1,
+                                   progress_time,
+                                   self.COLOR_DEFAULT)
         else:
-            footnote_timebox_left = "no active timebox"
+            self.stdscr.addstr(max_y - 2, 1,
+                               "no active timebox",
+                               self.COLOR_DEFAULT)
 
         total = 4  # TODO Show actual total timeboxes of today
 
         footnote_timebox_right: str = f"total: {total}"
 
-        self.stdscr.addstr(max_y - 2, 1,
-                           footnote_timebox_left,
-                           self.COLOR_DEFAULT)
         self.stdscr.addstr(max_y - 2, max_x - len(footnote_timebox_right) - 1,
                            footnote_timebox_right,
                            self.COLOR_DEFAULT)
