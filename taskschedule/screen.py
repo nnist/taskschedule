@@ -191,7 +191,7 @@ class Screen():
             progress: float = (active_time / max_duration) * 100
 
             if progress > 99:
-                timeboxed_task.task.stop()
+                self.schedule.stop_active_timeboxed_task()
                 real = timeboxed_task.task['tb_real']
                 if real:
                     timeboxed_task.task['tb_real'] = int(real) + 1

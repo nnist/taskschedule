@@ -62,7 +62,6 @@ class Schedule():
         self.completed = completed
 
         self.timeboxed_task: ScheduledTask = None
-        self.timebox_active: bool = False
 
     def get_active_timeboxed_task(self):
         """If a timeboxed task is currently active, return it. Otherwise,
@@ -75,6 +74,12 @@ class Schedule():
             return self.timeboxed_task
 
         return None
+
+    def stop_active_timeboxed_task(self):
+        """Stop the current timeboxed task."""
+        timeboxed_task = self.get_active_timeboxed_task()
+        timeboxed_task.task.stop()
+        self.timeboxed_task = None
 
     def get_tasks(self):
         """Retrieve today's scheduled tasks from taskwarrior."""
