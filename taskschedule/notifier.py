@@ -57,17 +57,6 @@ class Notifier:
                 ]
             )
         else:
-            subprocess.run(
-                [
-                    "termux-notification",
-                    "--priority",
-                    urgency,
-                    "--title",
-                    summary,
-                    "--content",
-                    body,
-                ]
-            )
             subprocess.run(["notify-send", "--urgency", urgency, summary, body])
 
             subprocess.Popen(
