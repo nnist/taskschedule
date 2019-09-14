@@ -9,15 +9,8 @@ from isodate import parse_duration
 
 # Patch TaskWarrior to return ScheduledTask instead of Task
 class PatchedTaskWarrior(TaskWarrior):
-    def __init__(
-        self,
-        data_location=None,
-        create=True,
-        taskrc_location=None,
-        task_command="task",
-        version_override=None,
-    ):
-        super(PatchedTaskWarrior, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(PatchedTaskWarrior, self).__init__(*args, **kwargs)
         self.tasks = ScheduledTaskQuerySet(self)
 
     def filter_tasks(self, filter_obj):
