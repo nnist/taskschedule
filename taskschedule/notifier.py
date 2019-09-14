@@ -18,7 +18,12 @@ class Notifier:
         """Send a notification for the given task."""
 
         home = os.path.expanduser("~")
-        summary: str = "Scheduled task: {}".format(task["id"])
+
+        scheduled_time = task["scheduled"]
+        scheduled_time_formatted = scheduled_time.strftime("%H:%M")
+
+        task_id: str = task["id"]
+        summary: str = f"{scheduled_time_formatted} | Task {task_id}"
         body: str = "{}".format(task["description"])
         urgency: str = "critical"
         uuid: str = task["uuid"]
