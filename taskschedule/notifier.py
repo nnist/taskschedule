@@ -94,8 +94,8 @@ def main(argv):
         notifier = Notifier()
         notifier.send_notifications()
 
-        if args.refresh:
-            time.sleep(args.refresh)
+        if args.rate:
+            time.sleep(args.rate)
         else:
             break
 
