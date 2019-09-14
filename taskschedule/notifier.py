@@ -21,14 +21,60 @@ class Notifier:
         summary: str = "Scheduled task: {}".format(task["id"])
         body: str = "{}".format(task["description"])
         urgency: str = "critical"
+        uuid: str = task["uuid"]
 
-        subprocess.run(["notify-send", "--urgency", urgency, summary, body])
+        if "termux" in str(os.getenv("PREFIX")):
+            urgency = "max"
+            subprocess.run(
+                [
+                    "termux-notification",
+                    "--title",
+                    summary,
+                    "--content",
+                    body,
+                    "--button1",
+                    "Start",
+                    "--button1-action",
+                    f"task {uuid} start",
+                    "--button2",
+                    "Stop",
+                    "--button2-action",
+                    f"task {uuid} stop",
+                    "--on-delete",
+                    "echo deleted",
+                    "--action",
+                    "echo action",
+                    "--id",
+                    f"taskschedule-{uuid}",
+                    "--vibrate",
+                    "200",
+                    "--priority",
+                    urgency,
+                    "--led-off",
+                    "200",
+                    "--led-on",
+                    "200",
+                ]
+            )
+        else:
+            subprocess.run(
+                [
+                    "termux-notification",
+                    "--priority",
+                    urgency,
+                    "--title",
+                    summary,
+                    "--content",
+                    body,
+                ]
+            )
+            subprocess.run(["notify-send", "--urgency", urgency, summary, body])
 
-        subprocess.Popen(
-            ["aplay", home + "/.taskschedule/hooks/drip.wav"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.STDOUT,
-        )
+            subprocess.Popen(
+                ["aplay", home + "/.taskschedule/hooks/drip.wav"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.STDOUT,
+            )
 
     def send_notifications(self):
         """Send notifications for scheduled tasks that should be started."""
