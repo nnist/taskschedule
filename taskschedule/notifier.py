@@ -1,7 +1,10 @@
+import time
 import os
 import subprocess
 from typing import List
 from scheduled_task import ScheduledTask, PatchedTaskWarrior
+import argparse
+import sys
 
 
 class Notifier:
@@ -78,6 +81,31 @@ class Notifier:
                 self.notify(task)
 
 
+def main(argv):
+    parser = argparse.ArgumentParser(
+        description="""Send notifications for scheduled tasks."""
+    )
+    parser.add_argument(
+        "-r", "--rate", help="check tasks every n seconds", type=int, default=0
+    )
+    args = parser.parse_args(argv)
+
+    while True:
+        notifier = Notifier()
+        notifier.send_notifications()
+
+        if args.refresh:
+            time.sleep(args.refresh)
+        else:
+            break
+
+
 if __name__ == "__main__":
-    notifier = Notifier()
-    notifier.send_notifications()
+    try:
+        main(sys.argv[1:])
+    except KeyboardInterrupt:
+        print("Interrupted by user.")
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)  # pylint: disable=protected-access
