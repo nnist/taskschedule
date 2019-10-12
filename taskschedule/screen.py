@@ -247,9 +247,11 @@ class Screen:
 
         # Draw footnote
         if self.scheduled_before and self.scheduled_after:
-            footnote = "{} tasks - from {} until {}".format(
-                len(self.schedule.tasks), self.scheduled_after, self.scheduled_before
-            )
+            count = len(self.schedule.tasks)
+            date_format = "%a %d %b %Y"
+            before = self.scheduled_before.strftime(date_format)
+            after = self.scheduled_after.strftime(date_format)
+            footnote = f"{count} tasks - from {after} until {before}"
         else:
             footnote = "{} tasks - {}".format(len(self.schedule.tasks), self.scheduled)
 
