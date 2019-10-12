@@ -1,12 +1,12 @@
-from datetime import datetime as dt
 import json
-
-from tasklib.task import Task, TaskQuerySet
-from tasklib.backends import TaskWarriorException
-from tasklib import TaskWarrior
-from isodate import parse_duration
 import os
 import tempfile
+from datetime import datetime as dt
+
+from isodate import parse_duration
+from tasklib import TaskWarrior
+from tasklib.backends import TaskWarriorException
+from tasklib.task import Task, TaskQuerySet
 
 
 # Patch TaskWarrior to return ScheduledTask instead of Task
