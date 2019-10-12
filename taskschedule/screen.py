@@ -483,7 +483,7 @@ class Screen:
                         self.buffer.append((current_line, 5, str(task["id"]), color))
 
                     # Draw the time column.
-                    # Do not show the time if the task is not scheduled at a
+                    # Do not show the start time if the task is not scheduled at a
                     # specific time, so the column is not cluttered with tasks
                     # having start times as 00:00.
                     start_dt: datetime = task["scheduled"]
@@ -492,7 +492,13 @@ class Screen:
                         and start_dt.minute == 0
                         and start_dt.second == 0
                     ):
-                        formatted_time = ""
+                        if task.scheduled_end_time:
+                            end_time = "{}".format(
+                                task.scheduled_end_time.strftime("%H:%M")
+                            )
+                            formatted_time = "      {}".format(end_time)
+                        else:
+                            formatted_time = ""
                     else:
                         start_time = "{}".format(start_dt.strftime("%H:%M"))
                         if task.scheduled_end_time is None:
