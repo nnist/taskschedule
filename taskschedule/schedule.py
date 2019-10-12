@@ -2,6 +2,7 @@
    scheduled tasks from taskwarrior and displaying them in a table."""
 
 import datetime
+from cached_property import cached_property
 
 from tasklib import TaskWarrior
 
@@ -41,7 +42,6 @@ class Schedule:
         self.scheduled_after = scheduled_after
 
         self.timeboxed_task: ScheduledTask = None
-        self.tasks: ScheduledTaskQuerySet = self.get_tasks()
 
     def get_timebox_estimate_count(self):
         """"Return today's estimated timebox count."""
@@ -77,23 +77,16 @@ class Schedule:
         timeboxed_task.stop()
         self.timeboxed_task = None
 
-    def get_tasks(self):
+    def clear_cache(self):
+        if self.tasks:
+            del self.__dict__["tasks"]
+
+    @cached_property
+    def tasks(self):
         """Retrieve scheduled tasks from taskwarrior."""
         queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=self.backend)
 
-        self.tasks = queryset
-        return self.tasks
-
-    def load_tasks(self):
-        """"Update the schedule's tasks. Return True if any tasks were updated,
-            otherwise return False."""
-        new_tasks = self.get_tasks()
-
-        if self.tasks == new_tasks:
-            return False
-
-        self.tasks = new_tasks
-        return True
+        return queryset
 
     def get_calculated_date(self, synonym):
         """Leverage the `task calc` command to convert a date synonym string

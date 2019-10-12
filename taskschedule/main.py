@@ -175,6 +175,7 @@ def main(argv):
                 last_refresh_time = time.time()
             elif key == KEY_RESIZE or time.time() > last_refresh_time + args.refresh:
                 last_refresh_time = time.time()
+                schedule.clear_cache()
                 screen.refresh_buffer()
                 screen.draw()
                 napms(50)

@@ -311,7 +311,6 @@ class Screen:
         self.prev_buffer = self.buffer
         self.buffer = []
 
-        self.schedule.load_tasks()
         tasks = self.schedule.tasks
 
         if not self.schedule.tasks:
