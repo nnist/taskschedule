@@ -1,13 +1,14 @@
-from taskschedule.utils import calculate_date
 import curses
-import time
-import datetime
-from typing import List
 import math
+import time
+from datetime import datetime, timedelta
+from typing import List, Tuple
 
-from taskschedule.scheduled_task import ScheduledTask
-from taskschedule.hooks import run_hooks
 from taskschedule.config_parser import ConfigParser
+from taskschedule.hooks import run_hooks
+from taskschedule.schedule import Schedule
+from taskschedule.scheduled_task import ScheduledTask
+from taskschedule.utils import calculate_date
 
 
 class Screen:
@@ -15,9 +16,9 @@ class Screen:
 
     def __init__(
         self,
-        schedule,
-        scheduled_after,
-        scheduled_before,
+        schedule: Schedule,
+        scheduled_after: datetime,
+        scheduled_before: datetime,
         hide_projects=False,
         hide_empty=False,
     ):
@@ -37,8 +38,8 @@ class Screen:
 
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
-        self.buffer = []
-        self.prev_buffer = []
+        self.buffer: List[Tuple[int, int, str, curses.color_pair]] = []
+        self.prev_buffer: List[Tuple[int, int, str, curses.color_pair]] = []
         self.init_colors()
 
         self.current_task = None
@@ -110,7 +111,7 @@ class Screen:
             self.COLOR_DIVIDER_TEXT = curses.color_pair(0)
             self.COLOR_BLUE = curses.color_pair(0)
 
-    def get_task_color(self, task, alternate):
+    def get_task_color(self, task: ScheduledTask, alternate: bool) -> curses.color_pair:
         """Return the color for the given task."""
         color = None
 
@@ -139,15 +140,15 @@ class Screen:
 
         return color
 
-    def get_maxyx(self):
+    def get_maxyx(self) -> Tuple[int, int]:
         """Return the screen's maximum height and width."""
         max_y, max_x = self.stdscr.getmaxyx()
         return max_y, max_x
 
-    def scroll(self, direction):
+    def scroll(self, lines: int):
         """Scroll the curses pad by n lines."""
         max_y, max_x = self.get_maxyx()
-        self.scroll_level += direction
+        self.scroll_level += lines
         if self.scroll_level < 0:
             self.scroll_level = 0
 
@@ -161,11 +162,11 @@ class Screen:
         # Draw timebox status
         timeboxed_task: ScheduledTask = self.schedule.get_active_timeboxed_task()
         if timeboxed_task:
-            active_start_time: datetime.datetime = timeboxed_task["start"]
+            active_start_time: datetime = timeboxed_task["start"]
             active_start_time.replace(tzinfo=None)
-            current_time = datetime.datetime.now()
+            current_time = datetime.now()
             active_time = current_time.timestamp() - active_start_time.timestamp()
-            max_duration = datetime.timedelta(
+            max_duration = timedelta(
                 minutes=self.config["timebox"]["time"]
             ).total_seconds()
             progress: float = (active_time / max_duration) * 100
@@ -209,12 +210,12 @@ class Screen:
                 )
 
                 # Draw time
-                time1 = datetime.timedelta(seconds=active_time)
+                time1 = timedelta(seconds=active_time)
                 time1_fmt = str(time1).split(".", 2)[0]
                 time1_minutes = str(time1_fmt).split(":", 2)[1]
                 time1_seconds = str(time1_fmt).split(":", 2)[2]
 
-                time2 = datetime.timedelta(minutes=self.config["timebox"]["time"])
+                time2 = timedelta(minutes=self.config["timebox"]["time"])
                 time2_fmt = str(time2).split(".", 2)[0]
                 time2_minutes = str(time2_fmt).split(":", 2)[1]
                 time2_seconds = str(time2_fmt).split(":", 2)[2]
@@ -279,7 +280,9 @@ class Screen:
             self.draw_footnote()
             self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y - 3, max_x - 1)
 
-    def render_timeboxes(self, task, color) -> List[dict]:
+    def render_timeboxes(
+        self, task: ScheduledTask, color: curses.color_pair
+    ) -> List[dict]:
         """Render a task's timebox column."""
 
         timeboxes: List[dict] = []
@@ -387,7 +390,7 @@ class Screen:
             date_format = "%a %d %b %Y"
             formatted_date = calculate_date(day).strftime(date_format)
             divider_pt2 = " " + formatted_date + " "
-            if day == datetime.datetime.now().date().isoformat():
+            if day == datetime.now().date().isoformat():
                 self.buffer.append(
                     (
                         current_line,
@@ -434,7 +437,7 @@ class Screen:
                     current_hour = time.localtime().tm_hour
                     if (
                         int(hour) == current_hour
-                        and day == datetime.datetime.now().date().isoformat()
+                        and day == datetime.now().date().isoformat()
                     ):
                         self.buffer.append(
                             (current_line, 0, hour, self.COLOR_HOUR_CURRENT)
@@ -460,7 +463,7 @@ class Screen:
                     if hour_ != "":
                         if (
                             int(hour) == current_hour
-                            and day == datetime.datetime.now().date().isoformat()
+                            and day == datetime.now().date().isoformat()
                         ):
                             self.buffer.append(
                                 (current_line, 0, hour_, self.COLOR_HOUR_CURRENT)
@@ -484,7 +487,7 @@ class Screen:
                     # Do not show the time if the task is not scheduled at a
                     # specific time, so the column is not cluttered with tasks
                     # having start times as 00:00.
-                    start_dt: datetime.datetime = task["scheduled"]
+                    start_dt: datetime = task["scheduled"]
                     if (
                         start_dt.hour == 0
                         and start_dt.minute == 0

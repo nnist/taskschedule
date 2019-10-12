@@ -1,28 +1,23 @@
 """Command line interface of taskschedule"""
 
 import argparse
-import time
-import sys
 import os
-
-from taskschedule.schedule import Schedule
-
-from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
+import sys
+import time
+from curses import KEY_DOWN, KEY_RESIZE, KEY_UP
 from curses import error as curses_error
+from curses import napms
 
-from taskschedule.screen import Screen
-from taskschedule.schedule import (
-    UDADoesNotExistError,
-    TaskrcDoesNotExistError,
-    TaskDirDoesNotExistError,
-)
 from tasklib import TaskWarrior
 
-from taskschedule.scheduled_task import (
-    ScheduledTask,
-    ScheduledTaskQuerySet,
-    PatchedTaskWarrior,
+from taskschedule.schedule import (
+    Schedule,
+    TaskDirDoesNotExistError,
+    TaskrcDoesNotExistError,
+    UDADoesNotExistError,
 )
+from taskschedule.scheduled_task import PatchedTaskWarrior
+from taskschedule.screen import Screen
 
 
 def main(argv):
