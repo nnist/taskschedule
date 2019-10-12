@@ -38,8 +38,8 @@ class Screen:
 
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
-        self.buffer: List[Tuple[int, int, str, curses.color_pair]] = []
-        self.prev_buffer: List[Tuple[int, int, str, curses.color_pair]] = []
+        self.buffer: List[Tuple[int, int, str, int]] = []
+        self.prev_buffer: List[Tuple[int, int, str, int]] = []
         self.init_colors()
 
         self.current_task = None
@@ -111,7 +111,7 @@ class Screen:
             self.COLOR_DIVIDER_TEXT = curses.color_pair(0)
             self.COLOR_BLUE = curses.color_pair(0)
 
-    def get_task_color(self, task: ScheduledTask, alternate: bool) -> curses.color_pair:
+    def get_task_color(self, task: ScheduledTask, alternate: bool) -> int:
         """Return the color for the given task."""
         color = None
 
@@ -280,9 +280,7 @@ class Screen:
             self.draw_footnote()
             self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y - 3, max_x - 1)
 
-    def render_timeboxes(
-        self, task: ScheduledTask, color: curses.color_pair
-    ) -> List[dict]:
+    def render_timeboxes(self, task: ScheduledTask, color: int) -> List[dict]:
         """Render a task's timebox column."""
 
         timeboxes: List[dict] = []
