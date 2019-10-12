@@ -38,8 +38,8 @@ class ScheduledTaskQuerySet(TaskQuerySet):
 class ScheduledTask(Task):
     """A scheduled task."""
 
-    def __init__(self, backend, **kwargs):
-        super(ScheduledTask, self).__init__(backend)
+    def __init__(self, *args, **kwargs):
+        super(ScheduledTask, self).__init__(*args, **kwargs)
         # TODO Create reference to Schedule
         self.glyph = "○"
 
