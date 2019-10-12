@@ -122,6 +122,7 @@ class Schedule:
 
         # Disable _forcecolor because it breaks tw config output
         taskwarrior.overrides.update({"_forcecolor": "off"})
+
         if taskwarrior.config.get("uda.estimate.type") is None:
             raise UDADoesNotExistError(
                 ("uda.estimate.type does not exist " "in .taskrc")
