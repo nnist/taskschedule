@@ -1,11 +1,9 @@
 import curses
 import time
-import os
 import datetime
 from typing import List
 import math
 
-from taskschedule.schedule import Schedule
 from taskschedule.scheduled_task import ScheduledTask
 from taskschedule.hooks import run_hooks
 from taskschedule.config_parser import ConfigParser
@@ -16,29 +14,16 @@ class Screen:
 
     def __init__(
         self,
-        tw_data_dir=None,
-        taskrc_location=None,
-        refresh_rate=1,
-        hide_empty=True,
-        scheduled_before=None,
-        scheduled_after=None,
-        scheduled=None,
-        completed=True,
+        schedule,
+        scheduled_after,
+        scheduled_before,
         hide_projects=False,
+        hide_empty=False,
     ):
-        home = os.path.expanduser("~")
-
         self.config = ConfigParser().config()
-
-        if tw_data_dir is None:
-            tw_data_dir = home + "/.task"
-
-        self.tw_data_dir = tw_data_dir
-
-        if taskrc_location is None:
-            taskrc_location = home + "/.taskrc"
-
-        self.taskrc_location = taskrc_location
+        # TODO Calculate these dates outside of this class
+        self.scheduled_before = scheduled_before
+        self.scheduled_after = scheduled_after
 
         self.stdscr = curses.initscr()
         self.stdscr.nodelay(True)
@@ -49,13 +34,6 @@ class Screen:
         self.pad = curses.newpad(800, 800)
         self.scroll_level = 0
 
-        self.refresh_rate = refresh_rate
-        self.completed = completed
-
-        self.scheduled = scheduled
-        self.scheduled_before = scheduled_before
-        self.scheduled_after = scheduled_after
-
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
         self.buffer = []
@@ -64,16 +42,7 @@ class Screen:
 
         self.current_task = None
 
-        self.prev_refresh_time = time.time()
-
-        self.schedule = Schedule(
-            tw_data_dir=tw_data_dir,
-            taskrc_location=taskrc_location,
-            scheduled_before=self.scheduled_before,
-            scheduled_after=self.scheduled_after,
-            scheduled=self.scheduled,
-            completed=self.completed,
-        )
+        self.schedule = schedule
 
     def close(self):
         """Close the curses screen."""

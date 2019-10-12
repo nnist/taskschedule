@@ -1,16 +1,11 @@
 """This module provides a Schedule class, which is used for retrieving
    scheduled tasks from taskwarrior and displaying them in a table."""
 
-import os
 import datetime
 
 from tasklib import TaskWarrior
 
-from taskschedule.scheduled_task import (
-    ScheduledTask,
-    ScheduledTaskQuerySet,
-    PatchedTaskWarrior,
-)
+from taskschedule.scheduled_task import ScheduledTask, ScheduledTaskQuerySet
 
 
 class UDADoesNotExistError(Exception):
@@ -38,40 +33,12 @@ class Schedule:
     """This class provides methods to format tasks and display them in
        a schedule report."""
 
-    def __init__(
-        self,
-        tw_data_dir=None,
-        tw_data_dir_create=False,
-        taskrc_location=None,
-        scheduled_before=None,
-        scheduled_after=None,
-        scheduled="today",
-        completed=True,
-    ):
-        home = os.path.expanduser("~")
+    def __init__(self, backend, scheduled_after, scheduled_before):
+        self.backend = backend
 
-        if tw_data_dir is None:
-            tw_data_dir = home + "/.task"
-
-        self.tw_data_dir = tw_data_dir
-
-        if taskrc_location is None:
-            taskrc_location = home + "/.taskrc"
-
-        self.taskrc_location = taskrc_location
-
-        self.tw_data_dir_create = tw_data_dir_create
-
-        if os.path.isdir(self.tw_data_dir) is False:
-            raise TaskDirDoesNotExistError(".task directory not found")
-
-        if os.path.isfile(self.taskrc_location) is False:
-            raise TaskrcDoesNotExistError(".taskrc not found")
-
+        # TODO Calculate these dates outside of this class
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
-        self.scheduled = scheduled
-        self.completed = completed
 
         self.timeboxed_task: ScheduledTask = None
         self.tasks: ScheduledTaskQuerySet = self.get_tasks()
@@ -112,42 +79,7 @@ class Schedule:
 
     def get_tasks(self):
         """Retrieve scheduled tasks from taskwarrior."""
-        taskwarrior = TaskWarrior(
-            self.tw_data_dir,
-            self.tw_data_dir_create,
-            taskrc_location=self.taskrc_location,
-        )
-
-        # Disable _forcecolor because it breaks tw config output
-        taskwarrior.overrides.update({"_forcecolor": "off"})
-
-        if taskwarrior.config.get("uda.estimate.type") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.type does not exist " "in .taskrc")
-            )
-        if taskwarrior.config.get("uda.estimate.label") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.label does not exist " "in .taskrc")
-            )
-
-        task_command_args = ["task", "status.not:deleted"]
-
-        if self.scheduled_before is not None and self.scheduled_after is not None:
-            task_command_args.append(f"scheduled.after:{self.scheduled_after}")
-            task_command_args.append(f"scheduled.before:{self.scheduled_before}")
-        else:
-            task_command_args.append(f"scheduled:{self.scheduled}")
-
-        if not self.completed:
-            task_command_args.append("status.not:completed")
-
-        taskwarrior = PatchedTaskWarrior(
-            self.tw_data_dir,
-            self.tw_data_dir_create,
-            taskrc_location=self.taskrc_location,
-            task_command=" ".join(task_command_args),
-        )
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=taskwarrior)
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=self.backend)
 
         self.tasks = queryset
         return self.tasks
@@ -182,16 +114,8 @@ class Schedule:
         end_time = "23:00"
         slot_time = 60
 
-        start_date = self.get_calculated_date(self.scheduled_after)
-        end_date = self.get_calculated_date(self.scheduled_before)
-        scheduled_date = self.get_calculated_date(self.scheduled)
-
-        if scheduled_date:
-            start_date = scheduled_date.date()
-            end_date = scheduled_date.date() + datetime.timedelta(hours=23, minutes=59)
-        else:
-            start_date = start_date.date()
-            end_date = end_date.date()
+        start_date = self.get_calculated_date(self.scheduled_after).date()
+        end_date = self.get_calculated_date(self.scheduled_before).date()
 
         days = {}
         date = start_date
