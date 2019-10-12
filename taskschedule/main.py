@@ -1,23 +1,30 @@
 """Command line interface of taskschedule"""
 
 import argparse
-import time
-import sys
 import os
-
-from curses import napms, KEY_RESIZE, KEY_DOWN, KEY_UP
+import sys
+import time
+from curses import KEY_DOWN, KEY_RESIZE, KEY_UP
 from curses import error as curses_error
+from curses import napms
 
-from taskschedule.screen import Screen
+from tasklib import TaskWarrior
+
 from taskschedule.schedule import (
-    UDADoesNotExistError,
-    TaskrcDoesNotExistError,
+    Schedule,
     TaskDirDoesNotExistError,
+    TaskrcDoesNotExistError,
+    UDADoesNotExistError,
 )
+from taskschedule.scheduled_task import PatchedTaskWarrior
+from taskschedule.screen import Screen
+from taskschedule.utils import calculate_datetime
 
 
 def main(argv):
     """Display a schedule report for taskwarrior."""
+    home = os.path.expanduser("~")
+
     parser = argparse.ArgumentParser(
         description="""Display a schedule report for taskwarrior."""
     )
@@ -29,6 +36,7 @@ def main(argv):
         help="scheduled from date: ex. 'today', 'tomorrow'",
         type=str,
         dest="after",
+        default="today-1s",
     )
     parser.add_argument(
         "--to",
@@ -36,13 +44,7 @@ def main(argv):
         help="scheduled until date: ex. 'today', 'tomorrow'",
         type=str,
         dest="before",
-    )
-    parser.add_argument(
-        "-s",
-        "--scheduled",
-        help="""scheduled date: ex. 'today', 'tomorrow'
-                (overrides --from and --until)""",
-        type=str,
+        default="tomorrow-1s",
     )
     parser.add_argument(
         "-d",
@@ -50,6 +52,7 @@ def main(argv):
         help="""data location (e.g. ~/.task)""",
         type=str,
         dest="data_location",
+        default=f"{home}/.task",
     )
     parser.add_argument(
         "-t",
@@ -57,6 +60,7 @@ def main(argv):
         help="""taskrc location (e.g. ~/.taskrc)""",
         type=str,
         dest="taskrc_location",
+        default=f"{home}/.taskrc",
     )
     parser.add_argument(
         "-a",
@@ -81,31 +85,15 @@ def main(argv):
     )
     args = parser.parse_args(argv)
 
-    hide_empty = not args.all
+    if args.before and not args.after or not args.before and args.after:
+        print("Error: Either both --until and --from or neither options must be used.")
+        sys.exit(1)
 
-    if args.scheduled:
-        if args.before or args.after:
-            print(
-                "Error: The --scheduled option can not be used together "
-                "with --until and/or --from."
-            )
-            sys.exit(1)
-    else:
-        if args.before and not args.after or not args.before and args.after:
-            print(
-                "Error: Either both --until and --from or neither options "
-                "must be used."
-            )
-            sys.exit(1)
+    if not args.before:
+        args.before = "tomorrow"
+    if not args.after:
+        args.after = "yesterday"
 
-        if not args.before and not args.after:
-            args.scheduled = "today"
-        elif not args.before:
-            args.before = "tomorrow"
-        elif not args.after:
-            args.after = "yesterday"
-
-    home = os.path.expanduser("~")
     taskschedule_dir = home + "/.taskschedule"
     hooks_directory = home + "/.taskschedule/hooks"
 
@@ -114,15 +102,54 @@ def main(argv):
     if not os.path.isdir(hooks_directory):
         os.mkdir(hooks_directory)
 
+    # Setup the backend
+    taskwarrior = TaskWarrior(
+        data_location=args.data_location,
+        create=False,
+        taskrc_location=args.taskrc_location,
+    )
+
+    # Disable _forcecolor because it breaks tw config output
+    taskwarrior.overrides.update({"_forcecolor": "off"})
+
+    if os.path.isdir(args.data_location) is False:
+        raise TaskDirDoesNotExistError(".task directory not found")
+    if os.path.isfile(args.taskrc_location) is False:
+        raise TaskrcDoesNotExistError(".taskrc not found")
+    if taskwarrior.config.get("uda.estimate.type") is None:
+        raise UDADoesNotExistError(("uda.estimate.type does not exist " "in .taskrc"))
+    if taskwarrior.config.get("uda.estimate.label") is None:
+        raise UDADoesNotExistError(("uda.estimate.label does not exist " "in .taskrc"))
+
+    task_command_args = ["task", "status.not:deleted"]
+
+    # Parse schedule date range
+    scheduled_after = calculate_datetime(args.after)
+    scheduled_before = calculate_datetime(args.before)
+
+    task_command_args.append(f"scheduled.after:{scheduled_after}")
+    task_command_args.append(f"scheduled.before:{scheduled_before}")
+
+    if not args.completed:
+        task_command_args.append(f"status.not:{args.completed}")
+
+    backend = PatchedTaskWarrior(
+        data_location=args.data_location,
+        create=False,
+        taskrc_location=args.taskrc_location,
+        task_command=" ".join(task_command_args),
+    )
+
+    schedule = Schedule(
+        backend, scheduled_after=scheduled_after, scheduled_before=scheduled_before
+    )
+
     try:
         screen = Screen(
-            tw_data_dir=args.data_location,
-            taskrc_location=args.taskrc_location,
-            hide_empty=hide_empty,
-            scheduled_before=args.before,
-            scheduled_after=args.after,
-            scheduled=args.scheduled,
-            completed=args.completed,
+            schedule,
+            scheduled_after=scheduled_after,
+            scheduled_before=scheduled_before,
+            hide_empty=not args.all,
             hide_projects=args.project,
         )
 
@@ -148,6 +175,7 @@ def main(argv):
                 last_refresh_time = time.time()
             elif key == KEY_RESIZE or time.time() > last_refresh_time + args.refresh:
                 last_refresh_time = time.time()
+                schedule.clear_cache()
                 screen.refresh_buffer()
                 screen.draw()
                 napms(50)

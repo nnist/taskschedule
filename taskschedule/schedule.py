@@ -1,15 +1,15 @@
 """This module provides a Schedule class, which is used for retrieving
    scheduled tasks from taskwarrior and displaying them in a table."""
 
-import os
-import datetime
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
 
-from tasklib import TaskWarrior
+from cached_property import cached_property
 
 from taskschedule.scheduled_task import (
+    PatchedTaskWarrior,
     ScheduledTask,
     ScheduledTaskQuerySet,
-    PatchedTaskWarrior,
 )
 
 
@@ -40,43 +40,18 @@ class Schedule:
 
     def __init__(
         self,
-        tw_data_dir=None,
-        tw_data_dir_create=False,
-        taskrc_location=None,
-        scheduled_before=None,
-        scheduled_after=None,
-        scheduled="today",
-        completed=True,
+        backend: PatchedTaskWarrior,
+        scheduled_after: datetime,
+        scheduled_before: datetime,
     ):
-        home = os.path.expanduser("~")
-
-        if tw_data_dir is None:
-            tw_data_dir = home + "/.task"
-
-        self.tw_data_dir = tw_data_dir
-
-        if taskrc_location is None:
-            taskrc_location = home + "/.taskrc"
-
-        self.taskrc_location = taskrc_location
-
-        self.tw_data_dir_create = tw_data_dir_create
-
-        if os.path.isdir(self.tw_data_dir) is False:
-            raise TaskDirDoesNotExistError(".task directory not found")
-
-        if os.path.isfile(self.taskrc_location) is False:
-            raise TaskrcDoesNotExistError(".taskrc not found")
+        self.backend = backend
 
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
-        self.scheduled = scheduled
-        self.completed = completed
 
-        self.timeboxed_task: ScheduledTask = None
-        self.tasks: ScheduledTaskQuerySet = self.get_tasks()
+        self.timeboxed_task: Optional[ScheduledTask] = None
 
-    def get_timebox_estimate_count(self):
+    def get_timebox_estimate_count(self) -> int:
         """"Return today's estimated timebox count."""
         total = 0
         for task in self.tasks:
@@ -84,7 +59,7 @@ class Schedule:
                 total += task["tb_estimate"]
         return total
 
-    def get_timebox_real_count(self):
+    def get_timebox_real_count(self) -> int:
         """"Return today's real timebox count."""
         total = 0
         for task in self.tasks:
@@ -92,7 +67,7 @@ class Schedule:
                 total += task["tb_real"]
         return total
 
-    def get_active_timeboxed_task(self):
+    def get_active_timeboxed_task(self) -> Optional[ScheduledTask]:
         """If a timeboxed task is currently active, return it. Otherwise,
            return None."""
         for task in self.tasks:
@@ -110,69 +85,19 @@ class Schedule:
         timeboxed_task.stop()
         self.timeboxed_task = None
 
-    def get_tasks(self):
+    def clear_cache(self):
+        """Clear the scheduled tasks cache."""
+        if self.tasks:
+            del self.__dict__["tasks"]
+
+    @cached_property
+    def tasks(self) -> ScheduledTaskQuerySet:
         """Retrieve scheduled tasks from taskwarrior."""
-        taskwarrior = TaskWarrior(
-            self.tw_data_dir,
-            self.tw_data_dir_create,
-            taskrc_location=self.taskrc_location,
-        )
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=self.backend)
 
-        # Disable _forcecolor because it breaks tw config output
-        taskwarrior.overrides.update({"_forcecolor": "off"})
+        return queryset
 
-        if taskwarrior.config.get("uda.estimate.type") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.type does not exist " "in .taskrc")
-            )
-        if taskwarrior.config.get("uda.estimate.label") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.label does not exist " "in .taskrc")
-            )
-
-        task_command_args = ["task", "status.not:deleted"]
-
-        if self.scheduled_before is not None and self.scheduled_after is not None:
-            task_command_args.append(f"scheduled.after:{self.scheduled_after}")
-            task_command_args.append(f"scheduled.before:{self.scheduled_before}")
-        else:
-            task_command_args.append(f"scheduled:{self.scheduled}")
-
-        if not self.completed:
-            task_command_args.append("status.not:completed")
-
-        taskwarrior = PatchedTaskWarrior(
-            self.tw_data_dir,
-            self.tw_data_dir_create,
-            taskrc_location=self.taskrc_location,
-            task_command=" ".join(task_command_args),
-        )
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=taskwarrior)
-
-        self.tasks = queryset
-        return self.tasks
-
-    def load_tasks(self):
-        """"Update the schedule's tasks. Return True if any tasks were updated,
-            otherwise return False."""
-        new_tasks = self.get_tasks()
-
-        if self.tasks == new_tasks:
-            return False
-
-        self.tasks = new_tasks
-        return True
-
-    def get_calculated_date(self, synonym):
-        """Leverage the `task calc` command to convert a date synonym string
-           to a datetime object."""
-
-        taskwarrior = TaskWarrior()
-        task = ScheduledTask(taskwarrior, description="dummy")
-        task["due"] = synonym
-        return task["due"]
-
-    def get_time_slots(self):
+    def get_time_slots(self) -> Dict:
         """Return a dict with dates and their tasks.
         >>> get_time_slots()
         {datetime.date(2019, 6, 27): {00: [], 01: [], ..., 23: [task, task]},
@@ -182,23 +107,15 @@ class Schedule:
         end_time = "23:00"
         slot_time = 60
 
-        start_date = self.get_calculated_date(self.scheduled_after)
-        end_date = self.get_calculated_date(self.scheduled_before)
-        scheduled_date = self.get_calculated_date(self.scheduled)
-
-        if scheduled_date:
-            start_date = scheduled_date.date()
-            end_date = scheduled_date.date() + datetime.timedelta(hours=23, minutes=59)
-        else:
-            start_date = start_date.date()
-            end_date = end_date.date()
+        start_date = self.scheduled_after.date()
+        end_date = self.scheduled_before.date()
 
         days = {}
         date = start_date
         while date <= end_date:
             hours = {}
-            time = datetime.datetime.strptime(start_time, "%H:%M")
-            end = datetime.datetime.strptime(end_time, "%H:%M")
+            time = datetime.strptime(start_time, "%H:%M")
+            end = datetime.strptime(end_time, "%H:%M")
             while time <= end:
                 task_list = []
                 for task in self.tasks:
@@ -209,25 +126,25 @@ class Schedule:
 
                 task_list = sorted(task_list, key=lambda k: k["scheduled"])
                 hours[time.strftime("%H")] = task_list
-                time += datetime.timedelta(minutes=slot_time)
+                time += timedelta(minutes=slot_time)
             days[date.isoformat()] = hours
-            date += datetime.timedelta(days=1)
+            date += timedelta(days=1)
 
         return days
 
-    def get_max_length(self, value):
-        """Return the max string length of a given value of all tasks
-           in the schedule.
+    def get_max_length(self, key: str) -> int:
+        """Return the max string length of a given key's value of all tasks
+           in the schedule. Useful for determining column widths.
         """
         max_length = 0
         for task in self.tasks:
-            length = len(str(task[value]))
+            length = len(str(task[key]))
             if length > max_length:
                 max_length = length
 
         return max_length
 
-    def get_column_offsets(self):
+    def get_column_offsets(self) -> List[int]:
         """Return the offsets for each column in the schedule for rendering
            a table."""
         offsets = [0, 5]  # Hour, glyph
@@ -243,7 +160,7 @@ class Schedule:
         offsets.append(offsets[4] + add_offset)  # Project
         return offsets
 
-    def get_next_task(self, task):
+    def get_next_task(self, task: ScheduledTask) -> Optional[ScheduledTask]:
         """Get the next scheduled task after the given task. If there is no
            next scheduled task, return None."""
         next_tasks = []
@@ -258,10 +175,10 @@ class Schedule:
 
         return None
 
-    def align_matrix(self, array):
+    def align_matrix(self, array: List) -> List:
         """Align all columns in a matrix by padding the items with spaces.
            Return the aligned array."""
-        col_sizes = {}
+        col_sizes: Dict = {}
         for row in array:
             for i, col in enumerate(row):
                 col_sizes[i] = max(col_sizes.get(i, 0), len(col))
