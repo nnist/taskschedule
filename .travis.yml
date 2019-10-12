@@ -6,8 +6,9 @@ before_install:
     - sudo apt-get install -y taskwarrior
 install:
     - pip install -r requirements.txt
+    - pip install pytest
     - pip install codecov
 script:
-    - coverage run -m unittest
+    - coverage run -m pytest tests
 after_success:
     - codecov
