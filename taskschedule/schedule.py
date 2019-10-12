@@ -131,27 +131,25 @@ class Schedule:
                 ("uda.estimate.label does not exist " "in .taskrc")
             )
 
+        task_command_args = ["task", "status.not:deleted"]
+
+        if self.scheduled_before is not None and self.scheduled_after is not None:
+            task_command_args.append(f"scheduled.after:{self.scheduled_after}")
+            task_command_args.append(f"scheduled.before:{self.scheduled_before}")
+        else:
+            task_command_args.append(f"scheduled:{self.scheduled}")
+
+        if not self.completed:
+            task_command_args.append("status.not:completed")
+
         taskwarrior = PatchedTaskWarrior(
             self.tw_data_dir,
             self.tw_data_dir_create,
             taskrc_location=self.taskrc_location,
+            task_command=" ".join(task_command_args),
         )
         backend = taskwarrior.tasks[0].backend
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend).filter(
-            status__not="deleted"
-        )
-
-        if self.scheduled_before is not None and self.scheduled_after is not None:
-            queryset = queryset.filter(
-                scheduled__before=self.scheduled_before,
-                scheduled__after=self.scheduled_after,
-            )
-            if not self.completed:
-                queryset = queryset.filter(status__not="completed")
-        else:
-            queryset = queryset.filter(scheduled=self.scheduled)
-            if not self.completed:
-                queryset = queryset.filter(status__not="completed")
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend)
 
         self.tasks = queryset
         return self.tasks
