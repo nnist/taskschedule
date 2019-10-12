@@ -5,19 +5,14 @@ from tasklib.task import Task, TaskQuerySet
 from tasklib.backends import TaskWarriorException
 from tasklib import TaskWarrior
 from isodate import parse_duration
+import os
+import tempfile
 
 
 # Patch TaskWarrior to return ScheduledTask instead of Task
 class PatchedTaskWarrior(TaskWarrior):
-    def __init__(
-        self,
-        data_location=None,
-        create=True,
-        taskrc_location=None,
-        task_command="task",
-        version_override=None,
-    ):
-        super(PatchedTaskWarrior, self).__init__()
+    def __init__(self, *args, **kwargs):
+        super(PatchedTaskWarrior, self).__init__(*args, **kwargs)
         self.tasks = ScheduledTaskQuerySet(self)
 
     def filter_tasks(self, filter_obj):
@@ -57,6 +52,23 @@ class ScheduledTask(Task):
             return self["scheduled"] + duration
         except TypeError:
             return None
+
+    @property
+    def notified(self):
+        filename = tempfile.gettempdir() + "/taskschedule"
+
+        if os.path.exists(filename):
+            append_write = "r+"
+        else:
+            append_write = "w+"
+
+        with open(filename, append_write) as file_:
+            uuid = self["uuid"]
+            if uuid not in str(file_.readlines()):
+                file_.write(f"{uuid},")
+                return False
+
+        return True
 
     @property
     def should_be_active(self):
