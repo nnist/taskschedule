@@ -1,3 +1,4 @@
+from taskschedule.utils import calculate_date
 import curses
 import time
 import datetime
@@ -384,9 +385,7 @@ class Screen:
             self.buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
 
             date_format = "%a %d %b %Y"
-            formatted_date = self.schedule.get_calculated_date(day).strftime(
-                date_format
-            )
+            formatted_date = calculate_date(day).strftime(date_format)
             divider_pt2 = " " + formatted_date + " "
             if day == datetime.datetime.now().date().isoformat():
                 self.buffer.append(

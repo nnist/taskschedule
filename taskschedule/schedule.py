@@ -4,9 +4,8 @@
 import datetime
 from cached_property import cached_property
 
-from tasklib import TaskWarrior
-
 from taskschedule.scheduled_task import ScheduledTask, ScheduledTaskQuerySet
+from taskschedule.utils import calculate_date
 
 
 class UDADoesNotExistError(Exception):
@@ -88,15 +87,6 @@ class Schedule:
 
         return queryset
 
-    def get_calculated_date(self, synonym):
-        """Leverage the `task calc` command to convert a date synonym string
-           to a datetime object."""
-
-        taskwarrior = TaskWarrior()
-        task = ScheduledTask(taskwarrior, description="dummy")
-        task["due"] = synonym
-        return task["due"]
-
     def get_time_slots(self):
         """Return a dict with dates and their tasks.
         >>> get_time_slots()
@@ -107,8 +97,8 @@ class Schedule:
         end_time = "23:00"
         slot_time = 60
 
-        start_date = self.get_calculated_date(self.scheduled_after).date()
-        end_date = self.get_calculated_date(self.scheduled_before).date()
+        start_date = calculate_date(self.scheduled_after)
+        end_date = calculate_date(self.scheduled_before)
 
         days = {}
         date = start_date
