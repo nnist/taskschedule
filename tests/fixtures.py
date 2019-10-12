@@ -1,7 +1,9 @@
-import shutil
-import pytest
 import os
-from taskschedule.scheduled_task import PatchedTaskWarrior
+import shutil
+
+import pytest
+
+from taskschedule.taskwarrior import PatchedTaskWarrior
 
 
 @pytest.fixture(scope="module")

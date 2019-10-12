@@ -16,8 +16,8 @@ from taskschedule.schedule import (
     TaskrcDoesNotExistError,
     UDADoesNotExistError,
 )
-from taskschedule.scheduled_task import PatchedTaskWarrior
 from taskschedule.screen import Screen
+from taskschedule.taskwarrior import PatchedTaskWarrior
 from taskschedule.utils import calculate_datetime
 
 

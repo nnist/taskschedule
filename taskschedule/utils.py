@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from taskschedule.scheduled_task import PatchedTaskWarrior, ScheduledTask
+from taskschedule.scheduled_task import ScheduledTask
+from taskschedule.taskwarrior import PatchedTaskWarrior
 
 
 def calculate_datetime(date_str: str) -> datetime:

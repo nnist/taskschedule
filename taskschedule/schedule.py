@@ -6,11 +6,8 @@ from typing import Dict, List, Optional
 
 from cached_property import cached_property
 
-from taskschedule.scheduled_task import (
-    PatchedTaskWarrior,
-    ScheduledTask,
-    ScheduledTaskQuerySet,
-)
+from taskschedule.scheduled_task import ScheduledTask, ScheduledTaskQuerySet
+from taskschedule.taskwarrior import PatchedTaskWarrior
 
 
 class UDADoesNotExistError(Exception):
