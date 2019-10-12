@@ -148,8 +148,7 @@ class Schedule:
             taskrc_location=self.taskrc_location,
             task_command=" ".join(task_command_args),
         )
-        backend = taskwarrior.tasks[0].backend
-        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=backend)
+        queryset: ScheduledTaskQuerySet = ScheduledTaskQuerySet(backend=taskwarrior)
 
         self.tasks = queryset
         return self.tasks
