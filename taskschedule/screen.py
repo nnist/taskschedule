@@ -23,7 +23,6 @@ class Screen:
         hide_empty=False,
     ):
         self.config = ConfigParser().config()
-        # TODO Calculate these dates outside of this class
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
 
