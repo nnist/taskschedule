@@ -3,10 +3,8 @@
 
 import os
 import datetime
-import importlib
-import sys
 
-from tasklib import TaskWarrior, Task
+from tasklib import TaskWarrior
 
 from taskschedule.scheduled_task import (
     ScheduledTask,
