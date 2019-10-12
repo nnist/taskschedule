@@ -18,6 +18,7 @@ from taskschedule.schedule import (
 )
 from taskschedule.scheduled_task import PatchedTaskWarrior
 from taskschedule.screen import Screen
+from taskschedule.utils import calculate_datetime
 
 
 def main(argv):
@@ -122,8 +123,12 @@ def main(argv):
 
     task_command_args = ["task", "status.not:deleted"]
 
-    task_command_args.append(f"scheduled.after:{args.after}")
-    task_command_args.append(f"scheduled.before:{args.before}")
+    # Parse schedule date range
+    scheduled_after = calculate_datetime(args.after)
+    scheduled_before = calculate_datetime(args.before)
+
+    task_command_args.append(f"scheduled.after:{scheduled_after}")
+    task_command_args.append(f"scheduled.before:{scheduled_before}")
 
     if not args.completed:
         task_command_args.append(f"status.not:{args.completed}")
@@ -136,14 +141,14 @@ def main(argv):
     )
 
     schedule = Schedule(
-        backend, scheduled_after=args.after, scheduled_before=args.before
+        backend, scheduled_after=scheduled_after, scheduled_before=scheduled_before
     )
 
     try:
         screen = Screen(
             schedule,
-            scheduled_after=args.after,
-            scheduled_before=args.before,
+            scheduled_after=scheduled_after,
+            scheduled_before=scheduled_before,
             hide_empty=not args.all,
             hide_projects=args.project,
         )

@@ -1,8 +1,11 @@
-from taskschedule.utils import calculate_date
-from datetime import date, timedelta
+from datetime import datetime, timedelta
+
+from taskschedule.utils import calculate_datetime
 
 
-def test_calculate_date():
-    assert calculate_date("today") == date.today()
-    assert calculate_date("2000-01-01") == date(2000, 1, 1)
-    assert calculate_date("today+5days") == date.today() + timedelta(days=5)
+def test_calculate_datetime():
+    assert calculate_datetime("2000-01-01").year == 2000
+    assert (
+        calculate_datetime("today+5days").day
+        == (datetime.today() + timedelta(days=5)).day
+    )

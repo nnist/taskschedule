@@ -8,7 +8,7 @@ from taskschedule.config_parser import ConfigParser
 from taskschedule.hooks import run_hooks
 from taskschedule.schedule import Schedule
 from taskschedule.scheduled_task import ScheduledTask
-from taskschedule.utils import calculate_date
+from taskschedule.utils import calculate_datetime
 
 
 class Screen:
@@ -388,7 +388,7 @@ class Screen:
             self.buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
 
             date_format = "%a %d %b %Y"
-            formatted_date = calculate_date(day).strftime(date_format)
+            formatted_date = calculate_datetime(day).strftime(date_format)
             divider_pt2 = " " + formatted_date + " "
             if day == datetime.now().date().isoformat():
                 self.buffer.append(

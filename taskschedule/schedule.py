@@ -11,7 +11,6 @@ from taskschedule.scheduled_task import (
     ScheduledTask,
     ScheduledTaskQuerySet,
 )
-from taskschedule.utils import calculate_date
 
 
 class UDADoesNotExistError(Exception):
@@ -47,7 +46,6 @@ class Schedule:
     ):
         self.backend = backend
 
-        # TODO Calculate these dates outside of this class
         self.scheduled_before = scheduled_before
         self.scheduled_after = scheduled_after
 
@@ -109,8 +107,8 @@ class Schedule:
         end_time = "23:00"
         slot_time = 60
 
-        start_date = calculate_date(self.scheduled_after)
-        end_date = calculate_date(self.scheduled_before)
+        start_date = self.scheduled_after.date()
+        end_date = self.scheduled_before.date()
 
         days = {}
         date = start_date
