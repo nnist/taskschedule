@@ -10,6 +10,7 @@ from curses import napms
 
 from tasklib import TaskWarrior
 
+from taskschedule.notifier import Notifier
 from taskschedule.schedule import (
     Schedule,
     TaskDirDoesNotExistError,
@@ -143,6 +144,7 @@ def main(argv):
     schedule = Schedule(
         backend, scheduled_after=scheduled_after, scheduled_before=scheduled_before
     )
+    notifier = Notifier(backend)
 
     try:
         screen = Screen(
@@ -174,6 +176,7 @@ def main(argv):
                 screen.scroll(-(max_y - 4))
                 last_refresh_time = time.time()
             elif key == KEY_RESIZE or time.time() > last_refresh_time + args.refresh:
+                notifier.send_notifications()
                 last_refresh_time = time.time()
                 schedule.clear_cache()
                 screen.refresh_buffer()

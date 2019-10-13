@@ -1,21 +1,12 @@
-import time
 import os
 import subprocess
-from typing import List
-from scheduled_task import ScheduledTask, PatchedTaskWarrior
-import argparse
-import sys
+
+from taskschedule.scheduled_task import ScheduledTask
 
 
 class Notifier:
-    def __init__(self):
-        taskwarrior = PatchedTaskWarrior(
-            data_location="~/.task",
-            create=False,
-            taskrc_location="~/.taskrc",
-            task_command="task scheduled.after:today-1sec scheduled.before:now",
-        )
-        self.tasks: List[ScheduledTask] = taskwarrior.tasks
+    def __init__(self, backend):
+        self.backend = backend
 
     def notify(self, task: ScheduledTask):
         """Send a notification for the given task."""
@@ -76,36 +67,10 @@ class Notifier:
     def send_notifications(self):
         """Send notifications for scheduled tasks that should be started."""
 
-        for task in self.tasks:
+        tasks = self.backend.tasks.filter(
+            "-ACTIVE scheduled.before:now scheduled.after:today"
+        )
+
+        for task in tasks:
             if not task.notified:
                 self.notify(task)
-
-
-def main(argv):
-    parser = argparse.ArgumentParser(
-        description="""Send notifications for scheduled tasks."""
-    )
-    parser.add_argument(
-        "-r", "--rate", help="check tasks every n seconds", type=int, default=0
-    )
-    args = parser.parse_args(argv)
-
-    while True:
-        notifier = Notifier()
-        notifier.send_notifications()
-
-        if args.rate:
-            time.sleep(args.rate)
-        else:
-            break
-
-
-if __name__ == "__main__":
-    try:
-        main(sys.argv[1:])
-    except KeyboardInterrupt:
-        print("Interrupted by user.")
-        try:
-            sys.exit(0)
-        except SystemExit:
-            os._exit(0)  # pylint: disable=protected-access
