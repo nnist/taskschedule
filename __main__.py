@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-import sys
 import os
+import sys
 
-import taskschedule.main
+from taskschedule.main import Main
 
 if __name__ == "__main__":
     try:
-        taskschedule.main.main(sys.argv[1:])
+        main = Main(sys.argv[1:])
+        main.main()
     except KeyboardInterrupt:
-        print('Interrupted by user.')
+        print("Interrupted by user.")
         try:
             sys.exit(0)
         except SystemExit:
