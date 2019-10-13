@@ -26,6 +26,35 @@ class Main:
     def __init__(self, argv):
         self.home_dir = os.path.expanduser("~")
         self.parse_args(argv)
+        self.check_files()
+
+    def check_files(self):
+        taskwarrior = TaskWarrior(
+            data_location=self.data_location,
+            create=False,
+            taskrc_location=self.taskrc_location,
+        )
+
+        # Disable _forcecolor because it breaks tw config output
+        taskwarrior.overrides.update({"_forcecolor": "off"})
+
+        if os.path.isdir(self.data_location) is False:
+            raise TaskDirDoesNotExistError(".task directory not found")
+        if os.path.isfile(self.taskrc_location) is False:
+            raise TaskrcDoesNotExistError(".taskrc not found")
+        if taskwarrior.config.get("uda.estimate.type") is None:
+            raise UDADoesNotExistError(
+                ("uda.estimate.type does not exist " "in .taskrc")
+            )
+        if taskwarrior.config.get("uda.estimate.label") is None:
+            raise UDADoesNotExistError(
+                ("uda.estimate.label does not exist " "in .taskrc")
+            )
+        sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
+        if os.path.isfile(sound_file) is False:
+            raise SoundDoesNotExistError(
+                f"The specified sound file does not exist: {sound_file}"
+            )
 
     def parse_args(self, argv):
         parser = argparse.ArgumentParser(
@@ -111,34 +140,6 @@ class Main:
             os.mkdir(taskschedule_dir)
         if not os.path.isdir(hooks_directory):
             os.mkdir(hooks_directory)
-
-        # Setup the backend
-        taskwarrior = TaskWarrior(
-            data_location=self.data_location,
-            create=False,
-            taskrc_location=self.taskrc_location,
-        )
-
-        # Disable _forcecolor because it breaks tw config output
-        taskwarrior.overrides.update({"_forcecolor": "off"})
-
-        if os.path.isdir(self.data_location) is False:
-            raise TaskDirDoesNotExistError(".task directory not found")
-        if os.path.isfile(self.taskrc_location) is False:
-            raise TaskrcDoesNotExistError(".taskrc not found")
-        if taskwarrior.config.get("uda.estimate.type") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.type does not exist " "in .taskrc")
-            )
-        if taskwarrior.config.get("uda.estimate.label") is None:
-            raise UDADoesNotExistError(
-                ("uda.estimate.label does not exist " "in .taskrc")
-            )
-        sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
-        if os.path.isfile(sound_file) is False:
-            raise SoundDoesNotExistError(
-                f"The specified sound file does not exist: {sound_file}"
-            )
 
         task_command_args = ["task", "status.not:deleted"]
 
