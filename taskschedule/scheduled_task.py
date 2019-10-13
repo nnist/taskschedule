@@ -21,6 +21,25 @@ class ScheduledTask(Task):
         self.glyph = "○"
 
     @property
+    def has_scheduled_time(self) -> bool:
+        """If task's scheduled time is 00:00:00, it has been scheduled for a
+           particular day but not for a specific time. If this is the case,
+           return False."""
+        start = self.scheduled_start_datetime
+        if start:
+            if (
+                start.hour == 0
+                and start.minute == 0
+                and start.second == 0
+                and start.microsecond == 0
+            ):
+                return False
+            else:
+                return True
+
+        return False
+
+    @property
     def scheduled_start_datetime(self) -> Optional[dt]:
         """Return the task's scheduled start datetime."""
         try:

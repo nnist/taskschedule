@@ -488,11 +488,7 @@ class Screen:
                     # having start times as 00:00.
                     start_dt = task.scheduled_start_datetime
                     if start_dt:
-                        if (
-                            start_dt.hour == 0
-                            and start_dt.minute == 0
-                            and start_dt.second == 0
-                        ):
+                        if not task.has_scheduled_time:
                             if task.scheduled_end_datetime:
                                 end_time = "{}".format(
                                     task.scheduled_end_datetime.strftime("%H:%M")
