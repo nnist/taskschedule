@@ -21,8 +21,8 @@ class ScheduledTask(Task):
         self.glyph = "○"
 
     @property
-    def scheduled_end_time(self) -> Optional[dt]:
-        """Return the task's end datetime."""
+    def scheduled_end_datetime(self) -> Optional[dt]:
+        """Return the task's scheduled end datetime."""
         try:
             estimate: dt = self["estimate"]
             duration = parse_duration(estimate)

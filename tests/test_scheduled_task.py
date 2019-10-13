@@ -1,6 +1,8 @@
-import pytest
-from taskschedule.scheduled_task import ScheduledTask
 from datetime import datetime, timedelta
+
+import pytest
+
+from taskschedule.scheduled_task import ScheduledTask
 from tests.fixtures import tw  # noqa: F401
 
 
@@ -11,14 +13,14 @@ def test_as_dict(tw):  # noqa: F811
     assert task.as_dict()["description"] == expected_desc
 
 
-def test_scheduled_end_time(tw):  # noqa: F811
+def test_scheduled_end_datetime(tw):  # noqa: F811
     task = ScheduledTask(
         backend=tw,
         description="Test task",
         scheduled=datetime(2019, 10, 12, 0, 0),
         estimate="PT1H",
     )
-    difference = task.scheduled_end_time - task["scheduled"]
+    difference = task.scheduled_end_datetime - task["scheduled"]
 
     assert difference == timedelta(seconds=3600)
 

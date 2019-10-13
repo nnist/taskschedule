@@ -492,20 +492,20 @@ class Screen:
                         and start_dt.minute == 0
                         and start_dt.second == 0
                     ):
-                        if task.scheduled_end_time:
+                        if task.scheduled_end_datetime:
                             end_time = "{}".format(
-                                task.scheduled_end_time.strftime("%H:%M")
+                                task.scheduled_end_datetime.strftime("%H:%M")
                             )
                             formatted_time = "      {}".format(end_time)
                         else:
                             formatted_time = ""
                     else:
                         start_time = "{}".format(start_dt.strftime("%H:%M"))
-                        if task.scheduled_end_time is None:
+                        if task.scheduled_end_datetime is None:
                             formatted_time = start_time
                         else:
                             end_time = "{}".format(
-                                task.scheduled_end_time.strftime("%H:%M")
+                                task.scheduled_end_datetime.strftime("%H:%M")
                             )
                             formatted_time = "{}-{}".format(start_time, end_time)
 
