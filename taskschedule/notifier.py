@@ -4,6 +4,10 @@ import subprocess
 from taskschedule.scheduled_task import ScheduledTask
 
 
+class SoundDoesNotExistError(Exception):
+    ...
+
+
 class Notifier:
     def __init__(self, backend):
         self.backend = backend
@@ -58,11 +62,17 @@ class Notifier:
         else:
             subprocess.run(["notify-send", "--urgency", urgency, summary, body])
 
-            subprocess.Popen(
-                ["aplay", home + "/.taskschedule/hooks/drip.wav"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.STDOUT,
-            )
+            sound_file = home + "/.taskschedule/hooks/drip.wav"
+            if os.path.isfile(sound_file) is True:
+                subprocess.Popen(
+                    ["aplay", sound_file],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.STDOUT,
+                )
+            else:
+                raise SoundDoesNotExistError(
+                    f"The specified sound file does not exist: {sound_file}"
+                )
 
     def send_notifications(self):
         """Send notifications for scheduled tasks that should be started."""

@@ -10,7 +10,7 @@ from curses import napms
 
 from tasklib import TaskWarrior
 
-from taskschedule.notifier import Notifier
+from taskschedule.notifier import Notifier, SoundDoesNotExistError
 from taskschedule.schedule import (
     Schedule,
     TaskDirDoesNotExistError,
@@ -121,6 +121,11 @@ def main(argv):
         raise UDADoesNotExistError(("uda.estimate.type does not exist " "in .taskrc"))
     if taskwarrior.config.get("uda.estimate.label") is None:
         raise UDADoesNotExistError(("uda.estimate.label does not exist " "in .taskrc"))
+    sound_file = home + "/.taskschedule/hooks/drip.wav"
+    if os.path.isfile(sound_file) is False:
+        raise SoundDoesNotExistError(
+            f"The specified sound file does not exist: {sound_file}"
+        )
 
     task_command_args = ["task", "status.not:deleted"]
 
@@ -200,6 +205,10 @@ def main(argv):
         print("Error: {}".format(err))
         sys.exit(1)
     except UDADoesNotExistError as err:
+        screen.close()
+        print("Error: {}".format(err))
+        sys.exit(1)
+    except SoundDoesNotExistError as err:
         screen.close()
         print("Error: {}".format(err))
         sys.exit(1)
