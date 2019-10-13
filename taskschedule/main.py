@@ -1,5 +1,4 @@
 """Command line interface of taskschedule"""
-
 import argparse
 import os
 import sys
@@ -7,6 +6,7 @@ import time
 from curses import KEY_DOWN, KEY_RESIZE, KEY_UP
 from curses import error as curses_error
 from curses import napms
+from typing import Optional
 
 from tasklib import TaskWarrior
 
@@ -131,6 +131,13 @@ class Main:
             action="store_true",
             default=False,
         )
+        parser.add_argument(
+            "--no-notifications",
+            help="disable notifications",
+            action="store_false",
+            default=True,
+            dest="notifications",
+        )
         args = parser.parse_args(argv)
 
         if args.before and not args.after or not args.before and args.after:
@@ -147,6 +154,7 @@ class Main:
         self.hide_empty = not args.all
         self.hide_projects = args.project
         self.refresh_rate = args.refresh
+        self.show_notifications = args.notifications
 
     def main(self):
         task_command_args = ["task", "status.not:deleted"]
@@ -171,7 +179,10 @@ class Main:
         schedule = Schedule(
             backend, scheduled_after=scheduled_after, scheduled_before=scheduled_before
         )
-        notifier = Notifier(backend)
+
+        notifier: Optional[Notifier] = None
+        if self.show_notifications:
+            notifier = Notifier(backend)
 
         try:
             screen = Screen(
@@ -206,7 +217,9 @@ class Main:
                     key == KEY_RESIZE
                     or time.time() > last_refresh_time + self.refresh_rate
                 ):
-                    notifier.send_notifications()
+                    if notifier:
+                        notifier.send_notifications()
+
                     last_refresh_time = time.time()
                     schedule.clear_cache()
                     screen.refresh_buffer()
