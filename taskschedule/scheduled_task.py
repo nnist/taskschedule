@@ -2,6 +2,7 @@ import json
 import os
 import tempfile
 from datetime import datetime as dt
+from typing import Dict, Optional
 
 from isodate import parse_duration
 from tasklib.task import Task, TaskQuerySet
@@ -20,17 +21,17 @@ class ScheduledTask(Task):
         self.glyph = "○"
 
     @property
-    def scheduled_end_time(self):
-        """Return the task's end time."""
+    def scheduled_end_time(self) -> Optional[dt]:
+        """Return the task's end datetime."""
         try:
-            estimate = self["estimate"]
+            estimate: dt = self["estimate"]
             duration = parse_duration(estimate)
             return self["scheduled"] + duration
         except TypeError:
             return None
 
     @property
-    def notified(self):
+    def notified(self) -> bool:
         filename = tempfile.gettempdir() + "/taskschedule"
 
         if os.path.exists(filename):
@@ -47,13 +48,13 @@ class ScheduledTask(Task):
         return True
 
     @property
-    def should_be_active(self):
+    def should_be_active(self) -> bool:
         """Return true if the task should be active."""
 
-        if self["scheduled"] is not None:
-            start_ts = dt.timestamp(self["scheduled"])
-        else:
-            start_ts = None
+        if self["scheduled"] is None:
+            return False
+
+        start_ts: float = dt.timestamp(self["scheduled"])
 
         now = dt.now()
         now_ts = dt.timestamp(now)
@@ -74,7 +75,7 @@ class ScheduledTask(Task):
         return False
 
     @property
-    def overdue(self):
+    def overdue(self) -> bool:
         """If the task is overdue (current time is past end time),
            return True. Else, return False."""
         now = dt.now()
@@ -93,6 +94,6 @@ class ScheduledTask(Task):
 
         return False
 
-    def as_dict(self):
+    def as_dict(self) -> Dict:
         data = self.export_data()
         return json.loads(data)
