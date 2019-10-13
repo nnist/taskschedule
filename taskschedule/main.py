@@ -25,10 +25,13 @@ from taskschedule.utils import calculate_datetime
 class Main:
     def __init__(self, argv):
         self.home_dir = os.path.expanduser("~")
+
         self.parse_args(argv)
         self.check_files()
 
     def check_files(self):
+        """Check if the required files, directories and settings are present."""
+        # Create a temporary taskwarrior instance to read the config
         taskwarrior = TaskWarrior(
             data_location=self.data_location,
             create=False,
@@ -38,10 +41,13 @@ class Main:
         # Disable _forcecolor because it breaks tw config output
         taskwarrior.overrides.update({"_forcecolor": "off"})
 
+        # Check taskwarrior directory and taskrc
         if os.path.isdir(self.data_location) is False:
             raise TaskDirDoesNotExistError(".task directory not found")
         if os.path.isfile(self.taskrc_location) is False:
             raise TaskrcDoesNotExistError(".taskrc not found")
+
+        # Check if required UDAs exist
         if taskwarrior.config.get("uda.estimate.type") is None:
             raise UDADoesNotExistError(
                 ("uda.estimate.type does not exist " "in .taskrc")
@@ -50,11 +56,21 @@ class Main:
             raise UDADoesNotExistError(
                 ("uda.estimate.label does not exist " "in .taskrc")
             )
+
+        # Check sound file
         sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
         if os.path.isfile(sound_file) is False:
             raise SoundDoesNotExistError(
                 f"The specified sound file does not exist: {sound_file}"
             )
+
+        # Create user directory if it does not exist
+        taskschedule_dir = self.home_dir + "/.taskschedule"
+        hooks_directory = self.home_dir + "/.taskschedule/hooks"
+        if not os.path.isdir(taskschedule_dir):
+            os.mkdir(taskschedule_dir)
+        if not os.path.isdir(hooks_directory):
+            os.mkdir(hooks_directory)
 
     def parse_args(self, argv):
         parser = argparse.ArgumentParser(
@@ -133,14 +149,6 @@ class Main:
         self.refresh_rate = args.refresh
 
     def main(self):
-        taskschedule_dir = self.home_dir + "/.taskschedule"
-        hooks_directory = self.home_dir + "/.taskschedule/hooks"
-
-        if not os.path.isdir(taskschedule_dir):
-            os.mkdir(taskschedule_dir)
-        if not os.path.isdir(hooks_directory):
-            os.mkdir(hooks_directory)
-
         task_command_args = ["task", "status.not:deleted"]
 
         # Parse schedule date range
