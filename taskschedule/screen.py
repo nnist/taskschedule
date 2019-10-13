@@ -486,28 +486,31 @@ class Screen:
                     # Do not show the start time if the task is not scheduled at a
                     # specific time, so the column is not cluttered with tasks
                     # having start times as 00:00.
-                    start_dt: datetime = task["scheduled"]
-                    if (
-                        start_dt.hour == 0
-                        and start_dt.minute == 0
-                        and start_dt.second == 0
-                    ):
-                        if task.scheduled_end_datetime:
-                            end_time = "{}".format(
-                                task.scheduled_end_datetime.strftime("%H:%M")
-                            )
-                            formatted_time = "      {}".format(end_time)
+                    start_dt = task.scheduled_start_datetime
+                    if start_dt:
+                        if (
+                            start_dt.hour == 0
+                            and start_dt.minute == 0
+                            and start_dt.second == 0
+                        ):
+                            if task.scheduled_end_datetime:
+                                end_time = "{}".format(
+                                    task.scheduled_end_datetime.strftime("%H:%M")
+                                )
+                                formatted_time = "      {}".format(end_time)
+                            else:
+                                formatted_time = ""
                         else:
-                            formatted_time = ""
+                            start_time = "{}".format(start_dt.strftime("%H:%M"))
+                            if task.scheduled_end_datetime is None:
+                                formatted_time = start_time
+                            else:
+                                end_time = "{}".format(
+                                    task.scheduled_end_datetime.strftime("%H:%M")
+                                )
+                                formatted_time = "{}-{}".format(start_time, end_time)
                     else:
-                        start_time = "{}".format(start_dt.strftime("%H:%M"))
-                        if task.scheduled_end_datetime is None:
-                            formatted_time = start_time
-                        else:
-                            end_time = "{}".format(
-                                task.scheduled_end_datetime.strftime("%H:%M")
-                            )
-                            formatted_time = "{}-{}".format(start_time, end_time)
+                        formatted_time = ""
 
                     self.buffer.append(
                         (current_line, offsets[2], formatted_time, color)

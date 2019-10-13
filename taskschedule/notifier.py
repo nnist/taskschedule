@@ -17,7 +17,10 @@ class Notifier:
 
         home = os.path.expanduser("~")
 
-        scheduled_time = task["scheduled"]
+        scheduled_time = task.scheduled_start_datetime
+        if not scheduled_time:
+            return
+
         scheduled_time_formatted = scheduled_time.strftime("%H:%M")
 
         task_id: str = task["id"]

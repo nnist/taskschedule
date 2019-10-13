@@ -21,6 +21,14 @@ class ScheduledTask(Task):
         self.glyph = "○"
 
     @property
+    def scheduled_start_datetime(self) -> Optional[dt]:
+        """Return the task's scheduled start datetime."""
+        try:
+            return self["scheduled"]
+        except TypeError:
+            return None
+
+    @property
     def scheduled_end_datetime(self) -> Optional[dt]:
         """Return the task's scheduled end datetime."""
         try:
@@ -51,10 +59,10 @@ class ScheduledTask(Task):
     def should_be_active(self) -> bool:
         """Return true if the task should be active."""
 
-        if self["scheduled"] is None:
+        if self.scheduled_start_datetime is None:
             return False
 
-        start_ts: float = dt.timestamp(self["scheduled"])
+        start_ts: float = dt.timestamp(self.scheduled_start_datetime)
 
         now = dt.now()
         now_ts = dt.timestamp(now)
@@ -78,11 +86,14 @@ class ScheduledTask(Task):
     def overdue(self) -> bool:
         """If the task is overdue (current time is past end time),
            return True. Else, return False."""
+        if not self.scheduled_start_datetime:
+            return False
+
         now = dt.now()
         now_ts = dt.timestamp(now)
 
         if self["end"] is None:
-            start_ts = dt.timestamp(self["scheduled"])
+            start_ts = dt.timestamp(self.scheduled_start_datetime)
             if now_ts > start_ts:
                 return True
 

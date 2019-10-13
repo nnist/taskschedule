@@ -115,9 +115,10 @@ class Schedule:
             end = datetime.strptime(end_time, "%H:%M")
             while time <= end:
                 task_list = []
+                task: ScheduledTask
                 for task in self.tasks:
-                    start = task["scheduled"]
-                    if start.date() == date:
+                    start = task.scheduled_start_datetime
+                    if start and start.date() == date:
                         if start.hour == int(time.strftime("%H")):
                             task_list.append(task)
 

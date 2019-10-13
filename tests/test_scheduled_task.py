@@ -13,6 +13,18 @@ def test_as_dict(tw):  # noqa: F811
     assert task.as_dict()["description"] == expected_desc
 
 
+def test_scheduled_start_datetime(tw):  # noqa: F811
+    task = ScheduledTask(
+        backend=tw, description="Test task", scheduled=datetime(2019, 10, 12, 0, 0)
+    )
+    tzinfo = task["scheduled"].tzinfo
+    expected = datetime(2019, 10, 12, 0, 0, tzinfo=tzinfo)
+    assert task.scheduled_start_datetime == expected
+
+    task = ScheduledTask(backend=tw, description="Test task")
+    assert task.scheduled_start_datetime is None
+
+
 def test_scheduled_end_datetime(tw):  # noqa: F811
     task = ScheduledTask(
         backend=tw,
