@@ -47,7 +47,7 @@ class Main:
             help="scheduled until date: ex. 'today', 'tomorrow'",
             type=str,
             dest="before",
-            default="tomorrow-1s",
+            default="tomorrow",
         )
         parser.add_argument(
             "-d",
@@ -93,11 +93,6 @@ class Main:
                 "Error: Either both --until and --from or neither options must be used."
             )
             sys.exit(1)
-
-        if not args.before:
-            args.before = "tomorrow"
-        if not args.after:
-            args.after = "yesterday"
 
         self.data_location = args.data_location
         self.taskrc_location = args.taskrc_location
