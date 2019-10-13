@@ -78,7 +78,7 @@ class Notifier:
         """Send notifications for scheduled tasks that should be started."""
 
         tasks = self.backend.tasks.filter(
-            "-ACTIVE scheduled.before:now scheduled.after:today"
+            "-ACTIVE -COMPLETED scheduled.before:now scheduled.after:today"
         )
 
         for task in tasks:
