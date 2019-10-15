@@ -3,10 +3,10 @@ import argparse
 import os
 import sys
 import time
-from curses import KEY_DOWN, KEY_RESIZE, KEY_UP
+from curses import KEY_DOWN, KEY_RESIZE
 from curses import error as curses_error
 from curses import napms
-from typing import Optional
+from datetime import datetime
 
 from tasklib import TaskWarrior
 
@@ -28,6 +28,27 @@ class Main:
 
         self.parse_args(argv)
         self.check_files()
+
+        task_command_args = ["task", "status.not:deleted"]
+
+        task_command_args.append(f"scheduled.after:{self.scheduled_after}")
+        task_command_args.append(f"scheduled.before:{self.scheduled_before}")
+
+        if not self.show_completed:
+            task_command_args.append(f"status.not:{self.show_completed}")
+
+        self.backend = PatchedTaskWarrior(
+            data_location=self.data_location,
+            create=False,
+            taskrc_location=self.taskrc_location,
+            task_command=" ".join(task_command_args),
+        )
+
+        self.schedule = Schedule(
+            self.backend,
+            scheduled_after=self.scheduled_after,
+            scheduled_before=self.scheduled_before,
+        )
 
     def check_files(self):
         """Check if the required files, directories and settings are present."""
@@ -148,8 +169,11 @@ class Main:
 
         self.data_location = args.data_location
         self.taskrc_location = args.taskrc_location
-        self.scheduled_after = args.after
-        self.scheduled_before = args.before
+
+        # Parse schedule date range
+        self.scheduled_after: datetime = calculate_datetime(args.after)
+        self.scheduled_before: datetime = calculate_datetime(args.before)
+
         self.show_completed = args.completed
         self.hide_empty = not args.all
         self.hide_projects = args.project
@@ -157,79 +181,22 @@ class Main:
         self.show_notifications = args.notifications
 
     def main(self):
-        task_command_args = ["task", "status.not:deleted"]
+        """Initialize the screen and notifier, and start the main loop of
+           the interface."""
 
-        # Parse schedule date range
-        scheduled_after = calculate_datetime(self.scheduled_after)
-        scheduled_before = calculate_datetime(self.scheduled_before)
-
-        task_command_args.append(f"scheduled.after:{scheduled_after}")
-        task_command_args.append(f"scheduled.before:{scheduled_before}")
-
-        if not self.show_completed:
-            task_command_args.append(f"status.not:{self.show_completed}")
-
-        backend = PatchedTaskWarrior(
-            data_location=self.data_location,
-            create=False,
-            taskrc_location=self.taskrc_location,
-            task_command=" ".join(task_command_args),
-        )
-
-        schedule = Schedule(
-            backend, scheduled_after=scheduled_after, scheduled_before=scheduled_before
-        )
-
-        notifier: Optional[Notifier] = None
         if self.show_notifications:
-            notifier = Notifier(backend)
+            self.notifier = Notifier(self.backend)
+
+        self.screen = Screen(
+            self.schedule,
+            scheduled_after=self.scheduled_after,
+            scheduled_before=self.scheduled_before,
+            hide_empty=self.hide_empty,
+            hide_projects=self.hide_projects,
+        )
 
         try:
-            screen = Screen(
-                schedule,
-                scheduled_after=scheduled_after,
-                scheduled_before=scheduled_before,
-                hide_empty=self.hide_empty,
-                hide_projects=self.hide_projects,
-            )
-
-            # TODO Refresh on any file change in dir instead of every second
-            last_refresh_time = 0.0
-            while True:
-                key = screen.stdscr.getch()
-                if key == 113:  # q
-                    break
-                elif key == 65 or key == 107:  # Up / k
-                    screen.scroll(-1)
-                    last_refresh_time = time.time()
-                elif key == 66 or key == 106:  # Down / j
-                    screen.scroll(1)
-                    last_refresh_time = time.time()
-                elif key == 54:  # Page down
-                    max_y, max_x = screen.get_maxyx()
-                    screen.scroll(max_y - 4)
-                    last_refresh_time = time.time()
-                elif key == 53:  # Page up
-                    max_y, max_x = screen.get_maxyx()
-                    screen.scroll(-(max_y - 4))
-                    last_refresh_time = time.time()
-                elif (
-                    key == KEY_RESIZE
-                    or time.time() > last_refresh_time + self.refresh_rate
-                ):
-                    if notifier:
-                        notifier.send_notifications()
-
-                    last_refresh_time = time.time()
-                    schedule.clear_cache()
-                    screen.refresh_buffer()
-                    screen.draw()
-                    napms(50)
-
-                napms(1)
-
-                if self.refresh_rate < 0:
-                    break
+            self.run()
         except TaskDirDoesNotExistError as err:
             print("Error: {}".format(err))
             sys.exit(1)
@@ -237,21 +204,61 @@ class Main:
             print("Error: {}".format(err))
             sys.exit(1)
         except KeyboardInterrupt:
-            screen.close()
+            self.screen.close()
         except ValueError as err:
-            screen.close()
+            self.screen.close()
             print("Error: {}".format(err))
             sys.exit(1)
         except UDADoesNotExistError as err:
-            screen.close()
+            self.screen.close()
             print("Error: {}".format(err))
             sys.exit(1)
         except SoundDoesNotExistError as err:
-            screen.close()
+            self.screen.close()
             print("Error: {}".format(err))
             sys.exit(1)
         else:
             try:
-                screen.close()
+                self.screen.close()
             except curses_error as err:
                 print(err.with_traceback)
+
+    def run(self):
+        """The main loop of the interface."""
+
+        # TODO Refresh on any file change in dir instead of every second
+        last_refresh_time = 0.0
+        while True:
+            key = self.screen.stdscr.getch()
+            if key == 113:  # q
+                break
+            elif key == 65 or key == 107:  # Up / k
+                self.screen.scroll(-1)
+                last_refresh_time = time.time()
+            elif key == 66 or key == 106:  # Down / j
+                self.screen.scroll(1)
+                last_refresh_time = time.time()
+            elif key == 54:  # Page down
+                max_y, max_x = self.screen.get_maxyx()
+                self.screen.scroll(max_y - 4)
+                last_refresh_time = time.time()
+            elif key == 53:  # Page up
+                max_y, max_x = self.screen.get_maxyx()
+                self.screen.scroll(-(max_y - 4))
+                last_refresh_time = time.time()
+            elif (
+                key == KEY_RESIZE or time.time() > last_refresh_time + self.refresh_rate
+            ):
+                if self.notifier:
+                    self.notifier.send_notifications()
+
+                last_refresh_time = time.time()
+                self.schedule.clear_cache()
+                self.screen.refresh_buffer()
+                self.screen.draw()
+                napms(50)
+
+            napms(1)
+
+            if self.refresh_rate < 0:
+                break
