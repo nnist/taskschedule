@@ -1,9 +1,17 @@
+from __future__ import annotations
+
 import os
 import shutil
+from typing import TYPE_CHECKING
 
 import pytest
 
+from taskschedule.schedule import Schedule, ScheduledTask
 from taskschedule.taskwarrior import PatchedTaskWarrior
+from taskschedule.utils import calculate_datetime
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 @pytest.fixture(scope="module")
@@ -45,3 +53,40 @@ def tw():
         shutil.rmtree(task_dir_path)
     except FileNotFoundError:
         pass
+
+
+@pytest.fixture(scope="module")
+def schedule(tw):
+    """Create a Schedule instance with a few tasks."""
+    ScheduledTask(
+        tw, description="test_last_week", schedule="yesterday-7days", estimate="20min"
+    ).save()
+    ScheduledTask(
+        tw, description="test_yesterday", schedule="yesterday", estimate="20min"
+    ).save()
+    ScheduledTask(
+        tw, description="test_9:00_to_10:11", schedule="today+9hr", estimate="71min"
+    ).save()
+    ScheduledTask(
+        tw, description="test_14:00_to_16:00", schedule="today+14hr", estimate="2hr"
+    ).save()
+    ScheduledTask(
+        tw,
+        description="test_16:10_to_16:34",
+        schedule="today+16hr+10min",
+        estimate="24min",
+    ).save()
+    ScheduledTask(
+        tw, description="test_tomorrow", schedule="tomorrow", estimate="24min"
+    ).save()
+    ScheduledTask(
+        tw, description="test_next_week", schedule="today+7days", estimate="20min"
+    ).save()
+
+    scheduled_after: datetime = calculate_datetime("tomorrow-3days")
+    scheduled_before: datetime = calculate_datetime("tomorrow+3days")
+    schedule = Schedule(
+        backend=tw, scheduled_before=scheduled_after, scheduled_after=scheduled_before
+    )
+
+    yield schedule
