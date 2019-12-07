@@ -163,10 +163,10 @@ class Schedule:
            next scheduled task, return None."""
         next_tasks = []
         for task_ in self.tasks:
-            if task_.start > task.start:
+            if task_.scheduled_start_datetime > task.scheduled_start_datetime:
                 next_tasks.append(task_)
 
-        next_tasks.sort(key=lambda task: task.start)
+        next_tasks.sort(key=lambda task: task.scheduled_start_datetime)
 
         if next_tasks:
             return next_tasks[0]

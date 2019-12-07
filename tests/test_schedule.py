@@ -49,3 +49,14 @@ class TestSchedule:
     def test_get_column_offsets(self, schedule: Schedule):
         offsets = schedule.get_column_offsets()
         assert offsets == [0, 5, 7, 19, 29, 37]
+
+    def test_get_next_task_returns_next_task(self, schedule: Schedule):
+        next_task = schedule.get_next_task(schedule.tasks[2])
+        if next_task:
+            assert next_task["description"] == "test_14:00_to_16:00"
+        else:
+            pytest.fail("A next task was expected but not returned.")
+
+    def test_get_next_task_for_last_task_returns_none(self, schedule: Schedule):
+        next_task = schedule.get_next_task(schedule.tasks[6])
+        assert not next_task
