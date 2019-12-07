@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 class TestMain:
     def test_main_init_creates_backend_and_schedule(self, tw):
-        main = Main(["-t", "tests/test-data/.taskrc"])
+        main = Main(["-t", "tests/test-data/.taskrc", "--no-notifications"])
 
         backend = main.backend
         assert backend.taskrc_location == "tests/test-data/.taskrc"
@@ -20,7 +20,7 @@ class TestMain:
         assert schedule.backend is backend
 
     def test_main_command_args(self, tw):
-        main = Main(["-t", "tests/test-data/.taskrc"])
+        main = Main(["-t", "tests/test-data/.taskrc", "--no-notifications"])
         backend = main.backend
         task_command = backend.task_command
         assert "task" in task_command

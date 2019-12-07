@@ -80,7 +80,7 @@ class Main:
 
         # Check sound file
         sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
-        if os.path.isfile(sound_file) is False:
+        if self.show_notifications and os.path.isfile(sound_file) is False:
             raise SoundDoesNotExistError(
                 f"The specified sound file does not exist: {sound_file}"
             )
@@ -186,6 +186,8 @@ class Main:
 
         if self.show_notifications:
             self.notifier = Notifier(self.backend)
+        else:
+            self.notifier = None
 
         self.screen = Screen(
             self.schedule,
