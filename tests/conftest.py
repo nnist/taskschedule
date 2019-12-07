@@ -86,7 +86,7 @@ def schedule(tw):
     scheduled_after: datetime = calculate_datetime("tomorrow-3days")
     scheduled_before: datetime = calculate_datetime("tomorrow+3days")
     schedule = Schedule(
-        backend=tw, scheduled_before=scheduled_after, scheduled_after=scheduled_before
+        backend=tw, scheduled_before=scheduled_before, scheduled_after=scheduled_after
     )
 
     yield schedule
