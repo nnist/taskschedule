@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from taskschedule.schedule import Schedule, ScheduledTask
+from taskschedule.screen import Screen
 from taskschedule.taskwarrior import PatchedTaskWarrior
 from taskschedule.utils import calculate_datetime
 
@@ -90,3 +91,9 @@ def schedule(tw):
     )
 
     yield schedule
+
+
+@pytest.fixture(scope="module")
+def screen(tw, schedule):
+    screen = Screen(schedule, schedule.scheduled_after, schedule.scheduled_before)
+    yield screen
