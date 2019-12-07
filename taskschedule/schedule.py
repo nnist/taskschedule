@@ -172,22 +172,3 @@ class Schedule:
             return next_tasks[0]
 
         return None
-
-    def align_matrix(self, array: List) -> List:
-        """Align all columns in a matrix by padding the items with spaces.
-           Return the aligned array."""
-        col_sizes: Dict = {}
-        for row in array:
-            for i, col in enumerate(row):
-                col_sizes[i] = max(col_sizes.get(i, 0), len(col))
-
-        ncols = len(col_sizes)
-        result = []
-        for row in array:
-            row = list(row) + [""] * (ncols - len(row))
-            for i, col in enumerate(row):
-                row[i] = col.ljust(col_sizes[i])
-
-            result.append(row)
-
-        return result
