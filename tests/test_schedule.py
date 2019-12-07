@@ -4,6 +4,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from taskschedule.utils import calculate_datetime
+
 if TYPE_CHECKING:
     from taskschedule.schedule import Schedule
 
@@ -36,11 +38,16 @@ class TestSchedule:
 
     def test_get_time_slots_has_correct_tasks(self, schedule: Schedule):
         time_slots = schedule.get_time_slots()
-        assert time_slots["2019-12-06"]["00"][0]["description"] == "test_yesterday"
-        assert time_slots["2019-12-07"]["09"][0]["description"] == "test_9:00_to_10:11"
-        assert time_slots["2019-12-07"]["14"][0]["description"] == "test_14:00_to_16:00"
-        assert time_slots["2019-12-07"]["16"][0]["description"] == "test_16:10_to_16:34"
-        assert time_slots["2019-12-08"]["00"][0]["description"] == "test_tomorrow"
+
+        yesterday = calculate_datetime("yesterday").date().isoformat()
+        today = calculate_datetime("today").date().isoformat()
+        tomorrow = calculate_datetime("tomorrow").date().isoformat()
+
+        assert time_slots[yesterday]["00"][0]["description"] == "test_yesterday"
+        assert time_slots[today]["09"][0]["description"] == "test_9:00_to_10:11"
+        assert time_slots[today]["14"][0]["description"] == "test_14:00_to_16:00"
+        assert time_slots[today]["16"][0]["description"] == "test_16:10_to_16:34"
+        assert time_slots[tomorrow]["00"][0]["description"] == "test_tomorrow"
 
     def test_get_max_length(self, schedule: Schedule):
         length = schedule.get_max_length("description")
