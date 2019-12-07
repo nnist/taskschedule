@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import pytest
 
 from taskschedule.scheduled_task import ScheduledTask
-from tests.fixtures import tw  # noqa: F401
 
 
 def test_as_dict(tw):  # noqa: F811
