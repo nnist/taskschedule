@@ -18,4 +18,5 @@ class TestScreen:
 
     def test_prerender_footnote(self, screen: Screen):
         footnote = screen.prerender_footnote()
-        assert "tasks" in str(footnote)
+        count = len(screen.schedule.tasks)
+        assert f"{count} tasks" in str(footnote)
