@@ -571,7 +571,9 @@ class Screen:
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
                 if not tasks and not self.hide_empty:
-                    empty_line_buffer = self.prerender_empty_line()
+                    empty_line_buffer = self.prerender_empty_line(
+                        alternate, current_line, hour, day
+                    )
                     for part in empty_line_buffer:
                         self.buffer.append(part)
 
