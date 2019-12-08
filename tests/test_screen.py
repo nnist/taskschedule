@@ -20,3 +20,16 @@ class TestScreen:
         footnote = screen.prerender_footnote()
         count = len(screen.schedule.tasks)
         assert f"{count} tasks" in str(footnote)
+
+    def test_prerender_buffer(self, screen: Screen):
+        header_buffer = screen.prerender_headers()
+        assert "ID" in header_buffer[0][2]
+        assert header_buffer[0][1] == 5
+        assert "Time" in header_buffer[1][2]
+        assert header_buffer[1][1] == 7
+        assert "Timeboxes" in header_buffer[2][2]
+        assert header_buffer[2][1] == 19
+        assert "Project" in header_buffer[3][2]
+        assert header_buffer[3][1] == 29
+        assert "Description" in header_buffer[4][2]
+        assert header_buffer[4][1] == 37

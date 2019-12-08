@@ -310,6 +310,44 @@ class Screen:
 
         return timeboxes
 
+    def prerender_headers(self) -> List[Tuple[int, int, str, int]]:
+        """Pre-render the headers."""
+
+        header_buffer = []
+
+        # Determine offsets
+        max_y, max_x = self.get_maxyx()
+        offsets = self.schedule.get_column_offsets()
+        max_project_column_length = round(max_x / 8)
+        if offsets[5] - offsets[4] > max_project_column_length:
+            offsets[5] = offsets[4] + max_project_column_length
+
+        # Draw headers
+        headers = ["", "", "ID", "Time", "Timeboxes", "Project", "Description"]
+        column_lengths = [2, 1]
+        column_lengths.append(self.schedule.get_max_length("id"))
+        column_lengths.append(11)
+        column_lengths.append(9)
+        column_lengths.append(max_project_column_length - 1)
+        column_lengths.append(self.schedule.get_max_length("description"))
+
+        for i, header in enumerate(headers):
+            try:
+                extra_length = column_lengths[i] - len(header)
+                headers[i] += " " * extra_length
+            except IndexError:
+                pass
+
+        header_buffer.append((0, offsets[1], headers[2], self.COLOR_HEADER))
+        header_buffer.append((0, offsets[2], headers[3], self.COLOR_HEADER))
+        header_buffer.append((0, offsets[3], headers[4], self.COLOR_HEADER))
+        header_buffer.append((0, offsets[4], headers[5], self.COLOR_HEADER))
+
+        if not self.hide_projects:
+            header_buffer.append((0, offsets[5], headers[6], self.COLOR_HEADER))
+
+        return header_buffer
+
     def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.get_maxyx()
@@ -338,35 +376,12 @@ class Screen:
                     if current_task["id"] != 0:
                         run_hooks("on-progress", data=current_task.as_dict())
 
-        # Determine offsets
         offsets = self.schedule.get_column_offsets()
-        max_project_column_length = round(max_x / 8)
-        if offsets[5] - offsets[4] > max_project_column_length:
-            offsets[5] = offsets[4] + max_project_column_length
 
-        # Draw headers
-        headers = ["", "", "ID", "Time", "Timeboxes", "Project", "Description"]
-        column_lengths = [2, 1]
-        column_lengths.append(self.schedule.get_max_length("id"))
-        column_lengths.append(11)
-        column_lengths.append(9)
-        column_lengths.append(max_project_column_length - 1)
-        column_lengths.append(self.schedule.get_max_length("description"))
-
-        for i, header in enumerate(headers):
-            try:
-                extra_length = column_lengths[i] - len(header)
-                headers[i] += " " * extra_length
-            except IndexError:
-                pass
-
-        self.buffer.append((0, offsets[1], headers[2], self.COLOR_HEADER))
-        self.buffer.append((0, offsets[2], headers[3], self.COLOR_HEADER))
-        self.buffer.append((0, offsets[3], headers[4], self.COLOR_HEADER))
-        self.buffer.append((0, offsets[4], headers[5], self.COLOR_HEADER))
-
-        if not self.hide_projects:
-            self.buffer.append((0, offsets[5], headers[6], self.COLOR_HEADER))
+        # Add the headers to the buffer
+        header_buffer = self.prerender_headers()
+        for header in header_buffer:
+            self.buffer.append(header)
 
         # Draw schedule
         alternate = True
