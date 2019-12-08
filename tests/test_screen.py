@@ -33,3 +33,14 @@ class TestScreen:
         assert header_buffer[3][1] == 29
         assert "Description" in header_buffer[4][2]
         assert header_buffer[4][1] == 37
+
+    def test_predender_divider(self, screen: Screen):
+        divider_buffer = screen.prerender_divider("2019-12-07", 0)
+        assert "──────" in divider_buffer[0][2]
+        assert "Sat 07 Dec 2019" in divider_buffer[1][2]
+        assert divider_buffer[1][1] == 6
+        assert (
+            "─────────────────────────────────────────────────────────"
+            in divider_buffer[2][2]
+        )
+        assert divider_buffer[2][1] == 23

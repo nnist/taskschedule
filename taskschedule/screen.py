@@ -348,6 +348,40 @@ class Screen:
 
         return header_buffer
 
+    def prerender_divider(
+        self, day: str, current_line: int
+    ) -> List[Tuple[int, int, str, int]]:
+        max_y, max_x = self.get_maxyx()
+        offsets = self.schedule.get_column_offsets()
+        divider_pt1 = "─" * (offsets[2] - 1)
+
+        divider_buffer = []
+        divider_buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
+
+        date_format = "%a %d %b %Y"
+        formatted_date = calculate_datetime(day).strftime(date_format)
+        divider_pt2 = " " + formatted_date + " "
+        if day == datetime.now().date().isoformat():
+            divider_buffer.append(
+                (current_line, len(divider_pt1), divider_pt2, self.COLOR_DIVIDER_ACTIVE)
+            )
+        else:
+            divider_buffer.append(
+                (current_line, len(divider_pt1), divider_pt2, self.COLOR_DIVIDER_TEXT)
+            )
+
+        divider_pt3 = "─" * (max_x - (len(divider_pt1) + len(divider_pt2)))
+        divider_buffer.append(
+            (
+                current_line,
+                len(divider_pt1) + len(divider_pt2),
+                divider_pt3,
+                self.COLOR_DIVIDER,
+            )
+        )
+
+        return divider_buffer
+
     def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.get_maxyx()
@@ -399,41 +433,12 @@ class Screen:
 
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
+
             # Draw divider
-            divider_pt1 = "─" * (offsets[2] - 1)
-            self.buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
+            divider_buffer = self.prerender_divider(day, current_line)
+            for divider_part in divider_buffer:
+                self.buffer.append(divider_part)
 
-            date_format = "%a %d %b %Y"
-            formatted_date = calculate_datetime(day).strftime(date_format)
-            divider_pt2 = " " + formatted_date + " "
-            if day == datetime.now().date().isoformat():
-                self.buffer.append(
-                    (
-                        current_line,
-                        len(divider_pt1),
-                        divider_pt2,
-                        self.COLOR_DIVIDER_ACTIVE,
-                    )
-                )
-            else:
-                self.buffer.append(
-                    (
-                        current_line,
-                        len(divider_pt1),
-                        divider_pt2,
-                        self.COLOR_DIVIDER_TEXT,
-                    )
-                )
-
-            divider_pt3 = "─" * (max_x - (len(divider_pt1) + len(divider_pt2)))
-            self.buffer.append(
-                (
-                    current_line,
-                    len(divider_pt1) + len(divider_pt2),
-                    divider_pt3,
-                    self.COLOR_DIVIDER,
-                )
-            )
             current_line += 1
             alternate = False
 
