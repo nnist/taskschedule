@@ -1,7 +1,6 @@
 import curses
-import math
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import List, Tuple
 
 from taskschedule.config_parser import ConfigParser

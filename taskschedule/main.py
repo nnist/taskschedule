@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 import time
-from curses import KEY_DOWN, KEY_RESIZE
+from curses import KEY_RESIZE
 from curses import error as curses_error
 from curses import napms
 from datetime import datetime

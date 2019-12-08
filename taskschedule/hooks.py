@@ -1,6 +1,6 @@
-import subprocess
-import os
 import json
+import os
+import subprocess
 
 
 def run_hooks(hook_type, data={"id": -1, "description": "none"}):
