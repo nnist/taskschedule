@@ -560,13 +560,20 @@ class Screen:
         time_slots = self.schedule.get_time_slots()
         for day in time_slots:
 
-            # Draw divider
-            divider_buffer = self.prerender_divider(day, current_line)
-            for divider_part in divider_buffer:
-                self.buffer.append(divider_part)
+            # Draw divider if day has tasks
+            day_has_tasks = False
+            for hour in time_slots[day]:
+                tasks = time_slots[day][hour]
+                if tasks:
+                    day_has_tasks = True
 
-            current_line += 1
-            alternate = False
+            if day_has_tasks or not self.hide_empty:
+                divider_buffer = self.prerender_divider(day, current_line)
+                for divider_part in divider_buffer:
+                    self.buffer.append(divider_part)
+
+                current_line += 1
+                alternate = False
 
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
