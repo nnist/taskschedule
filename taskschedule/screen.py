@@ -2,7 +2,7 @@ import curses
 import math
 import time
 from datetime import datetime, timedelta
-from typing import List, Tuple, Union
+from typing import List, Tuple
 
 from taskschedule.config_parser import ConfigParser
 from taskschedule.hooks import run_hooks
@@ -402,10 +402,10 @@ class Screen:
 
     def prerender_empty_line(
         self, alternate: bool, current_line: int, hour: int, day: str
-    ) -> List[Tuple[int, int, Union[str, int], int]]:
+    ) -> List[Tuple[int, int, str, int]]:
         max_y, max_x = self.get_maxyx()
 
-        _buffer: List[Tuple[int, int, Union[str, int], int]] = []
+        _buffer: List[Tuple[int, int, str, int]] = []
 
         if alternate:
             color = self.COLOR_DEFAULT_ALTERNATE
@@ -418,9 +418,9 @@ class Screen:
         # Draw hour column, highlight current hour
         current_hour = time.localtime().tm_hour
         if int(hour) == current_hour and day == datetime.now().date().isoformat():
-            _buffer.append((current_line, 0, hour, self.COLOR_HOUR_CURRENT))
+            _buffer.append((current_line, 0, str(hour), self.COLOR_HOUR_CURRENT))
         else:
-            _buffer.append((current_line, 0, hour, self.COLOR_HOUR))
+            _buffer.append((current_line, 0, str(hour), self.COLOR_HOUR))
 
         return _buffer
 
@@ -432,12 +432,12 @@ class Screen:
         hour: int,
         current_line: int,
         day: str,
-    ) -> List[Tuple[int, int, Union[str, int], int]]:
+    ) -> List[Tuple[int, int, str, int]]:
         """Pre-render a task."""
         max_y, max_x = self.get_maxyx()
         offsets = self.schedule.get_column_offsets()
 
-        _buffer: List[Tuple[int, int, Union[str, int], int]] = []
+        _buffer: List[Tuple[int, int, str, int]] = []
 
         color = self.get_task_color(task, alternate)
 

@@ -19,7 +19,7 @@ class TestScreen:
     def test_prerender_footnote(self, screen: Screen):
         footnote = screen.prerender_footnote()
         count = len(screen.schedule.tasks)
-        assert f"{count} tasks" in str(footnote)
+        assert f"{count} tasks" in footnote
 
     def test_prerender_buffer(self, screen: Screen):
         header_buffer = screen.prerender_headers()
@@ -47,9 +47,9 @@ class TestScreen:
 
     def test_prerender_empty_line(self, screen: Screen):
         empty_line_buffer = screen.prerender_empty_line(True, 0, 22, "2019-12-08")
-        assert "  " in str(empty_line_buffer[0][2])
+        assert "  " in empty_line_buffer[0][2]
         assert empty_line_buffer[0][1] == 5
-        assert empty_line_buffer[1][2] == 22
+        assert empty_line_buffer[1][2] == "22"
         assert empty_line_buffer[1][1] == 0
 
     def test_prerender_task(self, screen: Screen):
