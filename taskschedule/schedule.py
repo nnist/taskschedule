@@ -57,7 +57,7 @@ class Hour:
 class Day:
     def __init__(self, date: dt.date, queryset: ScheduledTaskQuerySet):
         self.date = date
-        self.tasks = queryset.filter("scheduled:today")
+        self.tasks = queryset.filter(f"scheduled:{date}")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}({self.date}, {self.tasks})"
@@ -69,9 +69,9 @@ class Day:
     def hours(self) -> List[Hour]:
         hours = []
         for i in range(24):
-            queryset = self.tasks.filter(f"scheduled.after:today+{i}hr-1s").filter(
-                f"scheduled.before:today+{i+1}hr"
-            )
+            queryset = self.tasks.filter(
+                f"scheduled.after:{self.date}+{i}hr-1s"
+            ).filter(f"scheduled.before:{self.date}+{i+1}hr")
             hour = Hour(i, queryset)
             hours.append(hour)
 

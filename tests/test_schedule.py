@@ -73,11 +73,18 @@ class TestSchedule:
 
     def test_days(self, schedule: Schedule):
         days = schedule.days
+
+        assert len(days[1].tasks) == 1
+        assert days[1].tasks[0]["description"] == "test_yesterday"
+
         assert len(days[2].tasks) == 4
         assert days[2].tasks[0]["description"] == "test_0:00"
         assert days[2].tasks[1]["description"] == "test_9:00_to_10:11"
         assert days[2].tasks[2]["description"] == "test_14:00_to_16:00"
         assert days[2].tasks[3]["description"] == "test_16:10_to_16:34"
+
+        assert len(days[3].tasks) == 1
+        assert days[3].tasks[0]["description"] == "test_tomorrow"
 
 
 class TestDay:
