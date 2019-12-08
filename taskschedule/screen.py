@@ -382,20 +382,10 @@ class Screen:
 
         return divider_buffer
 
-    def refresh_buffer(self):
-        """Refresh the buffer."""
-        max_y, max_x = self.get_maxyx()
-        self.prev_buffer = self.buffer
-        self.buffer = []
-
-        tasks = self.schedule.tasks
-
-        if not self.schedule.tasks:
-            return
-
-        # Run on-progress hook
+    def run_hook(self):
+        # TODO This does not belong here, move it somewhere appropriate
         current_task = None
-        for task_ in tasks:
+        for task_ in self.schedule.tasks:
             if task_.should_be_active:
                 current_task = task_
 
@@ -409,6 +399,20 @@ class Screen:
                     self.current_task = current_task
                     if current_task["id"] != 0:
                         run_hooks("on-progress", data=current_task.as_dict())
+
+    def refresh_buffer(self):
+        """Refresh the buffer."""
+        max_y, max_x = self.get_maxyx()
+        self.prev_buffer = self.buffer
+        self.buffer = []
+
+        tasks = self.schedule.tasks
+
+        if not self.schedule.tasks:
+            return
+
+        # Run on-progress hook
+        self.run_hook()
 
         offsets = self.schedule.get_column_offsets()
 
