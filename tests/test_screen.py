@@ -51,3 +51,29 @@ class TestScreen:
         assert empty_line_buffer[0][1] == 5
         assert empty_line_buffer[1][2] == 22
         assert empty_line_buffer[1][1] == 0
+
+    def test_prerender_task(self, screen: Screen):
+        task = screen.schedule.tasks[0]
+        task_buffer = screen.prerender_task(0, task, False, 11, 0, "2019-12-08")
+        assert task_buffer[0][1] == 0
+        assert "11" in task_buffer[0][2]
+
+        # Glyph column
+        assert task_buffer[1][1] == 5
+        assert "  " in task_buffer[1][2]
+
+        # ID column
+        assert task_buffer[3][1] == 5
+        assert "1" in task_buffer[3][2]
+
+        # Time column
+        assert task_buffer[4][1] == 7
+        assert "00:20" in task_buffer[4][2]
+
+        # Project column
+        assert task_buffer[5][1] == 29
+        assert task_buffer[5][2] == ""
+
+        # Description column
+        assert task_buffer[6][1] == 37
+        assert "test_last_week" in task_buffer[6][2]

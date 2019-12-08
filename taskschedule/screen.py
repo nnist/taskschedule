@@ -424,6 +424,107 @@ class Screen:
 
         return _buffer
 
+    def prerender_task(
+        self,
+        task_num: int,
+        task: ScheduledTask,
+        alternate: bool,
+        hour: int,
+        current_line: int,
+        day: str,
+    ) -> List[Tuple[int, int, Union[str, int], int]]:
+        """Pre-render a task."""
+        max_y, max_x = self.get_maxyx()
+        offsets = self.schedule.get_column_offsets()
+
+        _buffer: List[Tuple[int, int, Union[str, int], int]] = []
+
+        color = self.get_task_color(task, alternate)
+
+        # Only draw hour once for multiple tasks
+        if task_num == 0:
+            hour_ = str(hour)
+        else:
+            hour_ = ""
+
+        # Draw hour column, highlight current hour
+        current_hour = time.localtime().tm_hour
+        if hour_ != "":
+            if int(hour) == current_hour and day == datetime.now().date().isoformat():
+                _buffer.append((current_line, 0, hour_, self.COLOR_HOUR_CURRENT))
+            else:
+                _buffer.append((current_line, 0, hour_, self.COLOR_HOUR))
+
+        # Fill line to screen length
+        _buffer.append((current_line, 5, " " * (max_x - 5), color))
+
+        # Draw glyph column
+        _buffer.append((current_line, 3, task.glyph, self.COLOR_GLYPH))
+
+        # Draw task id column
+        if task["id"] != 0:
+            _buffer.append((current_line, 5, str(task["id"]), color))
+
+        # Draw the time column.
+        # Do not show the start time if the task is not scheduled at a
+        # specific time, so the column is not cluttered with tasks
+        # having start times as 00:00.
+        start_dt = task.scheduled_start_datetime
+        if start_dt:
+            if not task.has_scheduled_time:
+                if task.scheduled_end_datetime:
+                    end_time = "{}".format(
+                        task.scheduled_end_datetime.strftime("%H:%M")
+                    )
+                    formatted_time = "      {}".format(end_time)
+                else:
+                    formatted_time = ""
+            else:
+                start_time = "{}".format(start_dt.strftime("%H:%M"))
+                if task.scheduled_end_datetime is None:
+                    formatted_time = start_time
+                else:
+                    end_time = "{}".format(
+                        task.scheduled_end_datetime.strftime("%H:%M")
+                    )
+                    formatted_time = "{}-{}".format(start_time, end_time)
+        else:
+            formatted_time = ""
+
+        _buffer.append((current_line, offsets[2], formatted_time, color))
+
+        # Draw timeboxes column
+        timeboxes = self.render_timeboxes(task, color)
+        for i, timebox in enumerate(timeboxes):
+            _buffer.append(
+                (
+                    current_line,
+                    offsets[3] + i,
+                    timebox.get("char"),
+                    timebox.get("color"),
+                )
+            )
+
+        # Optionally draw project column
+        offset = 0
+        if not self.hide_projects:
+            if task["project"] is None:
+                project = ""
+            else:
+                max_length = offsets[5] - offsets[4] - 1
+                project = task["project"][0:max_length]
+
+            _buffer.append((current_line, offsets[4], project, color))
+            offset = offsets[5]
+        else:
+            offset = offsets[4]
+
+        # Draw description column
+        description = task["description"][0 : max_x - offset]
+        _buffer.append((current_line, offset, description, color))
+
+        return _buffer
+
     def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.get_maxyx()
@@ -437,8 +538,6 @@ class Screen:
 
         # Run on-progress hook
         self.run_hook()
-
-        offsets = self.schedule.get_column_offsets()
 
         # Add the headers to the buffer
         header_buffer = self.prerender_headers()
@@ -481,99 +580,9 @@ class Screen:
                     alternate = not alternate
 
                 task: ScheduledTask
-                for ii, task in enumerate(tasks):
-                    color = self.get_task_color(task, alternate)
-
-                    # Only draw hour once for multiple tasks
-                    if ii == 0:
-                        hour_ = str(hour)
-                    else:
-                        hour_ = ""
-
-                    # Draw hour column, highlight current hour
-                    current_hour = time.localtime().tm_hour
-                    if hour_ != "":
-                        if (
-                            int(hour) == current_hour
-                            and day == datetime.now().date().isoformat()
-                        ):
-                            self.buffer.append(
-                                (current_line, 0, hour_, self.COLOR_HOUR_CURRENT)
-                            )
-                        else:
-                            self.buffer.append(
-                                (current_line, 0, hour_, self.COLOR_HOUR)
-                            )
-
-                    # Fill line to screen length
-                    self.buffer.append((current_line, 5, " " * (max_x - 5), color))
-
-                    # Draw glyph column
-                    self.buffer.append((current_line, 3, task.glyph, self.COLOR_GLYPH))
-
-                    # Draw task id column
-                    if task["id"] != 0:
-                        self.buffer.append((current_line, 5, str(task["id"]), color))
-
-                    # Draw the time column.
-                    # Do not show the start time if the task is not scheduled at a
-                    # specific time, so the column is not cluttered with tasks
-                    # having start times as 00:00.
-                    start_dt = task.scheduled_start_datetime
-                    if start_dt:
-                        if not task.has_scheduled_time:
-                            if task.scheduled_end_datetime:
-                                end_time = "{}".format(
-                                    task.scheduled_end_datetime.strftime("%H:%M")
-                                )
-                                formatted_time = "      {}".format(end_time)
-                            else:
-                                formatted_time = ""
-                        else:
-                            start_time = "{}".format(start_dt.strftime("%H:%M"))
-                            if task.scheduled_end_datetime is None:
-                                formatted_time = start_time
-                            else:
-                                end_time = "{}".format(
-                                    task.scheduled_end_datetime.strftime("%H:%M")
-                                )
-                                formatted_time = "{}-{}".format(start_time, end_time)
-                    else:
-                        formatted_time = ""
-
-                    self.buffer.append(
-                        (current_line, offsets[2], formatted_time, color)
+                for task_num, task in enumerate(tasks):
+                    self.prerender_task(
+                        task_num, task, alternate, hour, current_line, day
                     )
-
-                    # Draw timeboxes column
-                    timeboxes = self.render_timeboxes(task, color)
-                    for i, timebox in enumerate(timeboxes):
-                        self.buffer.append(
-                            (
-                                current_line,
-                                offsets[3] + i,
-                                timebox.get("char"),
-                                timebox.get("color"),
-                            )
-                        )
-
-                    # Optionally draw project column
-                    offset = 0
-                    if not self.hide_projects:
-                        if task["project"] is None:
-                            project = ""
-                        else:
-                            max_length = offsets[5] - offsets[4] - 1
-                            project = task["project"][0:max_length]
-
-                        self.buffer.append((current_line, offsets[4], project, color))
-                        offset = offsets[5]
-                    else:
-                        offset = offsets[4]
-
-                    # Draw description column
-                    description = task["description"][0 : max_x - offset]
-                    self.buffer.append((current_line, offset, description, color))
-
                     current_line += 1
                     alternate = not alternate
