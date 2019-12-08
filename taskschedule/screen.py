@@ -580,8 +580,11 @@ class Screen:
 
                 task: ScheduledTask
                 for task_num, task in enumerate(tasks):
-                    self.prerender_task(
+                    task_buffer = self.prerender_task(
                         task_num, task, alternate, hour, current_line, day
                     )
+                    for part in task_buffer:
+                        self.buffer.append(part)
+
                     current_line += 1
                     alternate = not alternate
