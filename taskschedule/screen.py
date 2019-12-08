@@ -10,6 +10,8 @@ from taskschedule.schedule import Schedule
 from taskschedule.scheduled_task import ScheduledTask
 from taskschedule.utils import calculate_datetime
 
+BufferType = List[Tuple[int, int, str, int]]
+
 
 class Screen:
     """This class handles the rendering of the schedule."""
@@ -37,8 +39,8 @@ class Screen:
 
         self.hide_projects = hide_projects
         self.hide_empty = hide_empty
-        self.buffer: List[Tuple[int, int, str, int]] = []
-        self.prev_buffer: List[Tuple[int, int, str, int]] = []
+        self.buffer: BufferType = []
+        self.prev_buffer: BufferType = []
         self.init_colors()
 
         self.current_task = None
@@ -310,10 +312,10 @@ class Screen:
 
         return timeboxes
 
-    def prerender_headers(self) -> List[Tuple[int, int, str, int]]:
+    def prerender_headers(self) -> BufferType:
         """Pre-render the headers."""
 
-        header_buffer = []
+        header_buffer: BufferType = []
 
         # Determine offsets
         max_y, max_x = self.get_maxyx()
@@ -348,14 +350,12 @@ class Screen:
 
         return header_buffer
 
-    def prerender_divider(
-        self, day: str, current_line: int
-    ) -> List[Tuple[int, int, str, int]]:
+    def prerender_divider(self, day: str, current_line: int) -> BufferType:
         max_y, max_x = self.get_maxyx()
         offsets = self.schedule.get_column_offsets()
         divider_pt1 = "─" * (offsets[2] - 1)
 
-        divider_buffer = []
+        divider_buffer: BufferType = []
         divider_buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
 
         date_format = "%a %d %b %Y"
@@ -402,10 +402,10 @@ class Screen:
 
     def prerender_empty_line(
         self, alternate: bool, current_line: int, hour: int, day: str
-    ) -> List[Tuple[int, int, str, int]]:
+    ) -> BufferType:
         max_y, max_x = self.get_maxyx()
 
-        _buffer: List[Tuple[int, int, str, int]] = []
+        _buffer: BufferType = []
 
         if alternate:
             color = self.COLOR_DEFAULT_ALTERNATE
@@ -432,12 +432,12 @@ class Screen:
         hour: int,
         current_line: int,
         day: str,
-    ) -> List[Tuple[int, int, str, int]]:
+    ) -> BufferType:
         """Pre-render a task."""
         max_y, max_x = self.get_maxyx()
         offsets = self.schedule.get_column_offsets()
 
-        _buffer: List[Tuple[int, int, str, int]] = []
+        _buffer: BufferType = []
 
         color = self.get_task_color(task, alternate)
 
