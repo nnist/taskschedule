@@ -1,7 +1,7 @@
 """This module provides a Schedule class, which is used for retrieving
    scheduled tasks from taskwarrior and displaying them in a table."""
 
-from datetime import datetime, timedelta
+import datetime as dt
 from typing import Dict, List, Optional
 
 from cached_property import cached_property
@@ -31,6 +31,60 @@ class TaskDirDoesNotExistError(Exception):
     pass
 
 
+class Hour:
+    def __init__(self, hour: int, queryset: ScheduledTaskQuerySet):
+        self.hour = hour
+        self.queryset = queryset
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.hour}, {self.tasks})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    @property
+    def tasks(self) -> ScheduledTaskQuerySet:
+        return self.queryset
+
+    @property
+    def has_tasks(self) -> bool:
+        if self.tasks:
+            return True
+
+        return False
+
+
+class Day:
+    def __init__(self, date: dt.date, queryset: ScheduledTaskQuerySet):
+        self.date = date
+        self.tasks = queryset.filter("scheduled:today")
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.date}, {self.tasks})"
+
+    def __str__(self) -> str:
+        return self.__repr__()
+
+    @property
+    def hours(self) -> List[Hour]:
+        hours = []
+        for i in range(24):
+            queryset = self.tasks.filter(f"scheduled.after:today+{i}hr-1s").filter(
+                f"scheduled.before:today+{i+1}hr"
+            )
+            hour = Hour(i, queryset)
+            hours.append(hour)
+
+        return hours
+
+    @property
+    def has_tasks(self) -> bool:
+        if self.tasks:
+            return True
+
+        return False
+
+
 class Schedule:
     """This class provides methods to format tasks and display them in
        a schedule report."""
@@ -38,8 +92,8 @@ class Schedule:
     def __init__(
         self,
         backend: PatchedTaskWarrior,
-        scheduled_after: datetime,
-        scheduled_before: datetime,
+        scheduled_after: dt.datetime,
+        scheduled_before: dt.datetime,
     ):
         self.backend = backend
 
@@ -94,6 +148,22 @@ class Schedule:
 
         return queryset
 
+    @property
+    def days(self):
+        """Return the days with tasks in the schedule."""
+        days = []
+        start_date = self.scheduled_after.date()
+        end_date = self.scheduled_before.date()
+
+        num_days = (end_date - start_date).days
+        for i in range(num_days):
+            date = start_date + dt.timedelta(days=i)
+            queryset = self.tasks.filter(f"scheduled:{date}")
+            day = Day(date, queryset)
+            days.append(day)
+
+        return days
+
     def get_time_slots(self) -> Dict:
         """Return a dict with dates and their tasks.
         >>> get_time_slots()
@@ -111,8 +181,8 @@ class Schedule:
         date = start_date
         while date <= end_date:
             hours = {}
-            time = datetime.strptime(start_time, "%H:%M")
-            end = datetime.strptime(end_time, "%H:%M")
+            time = dt.datetime.strptime(start_time, "%H:%M")
+            end = dt.datetime.strptime(end_time, "%H:%M")
             while time <= end:
                 task_list = []
                 task: ScheduledTask
@@ -124,9 +194,9 @@ class Schedule:
 
                 task_list = sorted(task_list, key=lambda k: k["scheduled"])
                 hours[time.strftime("%H")] = task_list
-                time += timedelta(minutes=slot_time)
+                time += dt.timedelta(minutes=slot_time)
             days[date.isoformat()] = hours
-            date += timedelta(days=1)
+            date += dt.timedelta(days=1)
 
         return days
 

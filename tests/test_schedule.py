@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import datetime as dt
 from typing import TYPE_CHECKING
 
 import pytest
 
+from taskschedule.schedule import Day, Hour
 from taskschedule.utils import calculate_datetime
 
 if TYPE_CHECKING:
@@ -67,3 +69,46 @@ class TestSchedule:
     def test_get_next_task_for_last_task_returns_none(self, schedule: Schedule):
         next_task = schedule.get_next_task(schedule.tasks[6])
         assert not next_task
+
+    def test_days(self, schedule: Schedule):
+        days = schedule.days
+        assert len(days[2].tasks) == 3
+        assert days[2].tasks[0]["description"] == "test_9:00_to_10:11"
+        assert days[2].tasks[1]["description"] == "test_14:00_to_16:00"
+        assert days[2].tasks[2]["description"] == "test_16:10_to_16:34"
+
+
+class TestDay:
+    def test_day_only_returns_tasks_for_day(self, schedule: Schedule):
+        date = dt.datetime.now().date()
+        day = Day(date, schedule.tasks)
+        assert len(day.tasks) == 3
+        assert day.tasks[0]["description"] == "test_9:00_to_10:11"
+        assert day.tasks[1]["description"] == "test_14:00_to_16:00"
+        assert day.tasks[2]["description"] == "test_16:10_to_16:34"
+
+    def test_day_has_tasks(self, schedule: Schedule):
+        date = dt.datetime.now().date()
+        day = Day(date, schedule.tasks)
+        assert day.has_tasks
+
+        day = Day(date, schedule.tasks.filter("scheduled:tomorrow+50days"))
+        assert not day.has_tasks
+
+    def test_hours(self, schedule: Schedule):
+        date = dt.datetime.now().date()
+        day = Day(date, schedule.tasks)
+        hours = day.hours
+        assert len(hours) == 24
+        assert hours[9].tasks[0]["description"] == "test_9:00_to_10:11"
+        assert hours[14].tasks[0]["description"] == "test_14:00_to_16:00"
+        assert hours[16].tasks[0]["description"] == "test_16:10_to_16:34"
+
+
+class TestHour:
+    def test_hour_has_tasks(self, schedule: Schedule):
+        hour = Hour(9, schedule.tasks[0])
+        assert hour.has_tasks
+
+        hour = Hour(9, schedule.tasks.filter("scheduled:tomorrow+50days"))
+        assert not hour.has_tasks
