@@ -154,6 +154,16 @@ class Screen:
         self.stdscr.refresh()
         self.pad.refresh(self.scroll_level + 1, 0, 1, 0, max_y - 3, max_x - 1)
 
+    def prerender_footnote(self) -> str:
+        """Pre-render the footnote."""
+        count = len(self.schedule.tasks)
+        date_format = "%a %d %b %Y"
+        before = self.scheduled_before.strftime(date_format)
+        after = self.scheduled_after.strftime(date_format)
+        footnote = f"{count} tasks - from {after} until {before}"
+
+        return footnote
+
     def draw_footnote(self):
         """Draw the footnote at the bottom of the screen."""
         max_y, max_x = self.get_maxyx()
@@ -246,15 +256,7 @@ class Screen:
         # )
 
         # Draw footnote
-        if self.scheduled_before and self.scheduled_after:
-            count = len(self.schedule.tasks)
-            date_format = "%a %d %b %Y"
-            before = self.scheduled_before.strftime(date_format)
-            after = self.scheduled_after.strftime(date_format)
-            footnote = f"{count} tasks - from {after} until {before}"
-        else:
-            footnote = "{} tasks - {}".format(len(self.schedule.tasks), self.scheduled)
-
+        footnote = self.prerender_footnote()
         self.stdscr.addstr(max_y - 1, 1, footnote, self.COLOR_DEFAULT)
 
     def draw(self, force=False):
