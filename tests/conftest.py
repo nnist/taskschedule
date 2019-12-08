@@ -65,6 +65,7 @@ def schedule(tw):
     ScheduledTask(
         tw, description="test_yesterday", schedule="yesterday", estimate="20min"
     ).save()
+    ScheduledTask(tw, description="test_0:00", schedule="today").save()
     ScheduledTask(
         tw, description="test_9:00_to_10:11", schedule="today+9hr", estimate="71min"
     ).save()

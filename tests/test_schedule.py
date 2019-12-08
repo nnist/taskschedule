@@ -15,14 +15,15 @@ if TYPE_CHECKING:
 class TestSchedule:
     def test_get_tasks_returns_correct_tasks(self, schedule: Schedule):
         tasks = schedule.tasks
-        assert len(tasks) == 7
+        assert len(tasks) == 8
         assert tasks[0]["description"] == "test_last_week"
         assert tasks[1]["description"] == "test_yesterday"
-        assert tasks[2]["description"] == "test_9:00_to_10:11"
-        assert tasks[3]["description"] == "test_14:00_to_16:00"
-        assert tasks[4]["description"] == "test_16:10_to_16:34"
-        assert tasks[5]["description"] == "test_tomorrow"
-        assert tasks[6]["description"] == "test_next_week"
+        assert tasks[2]["description"] == "test_0:00"
+        assert tasks[3]["description"] == "test_9:00_to_10:11"
+        assert tasks[4]["description"] == "test_14:00_to_16:00"
+        assert tasks[5]["description"] == "test_16:10_to_16:34"
+        assert tasks[6]["description"] == "test_tomorrow"
+        assert tasks[7]["description"] == "test_next_week"
 
     def test_clear_cache(self, schedule: Schedule):
         tasks = schedule.tasks
@@ -62,30 +63,32 @@ class TestSchedule:
     def test_get_next_task_returns_next_task(self, schedule: Schedule):
         next_task = schedule.get_next_task(schedule.tasks[2])
         if next_task:
-            assert next_task["description"] == "test_14:00_to_16:00"
+            assert next_task["description"] == "test_9:00_to_10:11"
         else:
             pytest.fail("A next task was expected but not returned.")
 
     def test_get_next_task_for_last_task_returns_none(self, schedule: Schedule):
-        next_task = schedule.get_next_task(schedule.tasks[6])
+        next_task = schedule.get_next_task(schedule.tasks[7])
         assert not next_task
 
     def test_days(self, schedule: Schedule):
         days = schedule.days
-        assert len(days[2].tasks) == 3
-        assert days[2].tasks[0]["description"] == "test_9:00_to_10:11"
-        assert days[2].tasks[1]["description"] == "test_14:00_to_16:00"
-        assert days[2].tasks[2]["description"] == "test_16:10_to_16:34"
+        assert len(days[2].tasks) == 4
+        assert days[2].tasks[0]["description"] == "test_0:00"
+        assert days[2].tasks[1]["description"] == "test_9:00_to_10:11"
+        assert days[2].tasks[2]["description"] == "test_14:00_to_16:00"
+        assert days[2].tasks[3]["description"] == "test_16:10_to_16:34"
 
 
 class TestDay:
     def test_day_only_returns_tasks_for_day(self, schedule: Schedule):
         date = dt.datetime.now().date()
         day = Day(date, schedule.tasks)
-        assert len(day.tasks) == 3
-        assert day.tasks[0]["description"] == "test_9:00_to_10:11"
-        assert day.tasks[1]["description"] == "test_14:00_to_16:00"
-        assert day.tasks[2]["description"] == "test_16:10_to_16:34"
+        assert len(day.tasks) == 4
+        assert day.tasks[0]["description"] == "test_0:00"
+        assert day.tasks[1]["description"] == "test_9:00_to_10:11"
+        assert day.tasks[2]["description"] == "test_14:00_to_16:00"
+        assert day.tasks[3]["description"] == "test_16:10_to_16:34"
 
     def test_day_has_tasks(self, schedule: Schedule):
         date = dt.datetime.now().date()
