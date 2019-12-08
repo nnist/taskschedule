@@ -2,7 +2,7 @@ import curses
 import math
 import time
 from datetime import datetime, timedelta
-from typing import List, Tuple
+from typing import List, Tuple, Union
 
 from taskschedule.config_parser import ConfigParser
 from taskschedule.hooks import run_hooks
@@ -400,6 +400,30 @@ class Screen:
                     if current_task["id"] != 0:
                         run_hooks("on-progress", data=current_task.as_dict())
 
+    def prerender_empty_line(
+        self, alternate: bool, current_line: int, hour: int, day: str
+    ) -> List[Tuple[int, int, Union[str, int], int]]:
+        max_y, max_x = self.get_maxyx()
+
+        _buffer: List[Tuple[int, int, Union[str, int], int]] = []
+
+        if alternate:
+            color = self.COLOR_DEFAULT_ALTERNATE
+        else:
+            color = self.COLOR_DEFAULT
+
+        # Fill line to screen length
+        _buffer.append((current_line, 5, " " * (max_x - 5), color))
+
+        # Draw hour column, highlight current hour
+        current_hour = time.localtime().tm_hour
+        if int(hour) == current_hour and day == datetime.now().date().isoformat():
+            _buffer.append((current_line, 0, hour, self.COLOR_HOUR_CURRENT))
+        else:
+            _buffer.append((current_line, 0, hour, self.COLOR_HOUR))
+
+        return _buffer
+
     def refresh_buffer(self):
         """Refresh the buffer."""
         max_y, max_x = self.get_maxyx()
@@ -449,26 +473,9 @@ class Screen:
             for hour in time_slots[day]:
                 tasks = time_slots[day][hour]
                 if not tasks and not self.hide_empty:
-                    # Add empty line
-                    if alternate:
-                        color = self.COLOR_DEFAULT_ALTERNATE
-                    else:
-                        color = self.COLOR_DEFAULT
-
-                    # Fill line to screen length
-                    self.buffer.append((current_line, 5, " " * (max_x - 5), color))
-
-                    # Draw hour column, highlight current hour
-                    current_hour = time.localtime().tm_hour
-                    if (
-                        int(hour) == current_hour
-                        and day == datetime.now().date().isoformat()
-                    ):
-                        self.buffer.append(
-                            (current_line, 0, hour, self.COLOR_HOUR_CURRENT)
-                        )
-                    else:
-                        self.buffer.append((current_line, 0, hour, self.COLOR_HOUR))
+                    empty_line_buffer = self.prerender_empty_line()
+                    for part in empty_line_buffer:
+                        self.buffer.append(part)
 
                     current_line += 1
                     alternate = not alternate

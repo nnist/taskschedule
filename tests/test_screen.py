@@ -44,3 +44,10 @@ class TestScreen:
             in divider_buffer[2][2]
         )
         assert divider_buffer[2][1] == 23
+
+    def test_prerender_empty_line(self, screen: Screen):
+        empty_line_buffer = screen.prerender_empty_line(True, 0, 22, "2019-12-08")
+        assert "  " in str(empty_line_buffer[0][2])
+        assert empty_line_buffer[0][1] == 5
+        assert empty_line_buffer[1][2] == 22
+        assert empty_line_buffer[1][1] == 0
