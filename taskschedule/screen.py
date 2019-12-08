@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import curses
 import time
 from datetime import datetime
-from typing import List, Tuple
+from typing import TYPE_CHECKING, List, Tuple
 
 from taskschedule.config_parser import ConfigParser
 from taskschedule.hooks import run_hooks
@@ -10,6 +12,9 @@ from taskschedule.scheduled_task import ScheduledTask
 from taskschedule.utils import calculate_datetime
 
 BufferType = List[Tuple[int, int, str, int]]
+
+if TYPE_CHECKING:
+    from taskschedule.schedule import Day, Hour
 
 
 class Screen:
@@ -349,7 +354,7 @@ class Screen:
 
         return header_buffer
 
-    def prerender_divider(self, day: str, current_line: int) -> BufferType:
+    def prerender_divider(self, day: Day, current_line: int) -> BufferType:
         max_y, max_x = self.get_maxyx()
         offsets = self.schedule.get_column_offsets()
         divider_pt1 = "─" * (offsets[2] - 1)
@@ -358,9 +363,9 @@ class Screen:
         divider_buffer.append((current_line, 0, divider_pt1, self.COLOR_DIVIDER))
 
         date_format = "%a %d %b %Y"
-        formatted_date = calculate_datetime(day).strftime(date_format)
+        formatted_date = day.date.strftime(date_format)
         divider_pt2 = " " + formatted_date + " "
-        if day == datetime.now().date().isoformat():
+        if day.date == datetime.now().date():
             divider_buffer.append(
                 (current_line, len(divider_pt1), divider_pt2, self.COLOR_DIVIDER_ACTIVE)
             )
@@ -400,7 +405,7 @@ class Screen:
                         run_hooks("on-progress", data=current_task.as_dict())
 
     def prerender_empty_line(
-        self, alternate: bool, current_line: int, hour: int, day: str
+        self, alternate: bool, current_line: int, hour: Hour, day: Day
     ) -> BufferType:
         max_y, max_x = self.get_maxyx()
 
@@ -416,10 +421,10 @@ class Screen:
 
         # Draw hour column, highlight current hour
         current_hour = time.localtime().tm_hour
-        if int(hour) == current_hour and day == datetime.now().date().isoformat():
-            _buffer.append((current_line, 0, str(hour), self.COLOR_HOUR_CURRENT))
+        if hour.hour == current_hour and day.date == datetime.now().date():
+            _buffer.append((current_line, 0, str(hour.hour), self.COLOR_HOUR_CURRENT))
         else:
-            _buffer.append((current_line, 0, str(hour), self.COLOR_HOUR))
+            _buffer.append((current_line, 0, str(hour.hour), self.COLOR_HOUR))
 
         return _buffer
 
@@ -428,9 +433,9 @@ class Screen:
         task_num: int,
         task: ScheduledTask,
         alternate: bool,
-        hour: int,
+        hour: Hour,
         current_line: int,
-        day: str,
+        day: Day,
     ) -> BufferType:
         """Pre-render a task."""
         max_y, max_x = self.get_maxyx()
@@ -442,14 +447,14 @@ class Screen:
 
         # Only draw hour once for multiple tasks
         if task_num == 0:
-            hour_ = str(hour)
+            hour_ = str(hour.hour)
         else:
             hour_ = ""
 
         # Draw hour column, highlight current hour
         current_hour = time.localtime().tm_hour
         if hour_ != "":
-            if int(hour) == current_hour and day == datetime.now().date().isoformat():
+            if hour.hour == current_hour and day.date == datetime.now().date():
                 _buffer.append((current_line, 0, hour_, self.COLOR_HOUR_CURRENT))
             else:
                 _buffer.append((current_line, 0, hour_, self.COLOR_HOUR))
@@ -557,17 +562,10 @@ class Screen:
         #    first_hour = 0
         #    last_hour = 23
 
-        time_slots = self.schedule.get_time_slots()
-        for day in time_slots:
+        for day in self.schedule.days:
 
             # Draw divider if day has tasks
-            day_has_tasks = False
-            for hour in time_slots[day]:
-                tasks = time_slots[day][hour]
-                if tasks:
-                    day_has_tasks = True
-
-            if day_has_tasks or not self.hide_empty:
+            if day.has_tasks or not self.hide_empty:
                 divider_buffer = self.prerender_divider(day, current_line)
                 for divider_part in divider_buffer:
                     self.buffer.append(divider_part)
@@ -575,8 +573,8 @@ class Screen:
                 current_line += 1
                 alternate = False
 
-            for hour in time_slots[day]:
-                tasks = time_slots[day][hour]
+            for hour in day.hours:
+                tasks = hour.tasks
                 if not tasks and not self.hide_empty:
                     empty_line_buffer = self.prerender_empty_line(
                         alternate, current_line, hour, day

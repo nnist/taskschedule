@@ -1,3 +1,6 @@
+import datetime as dt
+
+from taskschedule.schedule import Day, Hour
 from taskschedule.screen import Screen
 
 
@@ -35,7 +38,9 @@ class TestScreen:
         assert header_buffer[4][1] == 37
 
     def test_predender_divider(self, screen: Screen):
-        divider_buffer = screen.prerender_divider("2019-12-07", 0)
+        date = dt.date(2019, 12, 7)
+        day = Day(date, screen.schedule.tasks)
+        divider_buffer = screen.prerender_divider(day, 0)
         assert "──────" in divider_buffer[0][2]
         assert "Sat 07 Dec 2019" in divider_buffer[1][2]
         assert divider_buffer[1][1] == 6
@@ -46,15 +51,19 @@ class TestScreen:
         assert divider_buffer[2][1] == 23
 
     def test_prerender_empty_line(self, screen: Screen):
-        empty_line_buffer = screen.prerender_empty_line(True, 0, 22, "2019-12-08")
+        day = screen.schedule.days[0]
+        hour = day.hours[22]
+        empty_line_buffer = screen.prerender_empty_line(True, 0, hour, day)
         assert "  " in empty_line_buffer[0][2]
         assert empty_line_buffer[0][1] == 5
         assert empty_line_buffer[1][2] == "22"
         assert empty_line_buffer[1][1] == 0
 
     def test_prerender_task(self, screen: Screen):
+        day = screen.schedule.days[0]
+        hour = day.hours[11]
         task = screen.schedule.tasks[0]
-        task_buffer = screen.prerender_task(0, task, False, 11, 0, "2019-12-08")
+        task_buffer = screen.prerender_task(0, task, False, hour, 0, day)
         assert task_buffer[0][1] == 0
         assert "11" in task_buffer[0][2]
 
