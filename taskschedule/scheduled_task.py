@@ -1,6 +1,7 @@
 import json
 import os
 import tempfile
+import time
 from datetime import datetime as dt
 from typing import Dict, Optional
 
@@ -60,19 +61,40 @@ class ScheduledTask(Task):
     @property
     def notified(self) -> bool:
         filename = tempfile.gettempdir() + "/taskschedule"
+        uuid = self["uuid"]
 
+        # TODO Move this logic into Notifier; this is only used there
+
+        min_delay = 300  # TODO Make configurable
         if os.path.exists(filename):
-            append_write = "r+"
+            mode = "r+"
         else:
-            append_write = "w+"
+            mode = "w+"
 
-        with open(filename, append_write) as file_:
-            uuid = self["uuid"]
-            if uuid not in str(file_.readlines()):
-                file_.write(f"{uuid},")
+        with open(filename, mode) as f:
+            raw_data = f.read()
+
+            if not raw_data:
+                raw_data = "{}"
+
+            data = json.loads(raw_data)
+
+            # TODO Refactor to de-duplicate code
+            if uuid not in data:
+                data[uuid] = time.time()
+                f.seek(0)
+                f.truncate(0)
+                f.write(json.dumps(data))
                 return False
-
-        return True
+            else:
+                if time.time() > float(data[uuid]) + min_delay:
+                    data[uuid] = time.time()
+                    f.seek(0)
+                    f.truncate(0)
+                    f.write(json.dumps(data))
+                    return False
+                else:
+                    return True
 
     @property
     def should_be_active(self) -> bool:
