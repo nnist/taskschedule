@@ -228,7 +228,9 @@ class Main:
     def run(self):
         """The main loop of the interface."""
 
-        # TODO Refresh on any file change in dir instead of every second
+        filename = f"{self.data_location}/pending.data"
+        cached_stamp = 0.0
+
         last_refresh_time = 0.0
         while True:
             key = self.screen.stdscr.getch()
@@ -248,17 +250,23 @@ class Main:
                 max_y, max_x = self.screen.get_maxyx()
                 self.screen.scroll(-(max_y - 4))
                 last_refresh_time = time.time()
-            elif (
-                key == KEY_RESIZE or time.time() > last_refresh_time + self.refresh_rate
-            ):
+            elif key == KEY_RESIZE:
+                last_refresh_time = time.time()
+                self.screen.refresh_buffer()
+                self.screen.draw()
+            elif time.time() > last_refresh_time + self.refresh_rate:
                 if self.notifier:
                     self.notifier.send_notifications()
 
+                # Redraw if task data has changed
+                stamp = os.stat(filename).st_mtime
+                if stamp != cached_stamp:
+                    cached_stamp = stamp
+                    self.schedule.clear_cache()
+                    self.screen.refresh_buffer()
+                    self.screen.draw()
+
                 last_refresh_time = time.time()
-                self.schedule.clear_cache()
-                self.screen.refresh_buffer()
-                self.screen.draw()
-                napms(50)
 
             napms(1)
 
