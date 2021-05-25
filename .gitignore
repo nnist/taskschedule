@@ -13,3 +13,5 @@ tests/test_data/.taskrc
 .vimrc
 .mypy_cache/
 .python-version
+*.swp
+.idea
