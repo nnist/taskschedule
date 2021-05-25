@@ -32,6 +32,6 @@ setup(
     packages=["taskschedule", "tests"],
     scripts=["scripts/taskschedule"],
     include_package_data=True,
-    install_requires=["tasklib", "isodate"],
+    install_requires=["tasklib", "isodate", "cached-property"],
     extras_require={"dev": ["black", "flake8"]},
 )
