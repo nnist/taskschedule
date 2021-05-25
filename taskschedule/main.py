@@ -1,6 +1,7 @@
 """Command line interface of taskschedule"""
 import argparse
 import os
+import shutil
 import sys
 import time
 from curses import KEY_RESIZE
@@ -78,13 +79,6 @@ class Main:
                 ("uda.estimate.label does not exist " "in .taskrc")
             )
 
-        # Check sound file
-        sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
-        if self.show_notifications and os.path.isfile(sound_file) is False:
-            raise SoundDoesNotExistError(
-                f"The specified sound file does not exist: {sound_file}"
-            )
-
         # Create user directory if it does not exist
         taskschedule_dir = self.home_dir + "/.taskschedule"
         hooks_directory = self.home_dir + "/.taskschedule/hooks"
@@ -92,6 +86,11 @@ class Main:
             os.mkdir(taskschedule_dir)
         if not os.path.isdir(hooks_directory):
             os.mkdir(hooks_directory)
+
+        # Check sound file
+        sound_file = self.home_dir + "/.taskschedule/hooks/drip.wav"
+        if self.show_notifications and os.path.isfile(sound_file) is False:
+            shutil.copyfile("hooks/drip.wav", sound_file)
 
     def parse_args(self, argv):
         parser = argparse.ArgumentParser(
