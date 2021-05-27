@@ -5,4 +5,4 @@ import sys
 import taskschedule.main
 
 if __name__ == "__main__":
-    taskschedule.main.main(sys.argv[1:])
+    taskschedule.main.Main(sys.argv[1:]).main()
